@@ -42,7 +42,7 @@ assert(hello.topics.every(topic => topic.subject === 'english'));
 assert(hello.topics.every(topic => topic.goal?.trim() && topic.focus?.trim()), '每个目标同时提供学习目标和学习重点');
 assert.deepEqual(english.units, plain(oldEnglish.units), '已发布的 158 个词条内容完全保留');
 assert.equal(english.units.reduce((total, unit) => total + unit.words.length, 0), 158);
-assert.deepEqual(questions.topics.filter(topic => !goals.includes(topic.id)), plain(oldQuestions.topics), '全部已发布知识点完整对象保持不变');
+assert.deepEqual(questions.topics.filter(topic => oldQuestions.topics.some(previous => previous.id === topic.id)), plain(oldQuestions.topics), '全部已发布知识点完整对象保持不变');
 let oldVocabularyCount = 0, oldChineseCount = 0, oldMathCount = 0;
 const oldIds = new Set();
 for (const topic of oldQuestions.topics) {
@@ -213,7 +213,7 @@ for (const script of scriptSources) {
   assert(fs.existsSync(path.join(repository, script.source)), `脚本文件已包含：${script.source}`);
   assert(!/\b(?:fetch|XMLHttpRequest|WebSocket)\s*\(/.test(read(script.source)), '学习内容和备份不依赖网络接口');
 }
-const dependencies = ['data/english.js', 'data/english-hello.js', 'data/questions.js', 'record-backup.js'];
+const dependencies = ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/questions.js', 'record-backup.js'];
 const actualOrder = scriptSources.filter(script => dependencies.includes(script.source)).map(script => script.source);
 assert.deepEqual(actualOrder, dependencies, '双击运行时题库与备份依赖加载顺序正确');
 const sandbox = {};

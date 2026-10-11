@@ -2,7 +2,7 @@
   'use strict';
   const {topics,bank,shuffle}=GardenQuestions;
   const app=document.querySelector('#app'), key='learning-garden-v1';
-  let state={attempts:[],sessions:[],wrong:[]}, count=5, run=null, storageWarning='', importBusy=false, includeExtra=false, englishMode='mixed', study=null, speechToken=0;
+  let state={attempts:[],sessions:[],wrong:[]}, count=5, run=null, storageWarning='', importBusy=false, includeExtra=false, englishMode='mixed', study=null, speechToken=0, posterDraft=null;
   try { const saved=JSON.parse(localStorage.getItem(key)); if(saved && Array.isArray(saved.attempts) && Array.isArray(saved.sessions) && Array.isArray(saved.wrong)) state=saved; }
   catch { storageWarning='浏览器记录暂时无法读取。本次仍可练习，请确认浏览器允许本地存储。'; }
   const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -12,7 +12,7 @@
   function draw(html){stopSpeech();app.innerHTML=html+(storageWarning?`<p class="notice" role="alert">${escape(storageWarning)}</p>`:'');}
   function back(){return '<button class="back" data-action="home">← 回到首页</button>';}
   function home(){run=null;study=null;draw(`<section class="hero"><span class="flower" aria-hidden="true">🌼</span><div class="eyebrow">一年级 · 上学期基础练习</div><h1>今天，学一点新本领</h1><p>慢慢想，勇敢试。每一次练习都算进步。</p></section><div class="grid"><button class="tile" data-action="subject" data-id="math"><span class="icon">🍎</span><strong>数学练习</strong><small>分与合 · 加减法 · 比大小</small></button><button class="tile peach" data-action="subject" data-id="chinese"><span class="icon">📚</span><strong>语文练习</strong><small>基础拼音 · 字词搭配</small></button><button class="tile mint" data-action="subject" data-id="english"><span class="icon">🌍</span><strong>英语学习</strong><small>Power Up · Hello 与 Unit 1–4</small></button><button class="tile lavender" data-action="review"><span class="icon">🌷</span><strong>错题复习</strong><small>${state.wrong.length ? `${state.wrong.length} 道题，陪你再试一试` : '一步一步，把知识学牢'}</small></button><button class="tile blue" data-action="records"><span class="icon">🌿</span><strong>学习记录</strong><small>家长查看 · 发现小进步</small></button></div>`);}
-  function subject(id){study=null;if(id==='hello'){helloGoals();return;}if(id==='english'){englishUnits();return;}draw(`${back()}<h1>${id==='math'?'数学练习':'语文练习'}</h1><p>选一个知识点，开始今天的小练习。</p><div class="row count" aria-label="每次题数"><span>每次练习</span>${[5,10].map(n=>`<button data-action="count" data-id="${id}" data-count="${n}" aria-pressed="${count===n}">${n} 题</button>`).join('')}</div><div class="grid">${topics.filter(t=>t.subject===id).map(t=>`<button class="tile" data-action="start" data-id="${t.id}"><span class="icon">${t.icon}</span><strong>${t.name}</strong><small>${t.description}</small>${t.subject==='chinese'?`<small>固定题 ${bank(t.id).length} 道</small>`:''}</button>`).join('')}</div><p class="muted">原创基础题库，可按孩子的教材调整。</p>`);}
+  function subject(id){study=null;if(id==='hello'){helloGoals();return;}if(id==='unit1'){unit1Goals();return;}if(id==='english'){englishUnits();return;}draw(`${back()}<h1>${id==='math'?'数学练习':'语文练习'}</h1><p>选一个知识点，开始今天的小练习。</p><div class="row count" aria-label="每次题数"><span>每次练习</span>${[5,10].map(n=>`<button data-action="count" data-id="${id}" data-count="${n}" aria-pressed="${count===n}">${n} 题</button>`).join('')}</div><div class="grid">${topics.filter(t=>t.subject===id).map(t=>`<button class="tile" data-action="start" data-id="${t.id}"><span class="icon">${t.icon}</span><strong>${t.name}</strong><small>${t.description}</small>${t.subject==='chinese'?`<small>固定题 ${bank(t.id).length} 道</small>`:''}</button>`).join('')}</div><p class="muted">原创基础题库，可按孩子的教材调整。</p>`);}
   function review(){const ids=state.wrong.filter(id=>resolve(id));draw(`${back()}<h1>错题复习</h1><p>错题是学习的小脚印。我们一起再试一试。</p>${ids.length?`<div class="panel"><h2>还有 ${ids.length} 道题等你复习</h2><p>复习时，第一次答对就会从错题本移除。提示后答对的题保留，方便下次再练。</p><div class="row count">${[5,10].map(n=>`<button data-action="review-count" data-count="${n}" aria-pressed="${count===n}">${n} 题</button>`).join('')}</div><p class="muted">本次练习 ${Math.min(count,ids.length)} 道，不重复凑题。</p><button class="primary" data-action="start-review">开始复习</button></div>`:'<div class="panel empty"><div class="icon">🌼</div><h2>还没有错题</h2><p>先选一个知识点练习吧！</p><button class="primary" data-action="home">去练习</button></div>'}`);}
   function start(topic,reviewing=false){study=null;const pool=reviewing?state.wrong.map(resolve).filter(Boolean):topic.startsWith('english')?englishPool(topic):bank(topic);run={id:`${Date.now()}-${Math.random()}`,questions:shuffle(pool).slice(0,count).map(q=>({...q,choices:shuffle(q.choices)})),index:0,firstCorrect:0,recovered:0,reviewing,tries:0,phase:'answer',selected:null};if(!run.questions.length){review();return;}question();}
   function question() {
@@ -22,7 +22,7 @@
       ? `<div class="audio-tools"><button class="primary" data-action="listen">🔊 听题目</button><button class="secondary" data-action="show-listening-text">显示文字提示</button><p class="speech-status muted" role="status" aria-live="polite"></p><p class="listening-text" ${run.listeningText?'':'hidden'}>${escape(q.fallbackPrompt)}</p></div>`
       : q.speech || (run.phase==='done' && q.answerSpeech)
         ? `<div class="audio-tools"><button class="secondary" data-action="speak" data-text="${escape(q.speech || q.answerSpeech)}">🔊 听一听</button><p class="speech-status muted" role="status" aria-live="polite"></p></div>` : '';
-    draw(`<button class="back" data-action="leave">← 结束这次练习</button><div class="row"><strong>${run.reviewing?'错题复习':topicName(q.topic)}</strong><span class="muted">第 ${run.index+1} / ${run.questions.length} 题</span></div><div class="progress" aria-label="练习进度"><div style="width:${(run.index/run.questions.length)*100}%"></div></div><section class="panel"><div class="question" data-question-id="${escape(q.id)}">${escape(q.prompt)}</div>${q.visual?'<div class="question-visual">'+visual(q.visual)+'</div>':''}${listening?audio:''}<div class="choices ${englishQuestion?'english-choices':''}">${q.choices.map(c=>`<button data-action="answer" data-answer="${escape(c)}" ${run.phase!=='answer'?'disabled':''} class="${run.selected===c?'selected':''} ${c.length>2?'long-answer':''}">${escape(c)}</button>`).join('')}</div>${listening?'':audio}<div id="feedback" aria-live="polite">${feedback(q)}</div></section><p class="muted">不着急，认真想一想。</p>`);
+    draw(`<button class="back" data-action="leave">← 结束这次练习</button><div class="row"><strong>${run.reviewing?'错题复习':topicName(q.topic)}</strong><span class="muted">第 ${run.index+1} / ${run.questions.length} 题</span></div><div class="progress" aria-label="练习进度"><div style="width:${(run.index/run.questions.length)*100}%"></div></div><section class="panel"><div class="question" data-question-id="${escape(q.id)}">${escape(q.prompt)}</div>${q.visual?'<div class="question-visual">'+visual(q.visual)+'</div>':''}${reading(q)}${listening?audio:''}<div class="choices ${englishQuestion?'english-choices':''}">${q.choices.map(c=>`<button data-action="answer" data-answer="${escape(c)}" ${run.phase!=='answer'?'disabled':''} class="${run.selected===c?'selected':''} ${c.length>2?'long-answer':''}">${escape(c)}</button>`).join('')}</div>${listening?'':audio}<div id="feedback" aria-live="polite">${feedback(q)}</div></section><p class="muted">不着急，认真想一想。</p>`);
     if (listening && !speechAvailable()) {
       showListeningText();
       app.querySelector('.speech-status').textContent='这台设备暂不支持发音，已显示文字提示，可以继续练习。';
@@ -33,7 +33,42 @@
     if (item.type==='number') return `<div class="number-picture learning-visual" aria-label="数字 ${escape(item.value)}">${escape(item.value)}</div>`;
     if (item.type==='count') return `<div class="count-picture learning-visual" role="img" aria-label="${escape(item.count)} 个物品">${Array.from({length:item.count},()=>`<span aria-hidden="true">${escape(item.icon || '⭐')}</span>`).join('')}</div>`;
     if (item.type==='colour') return `<div class="colour-picture learning-visual" role="img" aria-label="${escape(item.label || '颜色图')}" style="background-color:${escape(item.value)}"></div>`;
+    if (item.type==='position') return `<div class="position-picture learning-visual">${positionSvg(item)}</div>`;
+    if (item.type==='objects') return `<div class="objects-picture learning-visual" role="img" aria-label="${escape(item.count)} 个${escape(item.word)}">${Array.from({length:item.count},()=>`<span aria-hidden="true">${escape(item.icon || '📚')}</span>`).join('')}<small>${escape(item.word)}</small></div>`;
     return '';
+  }
+  function reading(q) {
+    if (!q.passage?.length) return '';
+    return `<section class="reading-passage"><strong>读一读 · 原创小故事</strong>${q.passage.map(line=>`<p lang="en">${escape(line)}</p>`).join('')}<button class="secondary" data-action="read-passage" data-text="${escape(q.passage.join(' '))}">🔊 听故事</button><p class="speech-status muted" role="status" aria-live="polite"></p>${q.glossary?.length?`<details><summary>看看词语帮助</summary><p>${q.glossary.map(word=>`${escape(word.english)}：${escape(word.chinese)}`).join('；')}</p></details>`:''}</section>`;
+  }
+  function objectShape(key) {
+    const shapes={
+      book:'<rect x="1" y="1" width="40" height="28" rx="3" fill="#529374" stroke="#315841" stroke-width="2"/><path d="M7 2v25M8 25h31" stroke="#f8f6ee" stroke-width="3"/>',
+      pen:'<path d="M4 24L28 1l8 7L12 31Z" fill="#3879b5" stroke="#31506c" stroke-width="2"/><path d="M4 24l-2 9 10-2" fill="#ddc29b"/>',
+      pencil:'<path d="M4 24L28 1l8 7L12 31Z" fill="#f4c758" stroke="#947631" stroke-width="2"/><path d="M4 24l-2 9 10-2" fill="#cfad79"/><path d="M2 33l2-7 5 5" fill="#394139"/>',
+      crayon:'<path d="M4 23L27 1l8 7L12 30Z" fill="#e76f74" stroke="#934448" stroke-width="2"/><path d="M4 23l-3 10 11-3" fill="#ad515b"/><path d="M12 16l8 8M24 4l8 8" stroke="#f8cccc" stroke-width="4"/>',
+      rubber:'<rect x="2" y="8" width="37" height="20" rx="4" fill="#e8a8bc" stroke="#9c6d7e" stroke-width="2"/><path d="M26 8v20" stroke="#f8d9e2" stroke-width="5"/>',
+      ruler:'<rect x="1" y="10" width="41" height="16" rx="2" fill="#99cad1" stroke="#4b7b83" stroke-width="2"/><path d="M7 11v8M14 11v5M21 11v8M28 11v5M35 11v8" stroke="#3f6a74" stroke-width="2"/>'
+    };
+    return shapes[key] || shapes.book;
+  }
+  function positionSvg(item) {
+    const anchorKey=item.anchor.replace(/ /g,'_');
+    const anchors={
+      desk:'<rect x="70" y="86" width="180" height="18" rx="4" fill="#ba8e65"/><path d="M85 104v58M231 104v58" stroke="#8d674c" stroke-width="12"/>',
+      chair:'<rect x="116" y="106" width="96" height="15" rx="4" fill="#97b5c1"/><rect x="185" y="53" width="19" height="58" rx="5" fill="#97b5c1"/><path d="M127 121v45M200 121v45" stroke="#678994" stroke-width="10"/>',
+      bag:'<path d="M143 72V59q21-26 42 0v13" fill="none" stroke="#5f856d" stroke-width="7"/><rect x="120" y="72" width="89" height="90" rx="18" fill="#d8e8d4" stroke="#6a9379" stroke-width="3"/><path d="M126 85h77" stroke="#6a9379" stroke-width="3"/>',
+      pencil_case:'<rect x="94" y="100" width="134" height="51" rx="13" fill="#ead5bb" stroke="#a78964" stroke-width="3"/><path d="M102 111h118" stroke="#a78964" stroke-width="3"/>'
+    };
+    const count=item.count || 1;
+    const height={book:29,pen:33,pencil:33,crayon:33,rubber:28,ruler:26}[item.object] || 29;
+    const left={desk:70,chair:116,bag:120,pencil_case:94}[anchorKey] || 70;
+    const coords=item.relation==='next to' ? [Math.max(10,left-(42*.8+(count-1)*10)-10),116,.8]
+      : item.relation==='in' ? (anchorKey==='pencil_case'?[143,117,.65]:[144,100,.65])
+      : item.relation==='under' ? [139,137,.8]
+      : [140,(anchorKey==='chair'?106:86)-height*.8,.8];
+    const objects=Array.from({length:count},(_,i)=>`<g transform="translate(${coords[0]+i*10} ${coords[1]}) scale(${coords[2]})">${objectShape(item.object)}</g>`).join('');
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 210" role="img" aria-label="${escape(item.object)} 与 ${escape(item.anchor)} 的位置图"><rect x="10" y="8" width="300" height="168" rx="20" fill="#f4f6ec"/>${anchors[anchorKey] || anchors.desk}${objects}<text x="160" y="199" text-anchor="middle" font-size="17" fill="#426052" font-family="Arial, sans-serif">${escape(item.object)} · ${escape(item.anchor.replace(/_/g,' '))}</text></svg>`;
   }
   function showListeningText() {
     if (!run || run.questions[run.index].kind!=='listening') return;
@@ -52,7 +87,7 @@
     return bank(topic).filter(q => (includeExtra || !q.extended) && (englishMode==='mixed' || q.direction===englishMode));
   }
   function englishUnits() {
-    draw(`${back()}<div class="eyebrow">Power Up · 图片词表</div><h1>英语学习</h1><p>看词听读 → 选择练习 → 错题巩固</p><p class="muted">先按你提供的 Hello 和 Unit 1–4 词表学习，题目为原创练习。</p><div class="row count" aria-label="每次题数"><span>每次练习</span>${[5,10].map(n=>`<button data-action="count" data-id="english" data-count="${n}" aria-pressed="${count===n}">${n} 题</button>`).join('')}</div><div class="row count" aria-label="练习方式">${[['mixed','综合练习'],['meaning','选中文'],['word','选英文']].map(([mode,name])=>`<button data-action="english-mode" data-mode="${mode}" aria-pressed="${englishMode===mode}">${name}</button>`).join('')}</div><label class="extension-toggle"><input id="include-extra" type="checkbox" ${includeExtra?'checked':''}> 包含拓展词（词表标 *）</label><div class="grid english-units">${GardenEnglish.units.map(unit=>{const all=GardenEnglish.vocabulary(unit.id);const words=all.filter(w=>includeExtra || !w.extended);return `<article class="tile english-unit" data-topic="${unit.id}"><span class="icon" aria-hidden="true">${unit.icon}</span><strong>${unit.label} · ${unit.name}</strong><small>${all.filter(w=>!w.extended).length} 个核心词 · ${all.filter(w=>w.extended).length} 个拓展词</small><small>本次可学 ${words.length} 词 · ${englishPool(unit.id).length} 道原创选择题</small>${unit.id==='englishhello'?'<button class="goal-entry secondary" data-action="hello-goals">按学习目标学 Hello →</button>':''}<div class="row unit-actions"><button class="secondary" data-action="learn" data-id="${unit.id}">学单词</button><button class="primary" data-action="start" data-id="${unit.id}">开始练习</button></div></article>`;}).join('')}</div><p class="muted">单词学习不计入答题统计；练习按单元记录首次作答结果。发音取决于设备的英文语音支持。</p>`);
+    draw(`${back()}<div class="eyebrow">Power Up · 图片词表</div><h1>英语学习</h1><p>看词听读 → 选择练习 → 错题巩固</p><p class="muted">先按你提供的 Hello 和 Unit 1–4 词表学习，题目为原创练习。</p><div class="row count" aria-label="每次题数"><span>每次练习</span>${[5,10].map(n=>`<button data-action="count" data-id="english" data-count="${n}" aria-pressed="${count===n}">${n} 题</button>`).join('')}</div><div class="row count" aria-label="练习方式">${[['mixed','综合练习'],['meaning','选中文'],['word','选英文']].map(([mode,name])=>`<button data-action="english-mode" data-mode="${mode}" aria-pressed="${englishMode===mode}">${name}</button>`).join('')}</div><label class="extension-toggle"><input id="include-extra" type="checkbox" ${includeExtra?'checked':''}> 包含拓展词（词表标 *）</label><div class="grid english-units">${GardenEnglish.units.map(unit=>{const all=GardenEnglish.vocabulary(unit.id);const words=all.filter(w=>includeExtra || !w.extended);return `<article class="tile english-unit" data-topic="${unit.id}"><span class="icon" aria-hidden="true">${unit.icon}</span><strong>${unit.label} · ${unit.name}</strong><small>${all.filter(w=>!w.extended).length} 个核心词 · ${all.filter(w=>w.extended).length} 个拓展词</small><small>本次可学 ${words.length} 词 · ${englishPool(unit.id).length} 道原创选择题</small>${unit.id==='englishhello'?'<button class="goal-entry secondary" data-action="hello-goals">按学习目标学 Hello →</button>':''}${unit.id==='english1'?'<button class="goal-entry secondary" data-action="unit1-goals">按学习目标学 Unit 1 →</button>':''}<div class="row unit-actions"><button class="secondary" data-action="learn" data-id="${unit.id}">学单词</button><button class="primary" data-action="start" data-id="${unit.id}">开始练习</button></div></article>`;}).join('')}</div><p class="muted">单词学习不计入答题统计；练习按单元记录首次作答结果。发音取决于设备的英文语音支持。</p>`);
   }
   function learnWords(topic) {
     const words=GardenEnglish.vocabulary(topic).filter(w=>includeExtra || !w.extended);
@@ -64,23 +99,85 @@
     const word=study.words[study.index];
     draw(`<button class="back" data-action="subject" data-id="english">← 返回英语单元</button><div class="row"><strong>${escape(topicName(study.topic))}</strong><span class="muted">第 ${study.index+1} / ${study.words.length} 个词</span></div><section class="panel word-card">${word.extended?'<span class="eyebrow">拓展词 *</span>':''}<div class="vocab-word" lang="en">${escape(word.english)}</div><div class="vocab-meaning">${escape(word.meaning)}</div><p>${escape(word.hint)}</p><button class="primary" data-action="speak" data-text="${escape(word.speech || word.english)}">🔊 听单词</button><p class="speech-status muted" role="status" aria-live="polite">听完后，自己跟着读一遍。</p><div class="row vocab-nav"><button class="secondary" data-action="study-prev" ${study.index===0?'disabled':''}>← 上一个</button><button class="secondary" data-action="study-next" ${study.index+1===study.words.length?'disabled':''}>下一个 →</button></div></section><button class="primary" data-action="start" data-id="${study.topic}">我来练一练</button><p class="muted">认一认、听一听、读一读，学会了再去做题。</p>`);
   }
-  function helloGoals() {
+  function course(id) {
+    return id==='unit1'
+      ? {id:'unit1',api:GardenUnit1,label:'Unit 1 · Our new school',title:'我的新学校',backAction:'unit1-goals'}
+      : {id:'hello',api:GardenHello,label:'Hello',title:'认识朋友，说说自己',backAction:'hello-goals'};
+  }
+  function helloGoals() { goalOverview('hello'); }
+  function unit1Goals() { goalOverview('unit1'); }
+  function goalOverview(id) {
     study=null;
-    draw(`<button class="back" data-action="subject" data-id="english">← 返回英语单元</button><div class="eyebrow">Power Up · Hello</div><h1>认识朋友，说说自己</h1><p>先看示范、听一听，再自己开口，最后练一练。</p><div class="row count" aria-label="每次题数"><span>每次练习</span>${[5,10].map(n=>`<button data-action="count" data-id="hello" data-count="${n}" aria-pressed="${count===n}">${n} 题</button>`).join('')}</div><div class="grid goal-units">${GardenHello.topics.map(t=>{
+    const group=course(id);
+    const extras=id==='hello'
+      ? `<details class="panel character-list"><summary>认一认词表中的 8 位朋友</summary><p class="muted">看名字，点一下听读。小图标帮助记忆。</p><div class="character-grid">${GardenHello.characters.map(c=>`<button class="secondary" data-action="speak" data-text="${escape(c.name)}"><span aria-hidden="true">${c.icon}</span><strong lang="en">${escape(c.name)}</strong><small>${escape(c.chinese)}</small></button>`).join('')}</div><p class="speech-status muted" role="status" aria-live="polite"></p></details>`
+      : `<section class="panel poster-entry"><div class="icon" aria-hidden="true">🖼️</div><h2>做一张教室海报</h2><p>选物品和数量，用英文介绍位置，再选一条课堂规则。</p><button class="primary" data-action="poster">我来做海报</button><p class="muted">制作后可以下载或打印，也可以请家人听你介绍。</p></section>`;
+    draw(`<button class="back" data-action="subject" data-id="english">← 返回英语单元</button><div class="eyebrow">Power Up · ${escape(group.label)}</div><h1>${escape(group.title)}</h1><p>先看示范、听一听，再自己开口，最后练一练。</p><div class="row count" aria-label="每次题数"><span>每次练习</span>${[5,10].map(n=>`<button data-action="count" data-id="${id}" data-count="${n}" aria-pressed="${count===n}">${n} 题</button>`).join('')}</div><div class="grid goal-units">${group.api.topics.map(t=>{
       const attempts=state.attempts.filter(a=>a.topic===t.id);
-      return `<article class="tile goal-unit" data-topic="${t.id}"><span class="icon" aria-hidden="true">${t.icon}</span><strong>${escape(t.name.replace('Hello · ',''))}</strong><p class="goal-text">${escape(t.goal)}</p><small>学习重点：${escape(t.focus)}</small><small>${bank(t.id).length} 道原创练习 · ${attempts.length?`首次答对 ${Math.round(attempts.filter(a=>a.correct).length/attempts.length*100)}%`:'还没有作答记录'}</small><div class="row unit-actions"><button class="secondary" data-action="goal-learn" data-id="${t.id}">先学一学</button><button class="primary" data-action="start" data-id="${t.id}">练一练</button></div></article>`;
-    }).join('')}</div><details class="panel character-list"><summary>认一认词表中的 8 位朋友</summary><p class="muted">看名字，点一下听读。小图标帮助记忆。</p><div class="character-grid">${GardenHello.characters.map(c=>`<button class="secondary" data-action="speak" data-text="${escape(c.name)}"><span aria-hidden="true">${c.icon}</span><strong lang="en">${escape(c.name)}</strong><small>${escape(c.chinese)}</small></button>`).join('')}</div><p class="speech-status muted" role="status" aria-live="polite"></p></details><p class="muted">开口练习由孩子自行练说，不计答题成绩。四个目标的首次作答结果会分别记录；原有单词练习仍可使用。</p>`);
+      return `<article class="tile goal-unit" data-topic="${t.id}"><span class="icon" aria-hidden="true">${t.icon}</span><strong>${escape(t.name.replace(id==='hello'?'Hello · ':'Unit 1 · ',''))}</strong><p class="goal-text">${escape(t.goal)}</p><small>学习重点：${escape(t.focus)}</small><small>${bank(t.id).length} 道原创练习 · ${attempts.length?`首次答对 ${Math.round(attempts.filter(a=>a.correct).length/attempts.length*100)}%`:'还没有作答记录'}</small><div class="row unit-actions"><button class="secondary" data-action="goal-learn" data-id="${t.id}">先学一学</button><button class="primary" data-action="start" data-id="${t.id}">练一练</button></div></article>`;
+    }).join('')}</div>${extras}<p class="muted">开口练习由孩子自行练说，不计答题成绩。各个目标的首次作答结果会分别记录；原有单词练习仍可使用。</p>`);
   }
   function learnGoal(topic) {
-    const cards=GardenHello.lesson(topic);
-    if (!cards.length) {helloGoals();return;}
-    study={topic,cards,index:0};
+    const group=course(topic.startsWith('unit1-')?'unit1':'hello');
+    const cards=group.api.lesson(topic);
+    if (!cards.length) {goalOverview(group.id);return;}
+    study={topic,cards,index:0,group:group.id};
     goalCard();
   }
   function goalCard() {
-    const card=study.cards[study.index];
+    const card=study.cards[study.index], group=course(study.group);
     const lines=card.lines.map(line=>`<div class="sentence-line"><div lang="en">${escape(line.english)}</div><small>${escape(line.chinese)}</small></div>`).join('');
-    draw(`<button class="back" data-action="hello-goals">← 返回 Hello 学习目标</button><div class="row"><strong>${escape(topicName(study.topic))}</strong><span class="muted">第 ${study.index+1} / ${study.cards.length} 张</span></div><section class="panel goal-card"><h1 class="goal-title">${escape(card.title)}</h1>${visual(card.visual)}<div class="sentence-example">${lines}</div><button class="secondary" data-action="speak" data-text="${escape(card.lines.map(line=>line.english).join(' '))}">🔊 听示范</button><p class="speech-status muted" role="status" aria-live="polite">听一听，然后自己试着说。</p><div class="speaking-practice"><h2>我来说一说</h2><p>${escape(card.sayPrompt)}</p><button class="secondary" data-action="show-model">看看说法</button><div class="say-model" hidden><p lang="en">${escape(card.sayModel)}</p><button class="secondary" data-action="speak" data-text="${escape(card.sayModel)}">🔊 听说法</button></div><button class="primary" data-action="say-done">我试着说了 🌱</button><p class="practice-status muted" role="status" aria-live="polite">自己练说，不计答题成绩。</p></div><div class="row vocab-nav"><button class="secondary" data-action="goal-prev" ${study.index===0?'disabled':''}>← 上一张</button><button class="secondary" data-action="goal-next" ${study.index+1===study.cards.length?'disabled':''}>下一张 →</button></div></section><button class="primary" data-action="start" data-id="${study.topic}">练一练这个目标</button>`);
+    const phonics=study.topic==='unit1-phonics', audio=phonics?card.sayModel:card.lines.map(line=>line.english).join(' ');
+    draw(`<button class="back" data-action="${group.backAction}">← 返回 ${escape(group.id==='hello'?'Hello':'Unit 1')} 学习目标</button><div class="row"><strong>${escape(topicName(study.topic))}</strong><span class="muted">第 ${study.index+1} / ${study.cards.length} 张</span></div><section class="panel goal-card"><h1 class="goal-title">${escape(card.title)}</h1>${visual(card.visual)}<div class="sentence-example">${lines}</div>${card.note?`<p class="phonics-note">${escape(card.note)}</p>`:''}<button class="secondary" data-action="speak" data-text="${escape(audio)}">🔊 ${phonics?'听示例词':'听示范'}</button><p class="speech-status muted" role="status" aria-live="polite">听一听，然后自己试着说。</p><div class="speaking-practice"><h2>我来说一说</h2><p>${escape(card.sayPrompt)}</p><button class="secondary" data-action="show-model">看看说法</button><div class="say-model" hidden><p lang="en">${escape(card.sayModel)}</p><button class="secondary" data-action="speak" data-text="${escape(card.sayModel)}">🔊 听说法</button></div><button class="primary" data-action="say-done">我试着说了 🌱</button><p class="practice-status muted" role="status" aria-live="polite">自己练说，不计答题成绩。</p></div><div class="row vocab-nav"><button class="secondary" data-action="goal-prev" ${study.index===0?'disabled':''}>← 上一张</button><button class="secondary" data-action="goal-next" ${study.index+1===study.cards.length?'disabled':''}>下一张 →</button></div></section><button class="primary" data-action="start" data-id="${study.topic}">练一练这个目标</button>`);
+  }
+  function posterEditor() {
+    if (!posterDraft) posterDraft={items:[
+      {key:'book',count:1,relation:'on',anchor:'desk'},
+      {key:'pencil',count:1,relation:'in',anchor:'bag'},
+      {key:'rubber',count:1,relation:'under',anchor:'chair'},
+      {key:'pen',count:1,relation:'next to',anchor:'pencil_case'}
+    ],rule:GardenUnit1.poster.rules[0].key};
+    const config=GardenUnit1.poster;
+    draw(`<button class="back" data-action="unit1-goals">← 返回 Unit 1 学习目标</button><h1>我的教室海报</h1><p>选物品、选数量，再选一条课堂规则。做好后，试着用英语介绍。</p><section class="panel poster-controls">${posterDraft.items.map((item,index)=>{
+      const anchor=config.anchors.find(a=>a.key===item.anchor);
+      const relation=config.relations.find(r=>r.id===item.relation);
+      const place={on:`在${anchor.chinese}上面`,in:`在${anchor.chinese}里面`,under:`在${anchor.chinese}下面`,'next to':`紧挨着${anchor.chinese}`}[relation.id];
+      return `<fieldset class="poster-choice"><legend>第 ${index+1} 格 · ${escape(place)}</legend><label>物品<select data-poster-item="${index}" aria-label="第 ${index+1} 格物品">${config.objects.map(object=>`<option value="${object.key}" ${object.key===item.key?'selected':''}>${escape(object.label)}</option>`).join('')}</select></label><label>数量<select data-poster-count="${index}" aria-label="第 ${index+1} 格数量">${[1,2,3].map(n=>`<option value="${n}" ${n===item.count?'selected':''}>${n} 个</option>`).join('')}</select></label></fieldset>`;
+    }).join('')}<label class="poster-rule-label">课堂规则<select id="poster-rule">${config.rules.map(rule=>`<option value="${rule.key}" ${rule.key===posterDraft.rule?'selected':''}>${escape(rule.chinese)}</option>`).join('')}</select></label></section><section id="classroom-poster" class="poster-sheet"></section><section class="panel poster-actions"><h2>介绍我的海报</h2><p>听一听示范，再请家人听你介绍物品和课堂规则。</p><button class="secondary" data-action="read-poster">🔊 听海报介绍</button><p class="speech-status muted" role="status" aria-live="polite"></p><div class="row"><button class="primary" data-action="download-poster">下载海报</button><button class="secondary" data-action="print-poster">打印海报</button></div><p id="poster-status" class="muted" role="status" aria-live="polite">海报在本页编辑，刷新后重新制作。需要保留时，请下载海报文件。制作和听读不计答题成绩。</p></section>`);
+    updatePoster();
+  }
+  function posterScene(item) {
+    const config=GardenUnit1.poster, object=config.objects.find(o=>o.key===item.key);
+    const anchor=config.anchors.find(a=>a.key===item.anchor), relation=config.relations.find(r=>r.id===item.relation);
+    const sentence=`The ${item.count===1?object.english:object.plural} ${item.count===1?'is':'are'} ${relation.english} the ${anchor.english}.`;
+    return {sentence,visual:{type:'position',object:object.key,relation:relation.english,anchor:anchor.english,count:item.count}};
+  }
+  function updatePoster() {
+    stopSpeech();
+    const rule=GardenUnit1.poster.rules.find(r=>r.key===posterDraft.rule);
+    const sheet=document.querySelector('#classroom-poster');
+    if (!sheet) return;
+    sheet.innerHTML=`<div class="eyebrow">Unit 1 · 我的作品</div><h2 lang="en">Our classroom</h2><div class="poster-scenes">${posterDraft.items.map(item=>{const scene=posterScene(item);return `<article>${visual(scene.visual)}<p lang="en">${escape(scene.sentence)}</p></article>`;}).join('')}</div><div class="poster-classroom-rule"><strong lang="en">Our classroom rule</strong><p lang="en">${escape(rule.english)}</p><small>${escape(rule.chinese)}</small></div>`;
+  }
+  function posterSpeech() {
+    const rule=GardenUnit1.poster.rules.find(r=>r.key===posterDraft.rule);
+    return `This is our classroom poster. ${posterDraft.items.map(item=>posterScene(item).sentence).join(' ')} Our classroom rule: ${rule.english}`;
+  }
+  function downloadPoster() {
+    const rule=GardenUnit1.poster.rules.find(r=>r.key===posterDraft.rule);
+    const cells=posterDraft.items.map((item,index)=>{
+      const scene=posterScene(item), x=30+(index%2)*390, y=110+Math.floor(index/2)*310;
+      const drawing=positionSvg(scene.visual).replace('<svg ',`<svg x="${x+15}" y="${y+8}" width="340" height="225" `);
+      // 两行文字让长句在 Windows 和手机查看器中都能完整显示。
+      const object=GardenUnit1.poster.objects.find(o=>o.key===item.key);
+      const anchor=GardenUnit1.poster.anchors.find(a=>a.key===item.anchor);
+      return `<g><title>${escape(scene.sentence)}</title><rect x="${x}" y="${y}" width="370" height="290" rx="20" fill="white"/>${drawing}<text x="${x+185}" y="${y+245}" text-anchor="middle" font-size="19" fill="#30463d">The ${escape(item.count===1?object.english:object.plural)} ${item.count===1?'is':'are'}</text><text x="${x+185}" y="${y+272}" text-anchor="middle" font-size="19" fill="#30463d">${escape(item.relation)} the ${escape(anchor.english)}.</text></g>`;
+    }).join('');
+    const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="840" height="900" viewBox="0 0 840 900" font-family="Arial, Microsoft YaHei, sans-serif"><rect width="840" height="900" rx="24" fill="#eef4e7"/><text x="420" y="65" text-anchor="middle" font-size="38" font-weight="bold" fill="#345648">Our classroom</text>${cells}<text x="420" y="777" text-anchor="middle" font-size="22" fill="#30463d">Our classroom rule</text><text x="420" y="816" text-anchor="middle" font-size="26" fill="#345648">${escape(rule.english)}</text><text x="420" y="855" text-anchor="middle" font-size="20" fill="#617465">${escape(rule.chinese)}</text></svg>`;
+    const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}));
+    const link=document.createElement('a');link.href=url;link.download='学习小乐园-我的教室海报.svg';
+    document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+    app.querySelector('#poster-status').textContent='海报文件已生成，请在下载列表中查看。用浏览器打开 SVG 文件，也可以打印出来。';
   }
   function speechAvailable() {
     return Boolean(window.speechSynthesis && typeof window.SpeechSynthesisUtterance==='function');
@@ -167,11 +264,28 @@
     d.showModal();
   }
   app.addEventListener('change', e => {
+    if (e.target.dataset.posterItem!==undefined && posterDraft) {
+      const index=Number(e.target.dataset.posterItem);
+      if (GardenUnit1.poster.objects.some(o=>o.key===e.target.value)) {posterDraft.items[index].key=e.target.value;updatePoster();}
+    }
+    if (e.target.dataset.posterCount!==undefined && posterDraft) {
+      const index=Number(e.target.dataset.posterCount), value=Number(e.target.value);
+      if ([1,2,3].includes(value)) {posterDraft.items[index].count=value;updatePoster();}
+    }
+    if (e.target.id==='poster-rule' && posterDraft) {
+      if (GardenUnit1.poster.rules.some(r=>r.key===e.target.value)) {posterDraft.rule=e.target.value;updatePoster();}
+    }
     if (e.target.id === 'backup-file') importBackup(e.target);
     if (e.target.id === 'include-extra') {includeExtra=e.target.checked;englishUnits();}
   });
   app.addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(!b||b.disabled)return;const a=b.dataset.action;
     if(a==='hello-goals')helloGoals();
+    if(a==='unit1-goals')unit1Goals();
+    if(a==='poster')posterEditor();
+    if(a==='download-poster')downloadPoster();
+    if(a==='print-poster')window.print();
+    if(a==='read-passage')speak(b.dataset.text);
+    if(a==='read-poster')speak(posterSpeech());
     if(a==='goal-learn')learnGoal(b.dataset.id);
     if(a==='goal-next'&&study?.cards&&study.index+1<study.cards.length){study.index++;goalCard();}
     if(a==='goal-prev'&&study?.cards&&study.index>0){study.index--;goalCard();}
