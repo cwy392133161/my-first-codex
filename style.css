@@ -43,6 +43,19 @@
 .reading-passage summary{cursor:pointer;min-height:44px;font-size:17px;line-height:2}
 .reading-passage .speech-status{margin:8px 0}
 .phonics-note{background:#eef3eb;padding:14px;border-radius:14px;font-size:18px;text-align:left}
+.person-picture,.body-picture{width:100%;max-width:280px}
+.person-picture svg,.body-picture svg,.booklet-picture svg{display:block;width:100%;height:auto}
+.sense-picture{text-align:center;font-size:96px;line-height:1.4}
+.booklet-selects{display:grid;grid-template-columns:1fr;gap:18px}
+.booklet-controls label{display:flex;flex-direction:column;gap:8px;font-size:18px;min-width:0}
+.booklet-controls select{width:100%;font:inherit;font-size:18px;color:#30463d;background:white;border:1px solid #bdccbd;border-radius:12px;min-height:56px;padding:10px;min-width:0}
+#about-me-booklet{display:grid;grid-template-columns:1fr;gap:18px;margin:24px 0}
+.booklet-page{background:white;border:2px solid #d8e4d0;border-radius:24px;padding:24px 16px;text-align:center;min-width:0;break-inside:avoid}
+.booklet-page h2{font-size:28px;color:#345648;overflow-wrap:anywhere}
+.booklet-picture{max-width:240px;margin:auto}
+.booklet-page p{font-size:24px;color:#355f65;line-height:1.6;margin:12px 0;overflow-wrap:anywhere}
+.booklet-actions .row{margin-top:18px}.booklet-actions .row button{flex:1}
+@media(min-width:640px){.booklet-selects,#about-me-booklet{grid-template-columns:1fr 1fr}}
 .poster-entry .icon{font-size:36px}
 .poster-controls label{display:flex;flex-direction:column;gap:8px;font-size:18px;min-width:0}
 .poster-controls select{width:100%;font:inherit;font-size:18px;color:#30463d;background:#fff;border:1px solid #bdccbd;border-radius:12px;min-height:56px;padding:10px;min-width:0}
@@ -66,4 +79,13 @@
   #classroom-poster .poster-scenes{grid-template-columns:1fr 1fr}
   #classroom-poster .poster-scenes article{padding:10px}
   #classroom-poster .poster-scenes p{font-size:18px}
+  body:has(#about-me-booklet){background:white}
+  body:has(#about-me-booklet) header,body:has(#about-me-booklet) footer,body:has(#about-me-booklet) main>:not(#about-me-booklet){display:none!important}
+  body:has(#about-me-booklet) main{max-width:none;min-height:0;padding:0;margin:0}
+  #about-me-booklet{display:block;margin:0}
+  #about-me-booklet .booklet-page{border:0;margin:0;padding:16mm 8mm;min-height:245mm;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  #about-me-booklet .booklet-page+.booklet-page{break-before:page}
+  #about-me-booklet .booklet-picture{max-width:100mm}
+  #about-me-booklet h2{font-size:36px}
+  #about-me-booklet p{font-size:28px}
 }
