@@ -43,11 +43,24 @@ Windows 上可改用 `py -m http.server 8000 --bind 0.0.0.0`。电脑浏览器�
 
 发音优先播放项目自带的英国英语示范 MP3，不依赖平板的系统语音服务。音频包含单词、学习卡、听辨题、原创故事及海报／小手册介绍；是本项目预先生成的示范声音，不是教材原声。音频无法播放时，会尝试设备自带的英文语音；两种方式都失败时显示文字提示。没有麦克风录音或发音评分，网页无需登录，不调用外部AI或语音接口。
 
+### 发音修正与家长试听
+
+此分支为发音试听版，尚未通过听感验收，暂未替换正式网页的音频。可打开 [在线试听版](https://cwy392133161.github.io/my-first-codex/pronunciation-preview/audio-review.html) 检查 Hello、Hi 和全部词句。
+
+根据 Hello、Hi 等发音反馈，当前版本重新生成全部英语示范音频，改用模型配套的英式读音处理。共有 **398 段音频**，覆盖 **1,517 个朗读入口**；相同的单词和句子会共用音频。这些数字是音频及入口数量，不是题库题数，也不是测试次数。
+
+单词和例句分开播放，修正34张学习卡中原来连在一起的文字；`foot` 和 `feet` 分别示范，同义词、缩写对照和颜色短语都有清楚的分段。`close` 按“关闭”的动词读音处理，`read`／`reads` 按当前示例的现在时读音处理，`minute` 按“分钟”读音处理。普通英语缩写保留，p／b、th／t 仍播放完整示例词。所有题号、答案和已有学习记录保留。
+
+打开 [英语发音试听](audio-review.html)，先点击 **Hello、Hi**，再听数字、颜色和其他内容，也可以搜索英文单词或句子。这里播放练习使用的同一套 MP3，试听不会改动学习记录。
+
+程序检查覆盖读音输入、音频完整性和实际播放，但**不能证明所有音频都已经由老师逐条听审，也不能保证每句合成语音的重音和语调完全自然**。有疑问时，可在试听页找到对应文字，与老师或可靠英式词典核对。本项目没有用华为实体平板完成验证；兼容检查是在关闭系统语音功能的浏览器中进行的。
+
 ### 华为平板等设备如何听读
 
 保持原网址，在浏览器中刷新页面，然后点击 **“听单词”／“听题目”／“听一听”**。新版直接播放本站音频，浏览器不必支持系统朗读，也不需要安装语音软件。请确认调高的是设备的**媒体音量**。
 
 - 网站版首次播放某段音频需要网络；不同浏览器是否长期保留缓存取决于设备，不能保证断网后所有音频都已缓存。
+- 发音修正版为音频生成了新的文件地址，避免继续使用旧录音缓存。若网页仍显示旧版，请关闭旧标签页后重新打开原网址，再刷新；无需清空浏览器数据或学习记录。
 - 下载整个项目到 Windows 后，保留完整的 `assets/audio` 文件夹，MP3 和网页都在同一文件夹中，可本地播放，不需要联网。不要只复制 `index.html`。
 - 播放按钮需要孩子点击，不会自动播放。连续点击会停止上一段，换题、返回页面或切到后台也会停止旧声音；故事和作品介绍按句子连续播放。
 - 若出现“音频暂时无法播放”，先检查媒体音量和网络，刷新后再点击。听辨题仍可通过“显示文字提示”继续练习，已有记录不会被清空。
@@ -167,7 +180,9 @@ Windows 上可改用 `py -m http.server 8000 --bind 0.0.0.0`。电脑浏览器�
 - `data/english-unit1.js`：Unit 1 六个学习目标、原创阅读、目标题和海报素材。
 - `data/english-unit2.js`：Unit 2 七个学习目标、原创阅读、0～2综合复习和小手册素材。
 - `data/questions.js`：独立题库和知识点定义，语文示例可直接调整；数学题由生成器计算答案。
-- `data/audio-manifest.js`、`audio-player.js`、`assets/audio/`：音频清单、兼容播放器及完整 MP3。
+- `speech-text.js`：学习卡、播放器和构建脚本共用的英语朗读文本规则。
+- `data/audio-manifest.js`、`data/audio-audit.json`、`audio-player.js`、`assets/audio/`：音频清单、生成输入检查信息、兼容播放器及完整 MP3。
+- `audio-review.html`、`audio-review.js`、`audio-review.css`：家长试听页，可搜索并播放练习中的音频，不改学习记录。
 - `app.js`：练习流程、错题、本地记录及备份操作界面。
 - `record-backup.js`：备份格式检查和记录合并。
 - `style.css`：手机及电脑样式。
@@ -188,9 +203,11 @@ node tests/unit1.test.js
 node tests/unit1.browser.test.js
 node tests/unit2.test.js
 node tests/unit2-browser.test.js
+node tests/speech-text.test.js
 node tests/audio.test.js
 node tests/audio-player.test.js
 node tests/audio.browser.test.js
+node tests/audio-review.browser.test.js
 node tests/browser.test.js
 node tests/backup.browser.test.js
 ```
@@ -199,16 +216,32 @@ node tests/backup.browser.test.js
 
 音频浏览器检查会关闭系统语音接口，实际播放 MP3，覆盖听辨、连续朗读、停止及失败提示。如果开发环境已安装 FFmpeg，还可以运行 `node tests/audio.test.js --decode`，逐个检查所有 MP3 是否完整、可解码且包含声音。
 
+安装下面的音频开发依赖后，可运行 `python tests/pronunciation.test.py --model /你的模型目录/kokoro-v1.0.onnx` 检查英式音素、词义对应的读音和生成参数。`data/audio-audit.json` 保留每段的规范化文本、音素、来源及生成配置；检查通过不代表所有段落已经完成人工发音审核。
+
 备份检查还覆盖真实下载文件、恢复与取消、重复导入、保留旧记录、无效/超大文件拒绝及保存失败保护。
 
 ### 开发者重新生成音频（普通使用者不需要）
 
-音频已经随项目交付。`scripts/audio-texts.js` 汇总全部朗读入口；`scripts/build-audio.py` 在开发环境离线生成 MP3。新增可朗读文字后应更新音频清单，保持原有题号不变。模型和声音参数文件不放入仓库，来源及许可证见 `assets/audio/NOTICE.md`。
+音频已经随项目交付，打开网页不需要下面的软件。`scripts/audio-texts.js` 汇总全部朗读入口；`speech-text.js` 统一文本及分段；`scripts/build-audio.py` 在开发环境离线生成 MP3。新增可朗读文字后应更新音频清单，保持原有题号不变。模型和声音参数文件不放入仓库，官方来源及许可证见 [音频来源说明](assets/audio/NOTICE.md)。
 
-开发环境需要 Node、FFmpeg，以及 Python 虚拟环境中的 `kokoro-onnx==0.4.9` 和 `soundfile`。模型使用官方 `model-files-v1.1` 发布中的 `kokoro-v1.0.int8.onnx` 与 `voices-v1.0.bin`。验证下载完整后运行：
+开发环境需要 Node、FFmpeg、eSpeak NG，以及 Python 虚拟环境。本次生成使用 `misaki[en]==0.9.4`、`spacy==3.8.16`、`en_core_web_sm==3.8.0`、ONNX Runtime、NumPy、SoundFile，以及 `kokoro-onnx==0.4.9` 中的音频裁剪函数。Misaki 负责英式读音转换，ONNX Runtime 直接运行全精度模型；不使用旧版通用音素输入。安装 Python 依赖示例：
 
 ```sh
-python scripts/build-audio.py --model /你的模型目录/kokoro-v1.0.int8.onnx --voices /你的模型目录/voices-v1.0.bin
+python -m pip install "misaki[en]==0.9.4" "spacy==3.8.16" "kokoro-onnx==0.4.9" phonemizer-fork onnxruntime numpy soundfile
+python -m pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
 ```
 
-这批文件的 SHA-256：模型 `ae315a79b623f244700e4afb9246c46a26066782e049ba174bf3ba433970ee9c`，声音参数 `bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d`。脚本支持分片生成；例如分别运行 `--shard-count 2 --shard-index 0` 和 `--shard-count 2 --shard-index 1`，两个分片写入不同的音频文件。全部文件完成后，再运行音频检查。
+使用官方 `model-files-v1.1` 发布中的全精度 `kokoro-v1.0.onnx` 和 `voices-v1.0.bin`。下载后核对 SHA-256：
+
+| 文件 | SHA-256 |
+|---|---|
+| `kokoro-v1.0.onnx` | `beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a` |
+| `voices-v1.0.bin` | `bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d` |
+
+```sh
+python scripts/build-audio.py --model /你的模型目录/kokoro-v1.0.onnx --voices /你的模型目录/voices-v1.0.bin
+```
+
+默认使用英国英语声线 `bf_emma`、语速参数 `0.88`，输出24 kHz单声道、96 kbps MP3。脚本按官方规则用音素长度减一选择声线参数，保留安静的词首、词尾，并增加前后留白。`--limit 2` 可先生成 Hello、Hi 样本，不会改写全量清单。分片生成可分别运行 `--shard-count 2 --shard-index 0` 和 `--shard-count 2 --shard-index 1`；默认每个分片使用一个推理线程，可通过 `--threads` 调整。
+
+音频版本 `uk-misaki-v1-<12位指纹>` 根据模型、声线、语速、文本规则和完整音素序列生成，文件地址也包含这个版本的哈希。配置或读音变化后会使用新地址，避免旧录音缓存；配置相同时可以续跑已有文件。全部分片完成后才更新清单与 `data/audio-audit.json`，然后运行上述检查并逐条试听。发布时只保留新清单引用的 MP3，移除没有引用的旧音频。

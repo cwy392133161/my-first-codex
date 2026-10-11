@@ -2,11 +2,11 @@
 (function(root){
   'use strict';
   const manifest=typeof module!=='undefined' && module.exports?require('./data/audio-manifest.js'):root.GardenAudioManifest;
+  const speechText=typeof module!=='undefined' && module.exports?require('./speech-text.js'):root.GardenSpeechText;
   let audio=null,ticket=0,loadTimer=null,endTimer=null;
-  const canonical=text=>String(text).replace(/[’‘]/g,"'").replace(/\s+/g,' ').trim().replace(/[.!?]+$/,'').toLowerCase();
   function plan(text){
-    const parts=(String(text).match(/[^.!?]+[.!?]*/g)||[]).map(part=>part.trim()).filter(Boolean);
-    const files=parts.map(part=>manifest?.clips?.[canonical(part)]);
+    const parts=speechText.sentences(speechText.text(text));
+    const files=parts.map(part=>manifest?.clips?.[speechText.canonical(part)]);
     return files.length && files.every(file=>/^assets\/audio\/[a-f0-9]{20}\.mp3$/.test(file || ''))?files:[];
   }
   function has(text){return typeof root.Audio==='function' && plan(text).length>0;}

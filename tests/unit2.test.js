@@ -437,7 +437,7 @@ for (const entry of booklet.favourites) assert(entry.icon?.trim() && entry.engli
 
 // Run required data as classic scripts in a sandbox with no network APIs.
 const scripts = [...read('index.html').matchAll(/<script\b([^>]*)>/g)]
-  .map(match => ({ attributes: match[1], source: match[1].match(/\bsrc=["']([^"']+)["']/)?.[1] }))
+  .map(match => ({ attributes: match[1], source: match[1].match(/\bsrc=["']([^"']+)["']/)?.[1]?.split(/[?#]/)[0] }))
   .filter(script => script.source);
 for (const script of scripts) {
   assert(!/^https?:|^\/\//i.test(script.source), '必需脚本全部保存在项目内');

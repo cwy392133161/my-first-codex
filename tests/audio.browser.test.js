@@ -7,8 +7,10 @@ const { chromium } = require('playwright');
 const http = require('node:http');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const crypto = require('node:crypto');
 const questions = require('../data/questions.js');
 const unit2 = require('../data/english-unit2.js');
+const manifest = require('../data/audio-manifest.js');
 
 const root = path.resolve(__dirname, '..');
 const KEY = 'learning-garden-v1';
@@ -238,7 +240,32 @@ function initialize(options) {
     assert(!(await status(page)).includes('不支持'));
     assert.deepEqual(await saved(page), afterAnswer, '听读不重复记录 wall 的首次作答');
     assert.equal(await page.evaluate(() => window.audioNativeCalls.length), 0);
-    pass('截图中的 wall 在无系统语音的浏览器中真实播放 MP3，首次作答记录不变');
+    await goals(page, 'hello');
+    await page.locator('.goal-unit[data-topic="hello-greetings"] button[data-action="goal-learn"]').click();
+    assert.equal(await page.evaluate(() => GardenAudioManifest.version), 2);
+    assert.match(manifest.voice.profile, /^uk-misaki-v1-[a-f0-9]{12}$/);
+    assert.equal(await page.evaluate(() => GardenAudioManifest.voice.profile), manifest.voice.profile);
+    for (const [index, greeting] of ['hello', 'hi'].entries()) {
+      if (index) await click(page, 'goal-next');
+      assert.equal((await page.locator('button[data-action="speak"]').first().getAttribute('data-text'))
+        .trim().replace(/[.!?]+$/, '').toLowerCase(), greeting, '问候卡保持 Hello 和 Hi 两个独立示范');
+      const greetingClips = await playToEnd(page, 'speak');
+      const corrected = crypto.createHash('sha256').update(manifest.voice.profile + '\0' + greeting).digest('hex').slice(0, 20);
+      const old = crypto.createHash('sha256').update(greeting).digest('hex').slice(0, 20);
+      assert.equal(manifest.clips[greeting], `assets/audio/${corrected}.mp3`);
+      assert.equal(greetingClips.length, 1, '每个问候只播放相应的新版片段');
+      assert.equal(new URL(greetingClips[0].src).pathname, '/assets/audio/' + corrected + '.mp3');
+      assert(!greetingClips[0].src.includes(old), '请求新地址，不重复播放旧缓存中的 Hello / Hi');
+    }
+    assert.deepEqual(await saved(page), afterAnswer, 'Hello / Hi 的听读不修改旧记录或英语首次作答');
+    assert.equal(await page.evaluate(() => window.audioNativeCalls.length), 0, '新版问候不依赖系统语音 API');
+    for (const source of ['data/audio-manifest.js', 'audio-player.js', 'app.js']) {
+      const sourceRequests = requests.filter(request => new URL(request.url).pathname === '/' + source);
+      assert(sourceRequests.length > 0, '真实页面确实加载新版脚本 ' + source);
+      assert(sourceRequests.every(request => new URL(request.url).searchParams.get('v') === 'uk-pronunciation-v2'),
+        source + ' 带新版缓存参数，避免平板继续使用旧逻辑');
+    }
+    pass('wall、Hello / Hi 真实播放新版 MP3，使用更新后的缓存地址，无系统语音且记录不变');
 
     // 2: Word learning and a listening question use audio without revealing its answer.
     await units(page);

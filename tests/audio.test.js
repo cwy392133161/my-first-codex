@@ -14,6 +14,7 @@ const hello = require('../data/english-hello.js');
 const unit1 = require('../data/english-unit1.js');
 const unit2 = require('../data/english-unit2.js');
 const questions = require('../data/questions.js');
+const speechText = require('../speech-text.js');
 const manifest = require('../data/audio-manifest.js');
 const audio = require('../audio-player.js');
 
@@ -25,10 +26,31 @@ const staticSources = [];
 const expectedKeys = new Set();
 let sourceCount = 0;
 
+function spokenPieces(text) {
+  // Enumerate the actual bilingual data, including explicitly taught expansions.
+  // A line is a reading boundary; punctuation-only pieces are not recordings.
+  const shortForms = {
+    "Who's = Who is": "Who's means who is.",
+    "He's = He is": "He's means he is.",
+    "She's = She is": "She's means she is."
+  };
+  let spoken = text.replace(/[\u2018\u2019]/g, "'");
+  for (const [display, reading] of Object.entries(shortForms)) spoken = spoken.replaceAll(display, reading);
+  return spoken.replace(/\s*\/\s*/g, ', ').split(/[.!?;]/)
+    .map(piece => piece.trim()).filter(Boolean);
+}
+
+function lessonReading(card) {
+  // Keep each distinct displayed word/sentence separate without merging vocab
+  // into the following sentence, such as "bag This is my bag".
+  return card.lines.map(line => /[.!?]$/.test(line.english.trim())
+    ? line.english.trim() : line.english.trim() + '.').join(' ');
+}
+
 function checkPlan(text, label, remember = false) {
   assert.equal(typeof text, 'string', `${label} 有英文朗读文本`);
   assert(text.trim(), `${label} 朗读文本非空`);
-  const pieces = text.split(/(?<=[.!?])\s*/u).filter(piece => piece.trim());
+  const pieces = spokenPieces(text);
   const expected = pieces.map(piece => {
     const key = normalize(piece);
     assert(key, `${label} 不包含空片段`);
@@ -41,10 +63,11 @@ function checkPlan(text, label, remember = false) {
   if (remember) staticSources.push({ text, label });
 }
 
-assert.equal(manifest.version, 1);
+assert.equal(manifest.version, 2);
 assert.equal(manifest.voice.language, 'en-GB');
 assert.equal(manifest.voice.name, 'bf_emma');
 assert.equal(manifest.voice.kind, 'offline-generated');
+assert.match(manifest.voice.profile, /^uk-misaki-v1-[a-f0-9]{12}$/, '新版音频配置包含实际生成配置指纹');
 assert(manifest.voice.source.includes('Kokoro'), '说明生成音频来源');
 assert(manifest.clips && typeof manifest.clips === 'object');
 
@@ -75,12 +98,28 @@ for (const api of [hello, unit1, unit2]) {
       checkPlan(card.sayModel, `开口示范 ${card.id}`, true);
       // Phonics buttons use whole-word sayModel rather than reading IPA/letters.
       if (!['unit1-phonics', 'unit2-phonics'].includes(topic.id)) {
-        checkPlan(card.lines.map(line => line.english).join(' '), `学习卡英文 ${card.id}`, true);
+        checkPlan(lessonReading(card), `学习卡英文 ${card.id}`, true);
       }
     }
   }
 }
 const staticCount = sourceCount;
+
+// These independent examples protect the specific speaking boundaries that
+// previously caused adjacent vocabulary and comparison marks to be read badly.
+const bagCard = unit1.lesson('unit1-school').find(card => card.id.endsWith('-bag'));
+assert.deepEqual(audio.plan(speechText.lesson(bagCard, false)),
+  ['bag', 'this is my bag'].map(key => manifest.clips[key]), '校园词和示例句分别听读');
+const feetCard = unit2.lesson('unit2-body').find(card => card.lines.some(line => line.english === 'feet'));
+assert(feetCard, '一只脚和多只脚有可独立听读的词条');
+const feetPlan = audio.plan(speechText.lesson(feetCard, false));
+assert.equal(feetPlan[0], manifest.clips.foot);
+assert.equal(feetPlan[1], manifest.clips.feet, 'foot 与 feet 不拼成一句含糊的文本');
+const shortFormCard = unit2.lesson('unit2-who').find(card => card.id.endsWith('-short'));
+assert.deepEqual(audio.plan(speechText.lesson(shortFormCard, false)),
+  ["who's means who is", "he's means he is", "she's means she is"].map(key => manifest.clips[key]),
+  '缩写对照用 means 示范，不将等号读入正文');
+assert.deepEqual(audio.plan('Hello! Hi!'), [manifest.clips.hello, manifest.clips.hi], '问候词使用两个独立新版片段');
 
 // The four editable scenes have fixed positions; item/count and rule are free.
 // Check every complete poster, not just the initial picture or a set of words.
@@ -130,15 +169,17 @@ assert.equal(bookletCount, booklet.names.length * booklet.ages.length * booklet.
 
 // Verify the physical delivery, not just the promise of a manifest entry.
 const entries = Object.entries(manifest.clips);
-assert(entries.length >= 425, '覆盖本版本全部英语音频片段');
+assert.equal(entries.length, expectedKeys.size, '题库、学习卡和全部作品实际需要的每个片段都已覆盖');
 assert.deepEqual(new Set(entries.map(([key]) => key)), expectedKeys, '所有音频都有实际教学朗读来源');
 const files = new Set();
 let totalBytes = 0;
 for (const [key, filename] of entries) {
   assert.equal(key, normalize(key), `映射键已规范化：${key}`);
   assert.match(filename, /^assets\/audio\/[a-f0-9]{20}\.mp3$/, '只播放压缩包内相对路径，无外部地址或目录逃逸');
-  const expected = crypto.createHash('sha256').update(key, 'utf8').digest('hex').slice(0, 20);
-  assert.equal(filename, `assets/audio/${expected}.mp3`, '文件名对应本段实际英文内容');
+  const expected = crypto.createHash('sha256').update(manifest.voice.profile + '\0' + key, 'utf8').digest('hex').slice(0, 20);
+  assert.equal(filename, `assets/audio/${expected}.mp3`, '文件名对应当前发音配置和本段实际英文内容');
+  const previous = crypto.createHash('sha256').update(key, 'utf8').digest('hex').slice(0, 20);
+  assert.notEqual(expected, previous, '改正发音后更换地址，平板不会继续命中旧音频文件');
   assert(!files.has(filename), '不同音频片段没有文件名冲突');
   files.add(filename);
   const location = path.join(repository, filename);
@@ -158,15 +199,21 @@ assert.deepEqual(audio.plan('wall. This is deliberately unpackaged audio xyzzy.'
 // Load the real HTML's classic scripts without require/fetch/server APIs.
 const html = fs.readFileSync(path.join(repository, 'index.html'), 'utf8');
 const scripts = [...html.matchAll(/<script\b([^>]*)\bsrc="([^"]+)"[^>]*>/g)];
-const paths = scripts.map(match => match[2]);
+const sources = scripts.map(match => match[2]);
+const paths = sources.map(source => source.split(/[?#]/)[0]);
 for (const [index, match] of scripts.entries()) {
   assert(!/\btype\s*=\s*["']module["']/i.test(match[0]), `${paths[index]} 是双击 HTML 可加载的经典脚本`);
   assert(!/^(?:[a-z]+:|\/)/i.test(paths[index]), '必需脚本都采用相对本地路径');
   assert(fs.statSync(path.join(repository, paths[index])).isFile(), `${paths[index]} 随项目交付`);
 }
-for (const required of ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js', 'data/questions.js', 'record-backup.js', 'data/audio-manifest.js', 'audio-player.js', 'app.js']) {
+for (const required of ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js', 'data/questions.js', 'record-backup.js', 'speech-text.js', 'data/audio-manifest.js', 'audio-player.js', 'app.js']) {
   assert.equal(paths.filter(filename => filename === required).length, 1, `${required} 加载一次`);
 }
+for (const changed of ['data/audio-manifest.js', 'audio-player.js', 'app.js']) {
+  assert.equal(sources.find(source => source.split(/[?#]/)[0] === changed), changed + '?v=uk-pronunciation-v2',
+    `${changed} 有缓存版本，避免平板沿用旧脚本`);
+}
+assert(paths.indexOf('speech-text.js') < paths.indexOf('data/audio-manifest.js'));
 assert(paths.indexOf('data/audio-manifest.js') < paths.indexOf('audio-player.js'));
 assert(paths.indexOf('audio-player.js') < paths.indexOf('app.js'));
 for (const prerequisite of ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js']) {
