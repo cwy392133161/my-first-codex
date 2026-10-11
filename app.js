@@ -2,7 +2,7 @@
   'use strict';
   const {topics,bank,shuffle}=GardenQuestions;
   const app=document.querySelector('#app'), key='learning-garden-v1';
-  let state={attempts:[],sessions:[],wrong:[]}, count=5, run=null, storageWarning='', importBusy=false, includeExtra=false, englishMode='mixed', study=null, speechToken=0, posterDraft=null, bookletDraft=null;
+  let state={attempts:[],sessions:[],wrong:[]}, count=5, run=null, storageWarning='', importBusy=false, includeExtra=false, englishMode='mixed', study=null, speechToken=0, speechStartTimer=null, speechEndTimer=null, posterDraft=null, bookletDraft=null;
   try { const saved=JSON.parse(localStorage.getItem(key)); if(saved && Array.isArray(saved.attempts) && Array.isArray(saved.sessions) && Array.isArray(saved.wrong)) state=saved; }
   catch { storageWarning='浏览器记录暂时无法读取。本次仍可练习，请确认浏览器允许本地存储。'; }
   const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -23,9 +23,9 @@
       : q.speech || (run.phase==='done' && q.answerSpeech)
         ? `<div class="audio-tools"><button class="secondary" data-action="speak" data-text="${escape(q.speech || q.answerSpeech)}">🔊 听一听</button><p class="speech-status muted" role="status" aria-live="polite"></p></div>` : '';
     draw(`<button class="back" data-action="leave">← 结束这次练习</button><div class="row"><strong>${run.reviewing?'错题复习':topicName(q.topic)}</strong><span class="muted">第 ${run.index+1} / ${run.questions.length} 题</span></div><div class="progress" aria-label="练习进度"><div style="width:${(run.index/run.questions.length)*100}%"></div></div><section class="panel"><div class="question" data-question-id="${escape(q.id)}">${escape(q.prompt)}</div>${q.visual?'<div class="question-visual">'+visual(q.visual)+'</div>':''}${reading(q)}${listening?audio:''}<div class="choices ${englishQuestion?'english-choices':''}">${q.choices.map(c=>`<button data-action="answer" data-answer="${escape(c)}" ${run.phase!=='answer'?'disabled':''} class="${run.selected===c?'selected':''} ${c.length>2?'long-answer':''}">${escape(c)}</button>`).join('')}</div>${listening?'':audio}<div id="feedback" aria-live="polite">${feedback(q)}</div></section><p class="muted">不着急，认真想一想。</p>`);
-    if (listening && !speechAvailable()) {
+    if (listening && !window.GardenAudio?.has(q.speech) && !speechAvailable()) {
       showListeningText();
-      app.querySelector('.speech-status').textContent='这台设备暂不支持发音，已显示文字提示，可以继续练习。';
+      app.querySelector('.speech-status').textContent='当前没有可用音频，已显示文字提示，可以继续练习。';
     }
   }
   function visual(item) {
@@ -105,7 +105,7 @@
     return bank(topic).filter(q => (includeExtra || !q.extended) && (englishMode==='mixed' || q.direction===englishMode));
   }
   function englishUnits() {
-    draw(`${back()}<div class="eyebrow">Power Up · 图片词表</div><h1>英语学习</h1><p>看词听读 → 选择练习 → 错题巩固</p><p class="muted">先按你提供的 Hello 和 Unit 1–4 词表学习，题目为原创练习。</p><div class="row count" aria-label="每次题数"><span>每次练习</span>${[5,10].map(n=>`<button data-action="count" data-id="english" data-count="${n}" aria-pressed="${count===n}">${n} 题</button>`).join('')}</div><div class="row count" aria-label="练习方式">${[['mixed','综合练习'],['meaning','选中文'],['word','选英文']].map(([mode,name])=>`<button data-action="english-mode" data-mode="${mode}" aria-pressed="${englishMode===mode}">${name}</button>`).join('')}</div><label class="extension-toggle"><input id="include-extra" type="checkbox" ${includeExtra?'checked':''}> 包含拓展词（词表标 *）</label><div class="grid english-units">${GardenEnglish.units.map(unit=>{const all=GardenEnglish.vocabulary(unit.id);const words=all.filter(w=>includeExtra || !w.extended);return `<article class="tile english-unit" data-topic="${unit.id}"><span class="icon" aria-hidden="true">${unit.icon}</span><strong>${unit.label} · ${unit.name}</strong><small>${all.filter(w=>!w.extended).length} 个核心词 · ${all.filter(w=>w.extended).length} 个拓展词</small><small>本次可学 ${words.length} 词 · ${englishPool(unit.id).length} 道原创选择题</small>${unit.id==='englishhello'?'<button class="goal-entry secondary" data-action="hello-goals">按学习目标学 Hello →</button>':''}${unit.id==='english1'?'<button class="goal-entry secondary" data-action="unit1-goals">按学习目标学 Unit 1 →</button>':''}${unit.id==='english2'?'<button class="goal-entry secondary" data-action="unit2-goals">按学习目标学 Unit 2 →</button>':''}<div class="row unit-actions"><button class="secondary" data-action="learn" data-id="${unit.id}">学单词</button><button class="primary" data-action="start" data-id="${unit.id}">开始练习</button></div></article>`;}).join('')}</div><section class="panel review-entry"><h2>Hello～Unit 2 综合复习</h2><p>一起练名字、年龄、颜色、学校物品和家人。</p><button class="primary" data-action="review02-goals">我来复习 0～2 单元 →</button></section><p class="muted">单词学习不计入答题统计；练习按单元记录首次作答结果。发音取决于设备的英文语音支持。</p>`);
+    draw(`${back()}<div class="eyebrow">Power Up · 图片词表</div><h1>英语学习</h1><p>看词听读 → 选择练习 → 错题巩固</p><p class="muted">先按你提供的 Hello 和 Unit 1–4 词表学习，题目为原创练习。</p><div class="row count" aria-label="每次题数"><span>每次练习</span>${[5,10].map(n=>`<button data-action="count" data-id="english" data-count="${n}" aria-pressed="${count===n}">${n} 题</button>`).join('')}</div><div class="row count" aria-label="练习方式">${[['mixed','综合练习'],['meaning','选中文'],['word','选英文']].map(([mode,name])=>`<button data-action="english-mode" data-mode="${mode}" aria-pressed="${englishMode===mode}">${name}</button>`).join('')}</div><label class="extension-toggle"><input id="include-extra" type="checkbox" ${includeExtra?'checked':''}> 包含拓展词（词表标 *）</label><div class="grid english-units">${GardenEnglish.units.map(unit=>{const all=GardenEnglish.vocabulary(unit.id);const words=all.filter(w=>includeExtra || !w.extended);return `<article class="tile english-unit" data-topic="${unit.id}"><span class="icon" aria-hidden="true">${unit.icon}</span><strong>${unit.label} · ${unit.name}</strong><small>${all.filter(w=>!w.extended).length} 个核心词 · ${all.filter(w=>w.extended).length} 个拓展词</small><small>本次可学 ${words.length} 词 · ${englishPool(unit.id).length} 道原创选择题</small>${unit.id==='englishhello'?'<button class="goal-entry secondary" data-action="hello-goals">按学习目标学 Hello →</button>':''}${unit.id==='english1'?'<button class="goal-entry secondary" data-action="unit1-goals">按学习目标学 Unit 1 →</button>':''}${unit.id==='english2'?'<button class="goal-entry secondary" data-action="unit2-goals">按学习目标学 Unit 2 →</button>':''}<div class="row unit-actions"><button class="secondary" data-action="learn" data-id="${unit.id}">学单词</button><button class="primary" data-action="start" data-id="${unit.id}">开始练习</button></div></article>`;}).join('')}</div><section class="panel review-entry"><h2>Hello～Unit 2 综合复习</h2><p>一起练名字、年龄、颜色、学校物品和家人。</p><button class="primary" data-action="review02-goals">我来复习 0～2 单元 →</button></section><p class="muted">单词学习不计入答题统计；练习按单元记录首次作答结果。点击发音按钮可听示范音频，播放时请打开媒体音量。</p>`);
   }
   function learnWords(topic) {
     const words=GardenEnglish.vocabulary(topic).filter(w=>includeExtra || !w.extended);
@@ -246,31 +246,66 @@
     document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
     app.querySelector('#booklet-status').textContent='四页小手册图片已生成，请在下载列表中查看。用 Edge 或 Chrome 打开 SVG 文件即可查看或打印。也可点击“打印小手册”，逐页打印或另存为 PDF。';
   }
+  function englishVoices() {
+    try{return window.speechSynthesis?.getVoices().filter(v=>v.lang.toLowerCase().startsWith('en')) || [];}catch{return [];}
+  }
   function speechAvailable() {
-    return Boolean(window.speechSynthesis && typeof window.SpeechSynthesisUtterance==='function');
+    return Boolean(window.speechSynthesis && typeof window.SpeechSynthesisUtterance==='function' && englishVoices().length);
   }
   function stopSpeech() {
     speechToken++;
+    clearTimeout(speechStartTimer);clearTimeout(speechEndTimer);
+    try { window.GardenAudio?.stop(); } catch { /* 文字练习始终可用。 */ }
     try { window.speechSynthesis?.cancel(); } catch { /* 文字练习始终可用。 */ }
   }
   function speak(text,onFailure) {
     const status=app.querySelector('.speech-status');
-    const show=message=>{if(status?.isConnected)status.textContent=message;};
     stopSpeech();
     const token=speechToken;
-    if (!speechAvailable()) {
-      show('这台设备暂不支持发音，可以看文字继续学习。');onFailure?.();return;
-    }
-    try {
-      const utterance=new SpeechSynthesisUtterance(text);
-      utterance.lang='en-GB';utterance.rate=0.8;
-      const voices=window.speechSynthesis.getVoices();
-      utterance.voice=voices.find(v=>v.lang.toLowerCase().replace('_','-')==='en-gb') || voices.find(v=>v.lang.toLowerCase().startsWith('en')) || null;
-      utterance.onend=()=>{if(token===speechToken)show('读完啦，你也试着读一遍。');};
-      utterance.onerror=event=>{if(token===speechToken && !['canceled','interrupted'].includes(event.error)){show('暂时无法播放。可以换支持英文发音的浏览器，或查看文字继续练习。');onFailure?.();}};
-      show('正在读，可以跟着读一遍。');
-      window.speechSynthesis.speak(utterance);
-    } catch { show('暂时无法播放，可以看文字继续学习。');onFailure?.(); }
+    let complete=false;
+    const current=()=>!complete && token===speechToken && status?.isConnected;
+    const show=message=>{if(current())status.textContent=message;};
+    const fail=()=>{
+      if(!current())return;
+      clearTimeout(speechStartTimer);clearTimeout(speechEndTimer);
+      show('音频暂时无法播放。请检查媒体音量和网络，再点一次；也可以看文字继续学习。');
+      complete=true;
+      try{window.speechSynthesis?.cancel();}catch{/* Continue with text. */}
+      onFailure?.();
+    };
+    const native=()=>{
+      if(!current())return;
+      if(!speechAvailable()){fail();return;}
+      try{
+        const utterance=new SpeechSynthesisUtterance(text);
+        utterance.lang='en-GB';utterance.rate=0.8;
+        const voices=englishVoices();
+        utterance.voice=voices.find(v=>v.lang.toLowerCase().replace('_','-')==='en-gb') || voices[0];
+        utterance.onstart=()=>{
+          if(!current())return;
+          clearTimeout(speechStartTimer);show('正在读，可以跟着读一遍。');
+          speechEndTimer=setTimeout(fail,Math.max(12000,Math.min(90000,String(text).length*100+6000)));
+        };
+        utterance.onend=()=>{
+          if(!current())return;
+          clearTimeout(speechStartTimer);clearTimeout(speechEndTimer);
+          show('读完啦，你也试着读一遍。');
+          complete=true;
+        };
+        utterance.onerror=event=>{if(current() && !['canceled','interrupted'].includes(event.error))fail();};
+        show('正在准备设备语音……');
+        speechStartTimer=setTimeout(fail,4000);
+        window.speechSynthesis.speak(utterance);
+      }catch{fail();}
+    };
+    // Prefer the shipped recordings: tablets can play MP3 even when their browser
+    // has no working English speechSynthesis implementation.
+    if(window.GardenAudio?.has(text))window.GardenAudio.play(text,{
+      onStatus:show,
+      onEnd:()=>{if(current()){show('读完啦，你也试着读一遍。');complete=true;}},
+      onFailure:native
+    });
+    else native();
   }
   function currentForImport() {
     // 确认时重新读取，保留其他标签页刚写入的记录以及当前未保存的内存记录。
@@ -382,5 +417,7 @@
     if(a==='learn')learnWords(b.dataset.id);if(a==='study-next'&&study&&study.index+1<study.words.length){study.index++;wordCard();}if(a==='study-prev'&&study&&study.index>0){study.index--;wordCard();}if(a==='english-mode'){englishMode=b.dataset.mode;englishUnits();}if(a==='speak')speak(b.dataset.text);if(a==='home')home();if(a==='subject')subject(b.dataset.id);if(a==='count'){count=Number(b.dataset.count);subject(b.dataset.id);}if(a==='start')start(b.dataset.id);if(a==='review')review();if(a==='review-count'){count=Number(b.dataset.count);review();}if(a==='start-review')start(null,true);if(a==='records')records();if(a==='export')exportBackup();if(a==='import'&&!importBusy)document.querySelector('#backup-file').click();if(a==='answer')answer(b.dataset.answer);if(a==='retry'&&run?.phase==='retry'){run.phase='answer';run.selected=null;question();}if(a==='next')next();if(a==='leave')confirmDialog('结束这次练习？','已经作答的题目记录会保留。','结束练习',home);if(a==='clear')confirmDialog('确定清空所有学习记录？','练习统计和错题都会删除，清空后无法恢复。','确认清空',()=>{state={attempts:[],sessions:[],wrong:[]};save();records();});
   });
   document.querySelector('#home-link').addEventListener('click',e=>{e.preventDefault();if(run)confirmDialog('结束这次练习？','已经作答的题目记录会保留。','回到首页',home);else home();});
+  window.addEventListener('pagehide',stopSpeech);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)stopSpeech();});
   home();
 })();

@@ -46,6 +46,11 @@ async function serverStart() {
 }
 
 function initBrowser(options = {}) {
+  // Keep this suite focused on native speech and the final text fallback.
+  // The default bundled MP3 path is covered separately in audio.browser.test.js.
+  Object.defineProperty(window, 'GardenAudio', {
+    configurable: true, get: () => undefined, set() {}
+  });
   let api;
   Object.defineProperty(window, 'GardenQuestions', {
     configurable: true,

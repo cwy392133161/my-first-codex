@@ -54,6 +54,11 @@ async function serverStart() {
     browser = await chromium.launch({ executablePath: '/usr/bin/chromium', headless: true, args: ['--no-sandbox'] });
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, acceptDownloads: true });
     await context.addInitScript(() => {
+      // Keep this suite focused on native speech; bundled MP3 playback has its
+      // own coverage in audio.browser.test.js, including no speech API devices.
+      Object.defineProperty(window, 'GardenAudio', {
+        configurable: true, get: () => undefined, set() {}
+      });
       let questions;
       // Force one known question first without changing its data or the UI.
       Object.defineProperty(window, 'GardenQuestions', {
@@ -305,9 +310,12 @@ async function serverStart() {
     assert(requests.every(request => request.method === 'GET' && new URL(request.url).origin === url), '只读取本地静态资源，不上传音频或调用 AI');
     passed.push('320px/390px长词学习卡与选项、电脑布局、无上传音频或 AI 网络请求');
 
-    // A browser without speech support must keep all learning and exercises usable.
+    // When bundled MP3 and native speech are both unavailable, learning still works.
     const fallbackContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
     await fallbackContext.addInitScript(() => {
+      Object.defineProperty(window, 'GardenAudio', {
+        configurable: true, get: () => undefined, set() {}
+      });
       Object.defineProperty(window, 'speechSynthesis', { configurable: true, value: undefined });
       Object.defineProperty(window, 'SpeechSynthesisUtterance', { configurable: true, value: undefined });
     });
