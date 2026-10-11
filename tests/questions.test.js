@@ -31,14 +31,14 @@ const previousQuestions = loadIsolated(baselineSource('data/questions.js'), 'bas
 const previousBackup = loadIsolated(baselineSource('record-backup.js'), 'baseline-record-backup.js', {
   './data/questions.js': previousQuestions
 });
-assert.deepEqual(topics, plain(previousQuestions.topics), '已有知识点及标识应保持不变');
+assert.deepEqual(topics.filter(topic=>topic.subject!=='english'), plain(previousQuestions.topics), '已有知识点及标识应保持不变');
 
 const fixedCounts = {pinyin: 60, words: 60};
 const dynamicCounts = {parts: 45, arithmetic: 132, compare: 121, advanced: 462};
 const fixedPrompts = new Set();
 let fixedTotal = 0;
 let dynamicTotal = 0;
-for (const topic of topics) {
+for (const topic of topics.filter(topic=>topic.subject!=='english')) {
   const questions = bank(topic.id);
   assert.equal(new Set(questions.map(question => question.id)).size, questions.length, `${topic.id} 题目 ID 必须唯一`);
   const isFixed = Object.hasOwn(fixedCounts, topic.id);

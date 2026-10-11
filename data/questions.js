@@ -1,12 +1,14 @@
 /* 独立题库：可在这里调整知识点和原创语文示例。数学答案由程序计算。 */
 (function (root) {
+  const english = typeof module !== 'undefined' ? require('./english.js') : root.GardenEnglish;
   const topics = [
     { id: 'parts', subject: 'math', name: '10以内分与合', icon: '🧩', description: '把一个数分成两部分' },
     { id: 'arithmetic', subject: 'math', name: '10以内加减法', icon: '🍎', description: '数一数，加一加，减一减' },
     { id: 'compare', subject: 'math', name: '比较大小', icon: '⚖️', description: '比一比，谁大谁小' },
     { id: 'advanced', subject: 'math', name: '20以内加减法', icon: '🚀', description: '可选进阶 · 准备好了再挑战' },
     { id: 'pinyin', subject: 'chinese', name: '基础拼音辨认', icon: '🎵', description: '认识声母和韵母' },
-    { id: 'words', subject: 'chinese', name: '常见字词搭配', icon: '📖', description: '读一读，找到合适的字' }
+    { id: 'words', subject: 'chinese', name: '常见字词搭配', icon: '📖', description: '读一读，找到合适的字' },
+    ...english.topics
   ];
   const pinyin = [
     ['“妈妈”的“妈”，声母是哪一个？','m',['m','n','b'],'读 mā 时，先闭上嘴唇。','“妈”的拼音是 mā，声母是 m。'],
@@ -141,6 +143,7 @@
     return {id:`${topic}-${a}-${b}-${op || ''}`,topic,prompt,answer:String(answer),choices:choices.map(String),hint,explanation,math:{a,b,op:op||null}};
   }
   function bank(topic) {
+    if (english.topics.some(item => item.id === topic)) return english.bank(topic);
     if (topic === 'pinyin' || topic === 'words') return (topic === 'pinyin' ? pinyin : words).map((q,i)=>({id:`${topic}-${i}`,topic,prompt:q[0],answer:q[1],choices:q[2],hint:q[3],explanation:q[4]}));
     const items = [], max = topic === 'advanced' ? 20 : 10;
     for(let a=0;a<=max;a++) for(let b=0;b<=max;b++) {
