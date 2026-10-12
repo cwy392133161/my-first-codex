@@ -150,7 +150,7 @@
   function goalCard() {
     const card=study.cards[study.index], group=course(study.group);
     const lines=card.lines.map(line=>`<div class="sentence-line"><div lang="en">${escape(line.english)}</div><small>${escape(line.chinese)}</small></div>`).join('');
-    const phonics=['unit1-phonics','unit2-phonics'].includes(study.topic), audio=phonics?card.sayModel:card.lines.map(line=>line.english).join(' ');
+    const phonics=['unit1-phonics','unit2-phonics'].includes(study.topic), audio=GardenSpeechText.lesson(card,phonics);
     draw(`<button class="back" data-action="${group.backAction}">← 返回 ${escape(group.shortLabel)} 学习目标</button><div class="row"><strong>${escape(topicName(study.topic))}</strong><span class="muted">第 ${study.index+1} / ${study.cards.length} 张</span></div><section class="panel goal-card"><h1 class="goal-title">${escape(card.title)}</h1>${visual(card.visual)}<div class="sentence-example">${lines}</div>${card.note?`<p class="phonics-note">${escape(card.note)}</p>`:''}<button class="secondary" data-action="speak" data-text="${escape(audio)}">🔊 ${phonics?'听示例词':'听示范'}</button><p class="speech-status muted" role="status" aria-live="polite">听一听，然后自己试着说。</p><div class="speaking-practice"><h2>我来说一说</h2><p>${escape(card.sayPrompt)}</p><button class="secondary" data-action="show-model">看看说法</button><div class="say-model" hidden><p lang="en">${escape(card.sayModel)}</p><button class="secondary" data-action="speak" data-text="${escape(card.sayModel)}">🔊 听说法</button></div><button class="primary" data-action="say-done">我试着说了 🌱</button><p class="practice-status muted" role="status" aria-live="polite">自己练说，不计答题成绩。</p></div><div class="row vocab-nav"><button class="secondary" data-action="goal-prev" ${study.index===0?'disabled':''}>← 上一张</button><button class="secondary" data-action="goal-next" ${study.index+1===study.cards.length?'disabled':''}>下一张 →</button></div></section><button class="primary" data-action="start" data-id="${study.topic}">练一练这个目标</button>`);
   }
   function posterEditor() {
@@ -259,6 +259,7 @@
     try { window.speechSynthesis?.cancel(); } catch { /* 文字练习始终可用。 */ }
   }
   function speak(text,onFailure) {
+    text=GardenSpeechText.text(text);
     const status=app.querySelector('.speech-status');
     stopSpeech();
     const token=speechToken;

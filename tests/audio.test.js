@@ -14,8 +14,11 @@ const hello = require('../data/english-hello.js');
 const unit1 = require('../data/english-unit1.js');
 const unit2 = require('../data/english-unit2.js');
 const questions = require('../data/questions.js');
+const speechText = require('../speech-text.js');
 const manifest = require('../data/audio-manifest.js');
 const audio = require('../audio-player.js');
+const audit = require('../data/audio-audit.json');
+const collected = require('../scripts/audio-texts.js').collect();
 
 const repository = path.resolve(__dirname, '..');
 const normalize = text => text.replace(/[\u2018\u2019]/g, "'").replace(/\s+/g, ' ')
@@ -25,10 +28,31 @@ const staticSources = [];
 const expectedKeys = new Set();
 let sourceCount = 0;
 
+function spokenPieces(text) {
+  // Enumerate the actual bilingual data, including explicitly taught expansions.
+  // A line is a reading boundary; punctuation-only pieces are not recordings.
+  const shortForms = {
+    "Who's = Who is": "Who's means who is.",
+    "He's = He is": "He's means he is.",
+    "She's = She is": "She's means she is."
+  };
+  let spoken = text.replace(/[\u2018\u2019]/g, "'");
+  for (const [display, reading] of Object.entries(shortForms)) spoken = spoken.replaceAll(display, reading);
+  return spoken.replace(/\s*\/\s*/g, ', ').split(/[.!?;]/)
+    .map(piece => piece.trim()).filter(Boolean);
+}
+
+function lessonReading(card) {
+  // Keep each distinct displayed word/sentence separate without merging vocab
+  // into the following sentence, such as "bag This is my bag".
+  return card.lines.map(line => /[.!?]$/.test(line.english.trim())
+    ? line.english.trim() : line.english.trim() + '.').join(' ');
+}
+
 function checkPlan(text, label, remember = false) {
   assert.equal(typeof text, 'string', `${label} 有英文朗读文本`);
   assert(text.trim(), `${label} 朗读文本非空`);
-  const pieces = text.split(/(?<=[.!?])\s*/u).filter(piece => piece.trim());
+  const pieces = spokenPieces(text);
   const expected = pieces.map(piece => {
     const key = normalize(piece);
     assert(key, `${label} 不包含空片段`);
@@ -41,11 +65,66 @@ function checkPlan(text, label, remember = false) {
   if (remember) staticSources.push({ text, label });
 }
 
-assert.equal(manifest.version, 1);
-assert.equal(manifest.voice.language, 'en-GB');
-assert.equal(manifest.voice.name, 'bf_emma');
-assert.equal(manifest.voice.kind, 'offline-generated');
-assert(manifest.voice.source.includes('Kokoro'), '说明生成音频来源');
+assert.equal(manifest.version, 3);
+assert.equal(manifest.voice.language, 'en-US');
+assert.equal(manifest.voice.name, 'en-US-JennyNeural');
+assert.equal(manifest.voice.kind, 'pre-generated');
+assert.match(manifest.voice.profile, /^azure-jenny-v1-[a-f0-9]{12}$/, '新版音频配置包含实际生成配置指纹');
+assert.equal(manifest.voice.source, 'Azure Speech', '说明生成音频来源');
+assert.equal(manifest.voice.style, 'default');
+assert.equal(manifest.voice.rate, 'normal');
+assert.equal(manifest.voice.format, 'audio-24khz-96kbitrate-mono-mp3');
+const configuration = {
+  provider: 'Azure Speech', voice: 'en-US-JennyNeural', language: 'en-US',
+  style: 'default', rate: 'normal', format: 'audio-24khz-96kbitrate-mono-mp3', pipeline: 1
+};
+assert.deepEqual(audit.configuration, configuration, '公开审核数据对应当前 Azure 默认风格和正常语速');
+assert.equal(audit.region, 'eastus');
+assert.equal(audit.version, 1);
+function ordered(value) {
+  if (Array.isArray(value)) return value.map(ordered);
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(Object.keys(value).sort().map(key => [key, ordered(value[key])]));
+  }
+  return value;
+}
+const hashJSON = value => crypto.createHash('sha256').update(JSON.stringify(ordered(value)), 'utf8').digest('hex');
+assert.equal(manifest.voice.profile, 'azure-jenny-v1-' + hashJSON(configuration).slice(0, 12));
+// Independently reconstruct the actual SSML, including the taught word meanings.
+// A canonical playback key alone cannot detect a changed punctuation or reading.
+const readings = { close: 'kloʊz', read: 'riːd', reads: 'riːdz', minute: 'ˈmɪnɪt', minutes: 'ˈmɪnɪts' };
+const escapeXML = text => text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+  .replaceAll('"', '&quot;').replaceAll("'", '&#x27;');
+function expectedSSML(text) {
+  const spoken = text.split(/(\b(?:close|read|reads|minute|minutes)\b)/i).map(part => {
+    const reading = readings[part.toLowerCase()];
+    return reading ? `<phoneme alphabet="ipa" ph="${reading}">${escapeXML(part)}</phoneme>` : escapeXML(part);
+  }).join('');
+  return '<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="en-US">'
+    + '<voice name="en-US-JennyNeural">' + spoken + '</voice></speak>';
+}
+assert.equal(audit.clips.length, collected.clips.length);
+const currentInputs = new Map(collected.clips.map(clip => [clip.key, clip]));
+const auditedClips = new Map();
+for (const clip of audit.clips) {
+  assert(!auditedClips.has(clip.key), '公开审核数据没有重复索引');
+  const input = currentInputs.get(clip.key);
+  assert(input, `${clip.key} 有当前题库来源`);
+  assert.equal(clip.text, input.text, `${clip.key} 使用当前实际朗读文本及标点`);
+  assert.deepEqual(clip.sources, input.sources, `${clip.key} 对应当前朗读入口`);
+  assert.equal(normalize(clip.text), clip.key);
+  const ssml = expectedSSML(clip.text);
+  const digest = hashJSON({ ssml, format: configuration.format, pipeline: 1 });
+  assert.equal(clip.digest, digest, `${clip.key} 的完整指纹包含真实 SSML、输出格式与规则版本`);
+  assert.equal(clip.path, `assets/audio/${digest.slice(0, 20)}.mp3`);
+  assert.equal(manifest.clips[clip.key], clip.path, `${clip.key} 清单与生成输入一致`);
+  auditedClips.set(clip.key, clip);
+}
+const prepared = audit.clips.map(clip => ({
+  key: clip.key, text: clip.text, ssml: expectedSSML(clip.text),
+  digest: clip.digest, path: clip.path, sources: clip.sources
+}));
+assert.equal(audit.datasetSha256, hashJSON(prepared), '审核数据完整对应当前数据集和逐段 SSML');
 assert(manifest.clips && typeof manifest.clips === 'object');
 
 // Word aliases include all optional extension words, not only the home defaults.
@@ -75,12 +154,28 @@ for (const api of [hello, unit1, unit2]) {
       checkPlan(card.sayModel, `开口示范 ${card.id}`, true);
       // Phonics buttons use whole-word sayModel rather than reading IPA/letters.
       if (!['unit1-phonics', 'unit2-phonics'].includes(topic.id)) {
-        checkPlan(card.lines.map(line => line.english).join(' '), `学习卡英文 ${card.id}`, true);
+        checkPlan(lessonReading(card), `学习卡英文 ${card.id}`, true);
       }
     }
   }
 }
 const staticCount = sourceCount;
+
+// These independent examples protect the specific speaking boundaries that
+// previously caused adjacent vocabulary and comparison marks to be read badly.
+const bagCard = unit1.lesson('unit1-school').find(card => card.id.endsWith('-bag'));
+assert.deepEqual(audio.plan(speechText.lesson(bagCard, false)),
+  ['bag', 'this is my bag'].map(key => manifest.clips[key]), '校园词和示例句分别听读');
+const feetCard = unit2.lesson('unit2-body').find(card => card.lines.some(line => line.english === 'feet'));
+assert(feetCard, '一只脚和多只脚有可独立听读的词条');
+const feetPlan = audio.plan(speechText.lesson(feetCard, false));
+assert.equal(feetPlan[0], manifest.clips.foot);
+assert.equal(feetPlan[1], manifest.clips.feet, 'foot 与 feet 不拼成一句含糊的文本');
+const shortFormCard = unit2.lesson('unit2-who').find(card => card.id.endsWith('-short'));
+assert.deepEqual(audio.plan(speechText.lesson(shortFormCard, false)),
+  ["who's means who is", "he's means he is", "she's means she is"].map(key => manifest.clips[key]),
+  '缩写对照用 means 示范，不将等号读入正文');
+assert.deepEqual(audio.plan('Hello! Hi!'), [manifest.clips.hello, manifest.clips.hi], '问候词使用两个独立新版片段');
 
 // The four editable scenes have fixed positions; item/count and rule are free.
 // Check every complete poster, not just the initial picture or a set of words.
@@ -130,21 +225,31 @@ assert.equal(bookletCount, booklet.names.length * booklet.ages.length * booklet.
 
 // Verify the physical delivery, not just the promise of a manifest entry.
 const entries = Object.entries(manifest.clips);
-assert(entries.length >= 425, '覆盖本版本全部英语音频片段');
+assert.equal(entries.length, expectedKeys.size, '题库、学习卡和全部作品实际需要的每个片段都已覆盖');
 assert.deepEqual(new Set(entries.map(([key]) => key)), expectedKeys, '所有音频都有实际教学朗读来源');
 const files = new Set();
 let totalBytes = 0;
 for (const [key, filename] of entries) {
   assert.equal(key, normalize(key), `映射键已规范化：${key}`);
   assert.match(filename, /^assets\/audio\/[a-f0-9]{20}\.mp3$/, '只播放压缩包内相对路径，无外部地址或目录逃逸');
-  const expected = crypto.createHash('sha256').update(key, 'utf8').digest('hex').slice(0, 20);
-  assert.equal(filename, `assets/audio/${expected}.mp3`, '文件名对应本段实际英文内容');
+  const expected = auditedClips.get(key).digest.slice(0, 20);
+  assert.equal(filename, `assets/audio/${expected}.mp3`, '文件名对应本段真实 SSML 指纹');
+  const previous = crypto.createHash('sha256').update(key, 'utf8').digest('hex').slice(0, 20);
+  assert.notEqual(expected, previous, '改正发音后更换地址，平板不会继续命中旧音频文件');
   assert(!files.has(filename), '不同音频片段没有文件名冲突');
   files.add(filename);
   const location = path.join(repository, filename);
   const stat = fs.statSync(location);
   assert(stat.isFile() && stat.size > 200, `${filename} 是完整的非空文件`);
-  const beginning = fs.readFileSync(location).subarray(0, 3);
+  const body = fs.readFileSync(location);
+  const metadata = auditedClips.get(key);
+  assert.equal(metadata.bytes, stat.size, `${key} 文件大小与生成时的公开验证结果一致`);
+  assert.match(metadata.sha256, /^[a-f0-9]{64}$/);
+  assert.equal(crypto.createHash('sha256').update(body).digest('hex'), metadata.sha256,
+    `${key} 实际 MP3 的 SHA-256 与生成时完整解码接受的文件一致`);
+  assert(Number.isFinite(metadata.duration) && metadata.duration >= 0.08 && metadata.duration <= 600,
+    `${key} 公开时长来自实际解码结果`);
+  const beginning = body.subarray(0, 3);
   assert(beginning.toString('ascii') === 'ID3' || (beginning[0] === 0xff && (beginning[1] & 0xe0) === 0xe0), `${filename} 有 MP3 文件头`);
   totalBytes += stat.size;
 }
@@ -158,15 +263,21 @@ assert.deepEqual(audio.plan('wall. This is deliberately unpackaged audio xyzzy.'
 // Load the real HTML's classic scripts without require/fetch/server APIs.
 const html = fs.readFileSync(path.join(repository, 'index.html'), 'utf8');
 const scripts = [...html.matchAll(/<script\b([^>]*)\bsrc="([^"]+)"[^>]*>/g)];
-const paths = scripts.map(match => match[2]);
+const sources = scripts.map(match => match[2]);
+const paths = sources.map(source => source.split(/[?#]/)[0]);
 for (const [index, match] of scripts.entries()) {
   assert(!/\btype\s*=\s*["']module["']/i.test(match[0]), `${paths[index]} 是双击 HTML 可加载的经典脚本`);
   assert(!/^(?:[a-z]+:|\/)/i.test(paths[index]), '必需脚本都采用相对本地路径');
   assert(fs.statSync(path.join(repository, paths[index])).isFile(), `${paths[index]} 随项目交付`);
 }
-for (const required of ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js', 'data/questions.js', 'record-backup.js', 'data/audio-manifest.js', 'audio-player.js', 'app.js']) {
+for (const required of ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js', 'data/questions.js', 'record-backup.js', 'speech-text.js', 'data/audio-manifest.js', 'audio-player.js', 'app.js']) {
   assert.equal(paths.filter(filename => filename === required).length, 1, `${required} 加载一次`);
 }
+for (const changed of ['speech-text.js', 'data/audio-manifest.js', 'audio-player.js', 'app.js']) {
+  assert.equal(sources.find(source => source.split(/[?#]/)[0] === changed), changed + '?v=azure-jenny-v3-20261012',
+    `${changed} 有缓存版本，避免平板沿用旧脚本`);
+}
+assert(paths.indexOf('speech-text.js') < paths.indexOf('data/audio-manifest.js'));
 assert(paths.indexOf('data/audio-manifest.js') < paths.indexOf('audio-player.js'));
 assert(paths.indexOf('audio-player.js') < paths.indexOf('app.js'));
 for (const prerequisite of ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js']) {
@@ -184,8 +295,14 @@ assert.equal(sandbox.GardenAudio.has('wall'), true, '没有系统语音 API 时�
 for (const { text, label } of staticSources) {
   assert.deepEqual(plain(sandbox.GardenAudio.plan(text)), audio.plan(text), `${label} 经典脚本与 Node 中的音频映射一致`);
 }
-for (const notice of ['NOTICE.md', 'LICENSE-Kokoro', 'LICENSE-kokoro-onnx']) {
-  assert(fs.statSync(path.join(repository, 'assets/audio', notice)).size > 100, '音频归属与许可证随项目交付');
+const notice = fs.readFileSync(path.join(repository, 'assets/audio/NOTICE.md'), 'utf8');
+for (const required of ['Azure Speech', 'en-US-JennyNeural', '美式英语', '默认风格', '正常语速', '人工']) {
+  assert(notice.includes(required), `来源说明包含 ${required}`);
+}
+assert(!notice.includes('发音修正版使用 Kokoro'), '当前来源说明不再把 Azure 成品归属到旧声线');
+const reviewHTML = fs.readFileSync(path.join(repository, 'audio-review.html'), 'utf8');
+for (const source of ['speech-text.js', 'data/audio-manifest.js', 'audio-player.js', 'audio-review.js']) {
+  assert(reviewHTML.includes(`src="${source}?v=azure-jenny-v3-20261012"`), '试听页使用新版脚本缓存地址');
 }
 
 console.log(`音频静态检查通过：${entries.length} 段，${staticCount} 个固定朗读入口，${posterCount} 种海报、${bookletCount} 种小手册，${(totalBytes / 1024 / 1024).toFixed(2)} MiB。`);
@@ -211,6 +328,8 @@ async function decodeEveryFile() {
       let peak = 0;
       for (let offset = 0; offset < pcm.length; offset += 2) peak = Math.max(peak, Math.abs(pcm.readInt16LE(offset)));
       assert(peak > 64, `${filename} 包含实际声音，不是静音文件`);
+      const metadata = audit.clips.find(clip => clip.path === filename);
+      assert(Math.abs(duration - metadata.duration) < 0.00011, `${filename} 完整解码时长与公开审核数据一致`);
       durations.push(duration);
     }
   }

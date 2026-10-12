@@ -205,7 +205,7 @@ for (const [id, answer] of Object.entries(dialogueAnswers)) {
 
 // Run the same data and backup scripts without CommonJS, fetch or a server.
 const scriptSources = [...read('index.html').matchAll(/<script\b([^>]*)>/g)]
-  .map(match => ({ attributes: match[1], source: match[1].match(/\bsrc=["']([^"']+)["']/)?.[1] }))
+  .map(match => ({ attributes: match[1], source: match[1].match(/\bsrc=["']([^"']+)["']/)?.[1]?.split(/[?#]/)[0] }))
   .filter(script => script.source);
 for (const script of scriptSources) {
   assert(!/^https?:|^\/\//i.test(script.source), '必需脚本保存在项目内');
