@@ -222,7 +222,7 @@ node tests/backup.browser.test.js
 
 ### 开发者重新生成音频（普通使用者不需要）
 
-新增 Azure Speech 预生成工具：使用已选定的 `en-US-JennyNeural`、默认风格和正常语速，支持内容复用、F0 限流和中断续跑。密钥只在云环境的 Secrets 中配置。请按 [Azure 音频配置说明](AZURE_SPEECH_SETUP.md) 操作；当前尚未生成真实 Azure 音频，网站仍使用原有录音。
+新增 Azure Speech 预生成工具：使用已选定的 `en-US-JennyNeural`、默认风格和正常语速，支持内容复用、F0 限流和中断续跑。密钥只在云环境的 Secrets 中配置。请按 [Azure 音频配置说明](AZURE_SPEECH_SETUP.md) 操作；用户已在另一个任务验证 Azure Speech 成功，当前分支的网页音频尚未替换。新任务请先阅读 [音频替换接续说明](AUDIO_HANDOFF.md)。
 
 音频已经随项目交付，打开网页不需要下面的软件。`scripts/audio-texts.js` 汇总全部朗读入口；`speech-text.js` 统一文本及分段；`scripts/build-audio.py` 在开发环境离线生成 MP3。新增可朗读文字后应更新音频清单，保持原有题号不变。模型和声音参数文件不放入仓库，官方来源及许可证见 [音频来源说明](assets/audio/NOTICE.md)。
 
