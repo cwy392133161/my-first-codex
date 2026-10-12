@@ -2,7 +2,7 @@
 
 本项目使用你已确认的 `en-US-JennyNeural`，默认风格、正常语速，在开发环境提前生成 MP3。孩子打开网站时只播放这些文件，不访问 Azure，不读取密钥。
 
-生成工具最初保存在 `azure-speech-audio`；最新接续快照见 [AUDIO_HANDOFF.md](AUDIO_HANDOFF.md)。用户已在另一个新任务验证 Azure Speech 成功。本工作区尚未用 Azure MP3 替换旧录音，也没有更新网站；原题号、首次作答记录、错题、备份格式和 `learning-garden-v1` 本地存储键保持原样。
+生成工具最初保存在 `azure-speech-audio`；接续快照见 [AUDIO_HANDOFF.md](AUDIO_HANDOFF.md)。当前 `azure-jenny-audio-20261012` 工作分支复用已验证的云环境网络密钥、HTTPS REST 接口及环境代理，准备了完整 Azure MP3 替换；具体生成和检查结果见 [Azure 检查记录](AZURE_AUDIO_CHECKS.md)。正式网站尚未发布本次更新；原题号、首次作答记录、错题、备份格式和 `learning-garden-v1` 本地存储键保持原样。
 
 ## 在哪里安全填写密钥
 
@@ -11,7 +11,7 @@
 3. 在环境变量中确认 `SPEECH_REGION` 为 `eastus`。这不是密钥，可以直接填写。
 4. 审阅并保存配置，再按界面要求**发布/应用云环境配置**，让密钥与网络规则进入运行环境。这一步是应用云环境配置；学习网站仍保持原版。
 
-已保存的配置草稿声明 `SPEECH_KEY` 只用于 `eastus.tts.speech.microsoft.com`，并增加该目标域名的网络许可。草稿没有密钥值；保存草稿也不等于运行环境已经配置成功。首次配置阶段曾因网络规则未应用而拒绝 Azure 连接。用户已在另一个任务验证成功，后续应复用那个任务的安全配置；具体运行状态以该任务的实际检查为准。
+本次复用了安全配置中绑定到 `eastus.tts.speech.microsoft.com` 的 `SPEECH_KEY` 和 `SPEECH_REGION=eastus`。运行环境已报告密钥及区域 ready、网络规则 enforced；实际 HTTPS REST 请求也已成功。生成器使用继承的环境代理及 CA 信任，保留 TLS 校验，不绕过代理。环境设置的配置状态与 Azure 实际授权结果仍是两项不同检查。
 
 配置好后，可以在聊天里只说“密钥已安全配置”，无需附上任何密钥或截图。助手将仅检查配置是否存在，再生成 Hello、Hi 两段真实样本。
 
@@ -63,7 +63,7 @@ python3 scripts/build-azure-audio.py --verify
 
 样本生成、失败或中断不会替换已有的完整清单；已验证的音频和限流进度会保留。生成器不覆盖项目根目录中的 `assets/audio/`、`data/audio-manifest.js` 或发布分支。
 
-全库生成、验证及关键样本试听完成后，助手才准备把**新清单引用的文件**及清单用于网站，并更新美式 Jenny 发音说明、脚本缓存版本和相关测试。此时仍可审阅更新；本阶段不发布学习网站。
+当前工作分支只把**新清单引用的文件**及清单用于网页，并更新美式 Jenny 发音说明、脚本缓存版本和相关测试。网页程序检查与人工听感结论分开记录；本阶段不发布正式学习网站。
 
 ## F0 限流和异常处理
 

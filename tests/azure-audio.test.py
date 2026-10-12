@@ -218,6 +218,10 @@ class AzureAudioBuilderTests(unittest.TestCase):
         result = self.build(transport=transport)
         self.assertIsInstance(result, dict)
         self.assertEqual(len(requested), 2)
+        audit = json.loads((self.root / '.audio-build/azure/data/audio-audit.json').read_text())
+        for clip in audit['clips']:
+            self.assertEqual({name: clip[name] for name in ('bytes', 'sha256', 'duration')},
+                             self.builder.validate_audio(self.root / '.audio-build/azure' / clip['path']))
         manifest_before = self.stage_manifest().read_bytes()
         original = self.builder.prepare_clips(self.clips())
         hello_before = self.staged_file(original[0]).stat().st_mtime_ns

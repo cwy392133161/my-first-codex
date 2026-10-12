@@ -8,6 +8,9 @@ const http = require('node:http');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const crypto = require('node:crypto');
+const vm = require('node:vm');
+const { execFile } = require('node:child_process');
+const audit = require('../data/audio-audit.json');
 const questions = require('../data/questions.js');
 const unit2 = require('../data/english-unit2.js');
 const manifest = require('../data/audio-manifest.js');
@@ -29,15 +32,46 @@ async function serverStart() {
       const url = new URL(request.url, 'http://localhost');
       const file = path.resolve(root, url.pathname === '/' ? 'index.html' : `.${decodeURIComponent(url.pathname)}`);
       if (!file.startsWith(`${root}${path.sep}`)) { response.writeHead(403).end(); return; }
-      const body = await fs.readFile(file);
+      const relative = url.pathname === '/' ? '/index.html' : url.pathname;
+      const body = server.legacyFiles?.get(relative) || await fs.readFile(file);
       const type = file.endsWith('.mp3') ? 'audio/mpeg'
         : file.endsWith('.js') ? 'text/javascript; charset=utf-8'
         : file.endsWith('.css') ? 'text/css; charset=utf-8' : 'text/html; charset=utf-8';
-      response.writeHead(200, { 'Content-Type': type, 'Content-Length': body.length }).end(body);
+      server.servedRequests.push(request.url);
+      response.writeHead(200, {
+        'Content-Type': type, 'Content-Length': body.length,
+        'Cache-Control': /\.(?:js|mp3)$/.test(file) ? 'public, max-age=31536000' : 'no-cache'
+      }).end(body);
     } catch { response.writeHead(404).end(); }
   });
+  server.servedRequests = [];
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   return server;
+}
+
+async function legacyAudioFiles() {
+  // Retain the real previous resources in browser HTTP cache before switching
+  // the same origin to the candidate. Playwright routing would disable cache.
+  const read = filename => new Promise((resolve, reject) => {
+    execFile('git', ['show', `d070b76:${filename}`],
+      { cwd: root, encoding: 'buffer', maxBuffer: 1024 * 1024 }, (error, body) => {
+        if (error) { reject(new Error(`无法读取交接提交中的缓存升级检查文件：${filename}`)); return; }
+        resolve(body);
+      });
+  });
+  const index = await read('index.html');
+  const manifestSource = await read('data/audio-manifest.js');
+  const sandbox = { module: { exports: {} } };
+  vm.runInNewContext(manifestSource.toString('utf8'), sandbox);
+  const previous = sandbox.module.exports;
+  assert.equal(previous.version, 2, '升级检查从真实交接版 v2 清单开始');
+  return {
+    previous,
+    files: new Map([
+      ['/index.html', index], ['/data/audio-manifest.js', manifestSource],
+      ['/' + previous.clips.hello, await read(previous.clips.hello)]
+    ])
+  };
 }
 
 function initialize(options) {
@@ -242,15 +276,15 @@ function initialize(options) {
     assert.equal(await page.evaluate(() => window.audioNativeCalls.length), 0);
     await goals(page, 'hello');
     await page.locator('.goal-unit[data-topic="hello-greetings"] button[data-action="goal-learn"]').click();
-    assert.equal(await page.evaluate(() => GardenAudioManifest.version), 2);
-    assert.match(manifest.voice.profile, /^uk-misaki-v1-[a-f0-9]{12}$/);
+    assert.equal(await page.evaluate(() => GardenAudioManifest.version), 3);
+    assert.match(manifest.voice.profile, /^azure-jenny-v1-[a-f0-9]{12}$/);
     assert.equal(await page.evaluate(() => GardenAudioManifest.voice.profile), manifest.voice.profile);
     for (const [index, greeting] of ['hello', 'hi'].entries()) {
       if (index) await click(page, 'goal-next');
       assert.equal((await page.locator('button[data-action="speak"]').first().getAttribute('data-text'))
         .trim().replace(/[.!?]+$/, '').toLowerCase(), greeting, '问候卡保持 Hello 和 Hi 两个独立示范');
       const greetingClips = await playToEnd(page, 'speak');
-      const corrected = crypto.createHash('sha256').update(manifest.voice.profile + '\0' + greeting).digest('hex').slice(0, 20);
+      const corrected = audit.clips.find(clip => clip.key === greeting).digest.slice(0, 20);
       const old = crypto.createHash('sha256').update(greeting).digest('hex').slice(0, 20);
       assert.equal(manifest.clips[greeting], `assets/audio/${corrected}.mp3`);
       assert.equal(greetingClips.length, 1, '每个问候只播放相应的新版片段');
@@ -259,10 +293,10 @@ function initialize(options) {
     }
     assert.deepEqual(await saved(page), afterAnswer, 'Hello / Hi 的听读不修改旧记录或英语首次作答');
     assert.equal(await page.evaluate(() => window.audioNativeCalls.length), 0, '新版问候不依赖系统语音 API');
-    for (const source of ['data/audio-manifest.js', 'audio-player.js', 'app.js']) {
+    for (const source of ['speech-text.js', 'data/audio-manifest.js', 'audio-player.js', 'app.js']) {
       const sourceRequests = requests.filter(request => new URL(request.url).pathname === '/' + source);
       assert(sourceRequests.length > 0, '真实页面确实加载新版脚本 ' + source);
-      assert(sourceRequests.every(request => new URL(request.url).searchParams.get('v') === 'uk-pronunciation-v2'),
+      assert(sourceRequests.every(request => new URL(request.url).searchParams.get('v') === 'azure-jenny-v3-20261012'),
         source + ' 带新版缓存参数，避免平板继续使用旧逻辑');
     }
     pass('wall、Hello / Hi 真实播放新版 MP3，使用更新后的缓存地址，无系统语音且记录不变');
@@ -405,11 +439,55 @@ function initialize(options) {
       }
       assert.deepEqual(await saved(unavailable), oldRecords);
     }
+    pass('录音失败后原生兜底可用；原生抛错、报错、超时与旧回调安全降级；仅同源文件读取');
+
+    // 9: Refresh the same origin with prior v2 resources still cached. Existing
+    // Chinese/English first answers, mistakes and unrelated settings survive.
+    const legacy = await legacyAudioFiles();
+    server.legacyFiles = legacy.files;
+    const upgrading = await fresh();
+    await upgrading.evaluate(({ key, records }) => {
+      localStorage.setItem(key, JSON.stringify(records));
+      localStorage.setItem('audio-upgrade-setting', 'keep-me');
+    }, { key: KEY, records: afterListening });
+    await upgrading.reload();
+    assert.equal(await upgrading.evaluate(() => GardenAudioManifest.version), 2);
+    await goals(upgrading, 'hello');
+    await upgrading.locator('.goal-unit[data-topic="hello-greetings"] button[data-action="goal-learn"]').click();
+    const oldPlayback = await playToEnd(upgrading, 'speak');
+    assert.equal(oldPlayback.length, 1);
+    assert.equal(new URL(oldPlayback[0].src).pathname, '/' + legacy.previous.clips.hello);
+    assert(server.servedRequests.includes('/data/audio-manifest.js?v=uk-pronunciation-v2'), '真实旧清单曾下载并可进入 HTTP 缓存');
+    assert(server.servedRequests.includes('/' + legacy.previous.clips.hello), '真实旧 Hello 曾下载并播放');
+    const oldHelloRequests = () => server.servedRequests.filter(url => url === '/' + legacy.previous.clips.hello).length;
+    const cachedHelloRequests = oldHelloRequests();
+    await playToEnd(upgrading, 'speak');
+    assert.equal(oldHelloRequests(), cachedHelloRequests, '再次播放旧 Hello 命中浏览器缓存，没有向服务端重复下载');
+    assert.deepEqual(await saved(upgrading), afterListening);
+    const beforeUpgrade = server.servedRequests.length;
+    server.legacyFiles = null;
+    await upgrading.reload();
+    assert.equal(await upgrading.evaluate(() => GardenAudioManifest.version), 3, '同源刷新加载 v3，没有沿用已缓存 v2 清单');
+    assert.equal(await upgrading.evaluate(() => GardenAudioManifest.voice.name), 'en-US-JennyNeural');
+    assert.deepEqual(await saved(upgrading), afterListening, '刷新升级原样保留中文、英语首次记录与错题');
+    assert.equal(await upgrading.evaluate(() => localStorage.getItem('audio-upgrade-setting')), 'keep-me');
+    await goals(upgrading, 'hello');
+    await upgrading.locator('.goal-unit[data-topic="hello-greetings"] button[data-action="goal-learn"]').click();
+    const newPlayback = await playToEnd(upgrading, 'speak');
+    assert.equal(newPlayback.length, 1);
+    assert.equal(new URL(newPlayback[0].src).pathname, '/' + manifest.clips.hello);
+    assert.notEqual(manifest.clips.hello, legacy.previous.clips.hello, 'Azure Hello 与旧 Emma 文件地址不同');
+    const upgradeRequests = server.servedRequests.slice(beforeUpgrade);
+    assert(upgradeRequests.includes('/data/audio-manifest.js?v=azure-jenny-v3-20261012'), '新缓存参数请求当前清单');
+    assert(upgradeRequests.includes('/' + manifest.clips.hello), '新哈希请求实际 Azure MP3');
+    assert(!upgradeRequests.includes('/' + legacy.previous.clips.hello), '刷新后无需请求旧录音');
+    assert.deepEqual(await saved(upgrading), afterListening, '新声音播放不改首次作答或错题，也没有清空数据');
+    pass('同源 v2 旧脚本和 MP3 已缓存时，刷新切换 v3 Jenny／新哈希，中文英语学习记录和错题完整保留');
+
     assert.deepEqual(pageErrors, [], '所有设备和失败场景均没有未捕获脚本异常');
     assert(requests.every(request => request.method === 'GET' && new URL(request.url).origin === origin),
       '运行时只读取项目本身的文件，不发送文字或资料到外部语音接口');
     assert(requests.some(request => /\/assets\/audio\/[^/]+\.mp3$/.test(request.url)), '确实请求了项目内的录音文件');
-    pass('录音失败后原生兜底可用；原生抛错、报错、超时与旧回调安全降级；仅同源文件读取');
 
     console.log(`通过 ${passed.length} 组真实浏览器音频检查。`);
   } finally {

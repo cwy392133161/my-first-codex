@@ -361,6 +361,7 @@ def build(root, clips, *, dry_run=False, limit=0, transport=None, clock=time.tim
         raise SafeError('未配置 SPEECH_KEY。请在云环境设置的密钥区域安全填写，不要发在聊天里。')
     with single_instance(stage):
         ledger = RateLedger(stage / 'ledger.json', clock, sleep, budget, max_wait)
+        verified = {}
         for index, clip in enumerate(selected):
             # Check again while holding the lock, because an earlier process may have finished.
             info = cache_info(stage, clip)
@@ -381,6 +382,7 @@ def build(root, clips, *, dry_run=False, limit=0, transport=None, clock=time.tim
                     })
                 finally:
                     if temporary and temporary.exists(): temporary.unlink()
+            verified[clip['digest']] = info
             print(f'音频 {index + 1}/{len(selected)} 已验证。', flush=True)
         if limit:
             return {**summary, 'sampleOnly': True, 'verifiedClips': len(selected),
@@ -394,7 +396,8 @@ def build(root, clips, *, dry_run=False, limit=0, transport=None, clock=time.tim
                     'clips': {clip['key']: clip['path'] for clip in prepared}}
         audit = {'version': 1, 'configuration': CONFIG, 'region': REGION,
                  'datasetSha256': hashlib.sha256(json_bytes(prepared)).hexdigest(),
-                 'clips': [{k: v for k, v in clip.items() if k != 'ssml'} for clip in prepared],
+                 'clips': [{**{k: v for k, v in clip.items() if k != 'ssml'},
+                            **verified[clip['digest']]} for clip in prepared],
                  'verification': 'Every cached MP3 passed a full non-silent decode; human pronunciation review is separate.'}
         source = ('/* Pre-generated Azure MP3 mapping; no credentials or runtime API calls. */\n'
                   '(function(root){\n const manifest=' + json.dumps(manifest, ensure_ascii=False, separators=(',', ':')) + ';\n'

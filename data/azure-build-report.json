@@ -1,0 +1,58 @@
+{
+  "date": "2026-10-12",
+  "baseCommit": "d070b76a413300a3d4124428ddf77c30d56e7805",
+  "branch": "azure-jenny-audio-20261012",
+  "configuration": {
+    "provider": "Azure Speech",
+    "voice": "en-US-JennyNeural",
+    "language": "en-US",
+    "style": "default",
+    "rate": "normal",
+    "format": "audio-24khz-96kbitrate-mono-mp3",
+    "pipeline": 1
+  },
+  "clips": 398,
+  "spokenCharacters": 5547,
+  "conservativeCharacters": 57906,
+  "requests": {
+    "samples": 2,
+    "fullRun": 396,
+    "total": 398,
+    "retries": 0,
+    "reusedAtFullRun": 2
+  },
+  "readOnlyVerification": {
+    "verifiedClips": 398,
+    "newRequests": 0,
+    "reusedClips": 398
+  },
+  "audioBytes": 9904320,
+  "durationSeconds": 825.36,
+  "minimumDurationSeconds": 1.872,
+  "maximumDurationSeconds": 3.912,
+  "datasetSha256": "94fef5163036eb3239872f8190ade76e48fd8161fa9e7275e387f2728acbe246",
+  "humanPronunciationReviewedAll": false,
+  "deployedToOfficialSite": false,
+  "budgetNote": "Conservative local SSML character accounting; not Azure remaining quota or an actual billing report.",
+  "softwareChecks": {
+    "generationRegressionTests": 26,
+    "audioWorkflowBrowserScenarios": 9,
+    "auditionBrowserScenarios": 5,
+    "backupBrowserScenarios": 14,
+    "realBrowserPlayback": {
+      "clips": 398,
+      "passed": 398,
+      "playbackRate": 4,
+      "muted": true,
+      "parallelLanes": 8,
+      "elapsedSeconds": 29.7,
+      "purpose": "Decoding and playback only; not a human pronunciation review."
+    },
+    "questionsAndIdsPreserved": 1602,
+    "coreSourceFilesUnchanged": 7,
+    "storageKey": "learning-garden-v1",
+    "oldCacheUpgradeAndRefreshPersistence": "passed",
+    "fileSchemePreview": "skipped: Chromium ERR_BLOCKED_BY_ADMINISTRATOR",
+    "physicalHuaweiDeviceVerified": false
+  }
+}

@@ -1,5 +1,7 @@
 # Azure 音频替换：新任务接续说明
 
+> 本文记录 `d070b76` 接续时的历史快照。后续 `azure-jenny-audio-20261012` 工作分支的 Azure 替换和实际检查见 [AZURE_AUDIO_CHECKS.md](AZURE_AUDIO_CHECKS.md) 与 [PRONUNCIATION_REVIEW.md](PRONUNCIATION_REVIEW.md)。正式网站暂未发布本次更新。
+
 交接分支：`azure-speech-handoff-20261012`。代码基于 `azure-speech-audio` 的 `d4cd2653b5a6fbce42e8d32ae6d4f9303523a01f`，包含完整网页、题库、旧音频、Azure 生成脚本及测试。
 
 ## 本次保存时的实际状态

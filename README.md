@@ -41,19 +41,19 @@ Windows 上可改用 `py -m http.server 8000 --bind 0.0.0.0`。电脑浏览器�
 
 图片中带 `*` 的词是拓展词，默认不加入。勾选“包含拓展词”即可一起学习和练习。错题复习会保留所有已答错的题，不受此开关影响。
 
-发音优先播放项目自带的英国英语示范 MP3，不依赖平板的系统语音服务。音频包含单词、学习卡、听辨题、原创故事及海报／小手册介绍；是本项目预先生成的示范声音，不是教材原声。音频无法播放时，会尝试设备自带的英文语音；两种方式都失败时显示文字提示。没有麦克风录音或发音评分，网页无需登录，不调用外部AI或语音接口。
+发音优先播放项目自带的 Azure Jenny 美式英语示范 MP3，不依赖平板的系统语音服务。音频包含单词、学习卡、听辨题、原创故事及海报／小手册介绍；是本项目预先生成的示范声音，不是教材原声。只有 MP3 不可用时，练习页才沿用原有降级行为，尝试设备自带的英文语音；两种方式都失败时显示文字提示。家长试听页仅播放 MP3，不调用系统语音。没有麦克风录音或发音评分，网页无需登录，不调用外部AI或语音接口。
 
-### 发音修正与家长试听
+### Azure 发音候选版与家长试听
 
-此分支为发音试听版，尚未通过听感验收，暂未替换正式网页的音频。可打开 [在线试听版](https://cwy392133161.github.io/my-first-codex/pronunciation-preview/audio-review.html) 检查 Hello、Hi 和全部词句。
+当前工作分支准备使用 **Azure Speech `en-US-JennyNeural`** 美式英语，默认风格、正常语速。此音频候选版尚未发布到正式网站；正式网址和之前的 `pronunciation-preview/` 页面不会因为工作分支更新而自动更换录音。
 
-根据 Hello、Hi 等发音反馈，当前版本重新生成全部英语示范音频，改用模型配套的英式读音处理。共有 **398 段音频**，覆盖 **1,517 个朗读入口**；相同的单词和句子会共用音频。这些数字是音频及入口数量，不是题库题数，也不是测试次数。
+共有 **398 段音频**，覆盖 **1,517 个朗读入口**；相同的单词和句子会共用音频。这些数字是音频及入口数量，不是题库题数，也不是测试次数。单词和例句分开播放；`foot` 和 `feet` 分别示范，同义词、缩写对照和颜色短语分别听读。`close` 按“关闭”的动词读音处理，`read`／`reads` 按当前示例的现在时读音处理，`minute`／`minutes` 按“分钟”读音处理。
 
-单词和例句分开播放，修正34张学习卡中原来连在一起的文字；`foot` 和 `feet` 分别示范，同义词、缩写对照和颜色短语都有清楚的分段。`close` 按“关闭”的动词读音处理，`read`／`reads` 按当前示例的现在时读音处理，`minute` 按“分钟”读音处理。普通英语缩写保留，p／b、th／t 仍播放完整示例词。所有题号、答案和已有学习记录保留。
+检出本工作分支后，按上面的本地服务方式打开 [英语发音试听](audio-review.html)，先点击 **Hello、Hi**，再听数字、颜色、读音重点、句子和作品介绍，也可以搜索全部英文单词或句子。这里播放练习使用的同一套 MP3，试听不会改动学习记录。
 
-打开 [英语发音试听](audio-review.html)，先点击 **Hello、Hi**，再听数字、颜色和其他内容，也可以搜索英文单词或句子。这里播放练习使用的同一套 MP3，试听不会改动学习记录。
+音频清单版本为 3。每段文件地址由实际 SSML、输出格式和生成规则指纹决定；页面脚本使用新的缓存参数。题目 ID、答案、`learning-garden-v1` 本地存储键、首次作答记录、错题及备份格式保持不变，**无需清空浏览器数据**。
 
-程序检查覆盖读音输入、音频完整性和实际播放，但**不能证明所有音频都已经由老师逐条听审，也不能保证每句合成语音的重音和语调完全自然**。有疑问时，可在试听页找到对应文字，与老师或可靠英式词典核对。本项目没有用华为实体平板完成验证；兼容检查是在关闭系统语音功能的浏览器中进行的。
+当前检查结果见 [Azure 发音候选版检查记录](PRONUNCIATION_REVIEW.md)。程序检查覆盖朗读对应关系、文件 SHA-256、完整解码、非静音及浏览器实际播放，**不能证明全部音频已经由老师逐条听审，也不能保证每句语音的发音、重音和语调都准确自然**。有疑问时，可在试听页找到对应文字，与老师或可靠美式词典核对。本项目没有用华为实体平板完成验证。
 
 ### 华为平板等设备如何听读
 
@@ -208,6 +208,7 @@ node tests/audio.test.js
 node tests/audio-player.test.js
 node tests/audio.browser.test.js
 node tests/audio-review.browser.test.js
+node tests/audio-all.browser.test.js
 node tests/browser.test.js
 node tests/backup.browser.test.js
 ```
@@ -216,34 +217,25 @@ node tests/backup.browser.test.js
 
 音频浏览器检查会关闭系统语音接口，实际播放 MP3，覆盖听辨、连续朗读、停止及失败提示。如果开发环境已安装 FFmpeg，还可以运行 `node tests/audio.test.js --decode`，逐个检查所有 MP3 是否完整、可解码且包含声音。
 
-安装下面的音频开发依赖后，可运行 `python tests/pronunciation.test.py --model /你的模型目录/kokoro-v1.0.onnx` 检查英式音素、词义对应的读音和生成参数。`data/audio-audit.json` 保留每段的规范化文本、音素、来源及生成配置；检查通过不代表所有段落已经完成人工发音审核。
+Azure 生成器检查使用 `python3 tests/azure-audio.test.py`，无需真实密钥且不消耗 Azure 额度。`data/audio-audit.json` 保留每段实际文本、来源、SSML 指纹、文件 SHA-256、文件大小和解码时长；这些结果用于核对生成输入及文件完整性，不能代替人工听辨。
 
 备份检查还覆盖真实下载文件、恢复与取消、重复导入、保留旧记录、无效/超大文件拒绝及保存失败保护。
 
 ### 开发者重新生成音频（普通使用者不需要）
 
-新增 Azure Speech 预生成工具：使用已选定的 `en-US-JennyNeural`、默认风格和正常语速，支持内容复用、F0 限流和中断续跑。密钥只在云环境的 Secrets 中配置。请按 [Azure 音频配置说明](AZURE_SPEECH_SETUP.md) 操作；用户已在另一个任务验证 Azure Speech 成功，当前分支的网页音频尚未替换。新任务请先阅读 [音频替换接续说明](AUDIO_HANDOFF.md)。
+使用 Python 3、Node 和 FFmpeg，通过 Azure Speech **HTTPS REST** 接口与执行环境代理提前生成音频；网页运行时只播放项目内 MP3，不调用 Azure，不读取密钥，不上传学习记录。配置和限流详情见 [Azure 音频配置说明](AZURE_SPEECH_SETUP.md)；本次起点和约束见 [音频替换接续说明](AUDIO_HANDOFF.md)。
 
-音频已经随项目交付，打开网页不需要下面的软件。`scripts/audio-texts.js` 汇总全部朗读入口；`speech-text.js` 统一文本及分段；`scripts/build-audio.py` 在开发环境离线生成 MP3。新增可朗读文字后应更新音频清单，保持原有题号不变。模型和声音参数文件不放入仓库，官方来源及许可证见 [音频来源说明](assets/audio/NOTICE.md)。
-
-开发环境需要 Node、FFmpeg、eSpeak NG，以及 Python 虚拟环境。本次生成使用 `misaki[en]==0.9.4`、`spacy==3.8.16`、`en_core_web_sm==3.8.0`、ONNX Runtime、NumPy、SoundFile，以及 `kokoro-onnx==0.4.9` 中的音频裁剪函数。Misaki 负责英式读音转换，ONNX Runtime 直接运行全精度模型；不使用旧版通用音素输入。安装 Python 依赖示例：
+密钥只从安全环境配置的 `SPEECH_KEY` 读取，区域为 `SPEECH_REGION=eastus`。不要把密钥、请求头、环境文件或原始服务错误正文写入仓库、聊天或日志。
 
 ```sh
-python -m pip install "misaki[en]==0.9.4" "spacy==3.8.16" "kokoro-onnx==0.4.9" phonemizer-fork onnxruntime numpy soundfile
-python -m pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+python3 scripts/build-azure-audio.py --dry-run
+python3 scripts/build-azure-audio.py --limit 2
+python3 scripts/build-azure-audio.py
+python3 scripts/build-azure-audio.py --verify
 ```
 
-使用官方 `model-files-v1.1` 发布中的全精度 `kokoro-v1.0.onnx` 和 `voices-v1.0.bin`。下载后核对 SHA-256：
+`scripts/audio-texts.js` 汇总朗读入口，`speech-text.js` 统一朗读文本和分段，`scripts/build-azure-audio.py` 生成 Azure MP3。F0 默认串行、每 4 秒一个请求，并限制为每 60 秒最多 20 次；重试计入限流账本。临时失败支持有限重试及 `Retry-After`，已验证文件可断点复用，避免重复合成。
 
-| 文件 | SHA-256 |
-|---|---|
-| `kokoro-v1.0.onnx` | `beb0d1848dee9a49da392cc3df26958d46cfa35d321edf434f52949153f0df3a` |
-| `voices-v1.0.bin` | `bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d` |
+输出只写入由 Git 忽略的 `.audio-build/azure/`。全部片段验证成功后，才会准备暂存清单和公开审核数据；生成器不会自动覆盖网页或部署。缓存复用必须同时满足当前 SSML 指纹、文件 SHA-256、完整解码和非静音检查。新增内容只生成缺失或变化的片段，原有题号保持不变。
 
-```sh
-python scripts/build-audio.py --model /你的模型目录/kokoro-v1.0.onnx --voices /你的模型目录/voices-v1.0.bin
-```
-
-默认使用英国英语声线 `bf_emma`、语速参数 `0.88`，输出24 kHz单声道、96 kbps MP3。脚本按官方规则用音素长度减一选择声线参数，保留安静的词首、词尾，并增加前后留白。`--limit 2` 可先生成 Hello、Hi 样本，不会改写全量清单。分片生成可分别运行 `--shard-count 2 --shard-index 0` 和 `--shard-count 2 --shard-index 1`；默认每个分片使用一个推理线程，可通过 `--threads` 调整。
-
-音频版本 `uk-misaki-v1-<12位指纹>` 根据模型、声线、语速、文本规则和完整音素序列生成，文件地址也包含这个版本的哈希。配置或读音变化后会使用新地址，避免旧录音缓存；配置相同时可以续跑已有文件。全部分片完成后才更新清单与 `data/audio-audit.json`，然后运行上述检查并逐条试听。发布时只保留新清单引用的 MP3，移除没有引用的旧音频。
+在完成生成及检查后，只复制新清单引用的 MP3、`data/audio-manifest.js` 和 `data/audio-audit.json` 到网页目录，移除清单不再引用的旧 MP3，同时更新脚本缓存参数。不要复制 `.audio-build` 账本或密钥配置。声线和生成来源见 [音频来源说明](assets/audio/NOTICE.md)。 本次生成请求、资产汇总和程序验收见 [Azure 检查记录](AZURE_AUDIO_CHECKS.md)。旧 Kokoro 工具及许可文件保留供历史追溯，当前音频不使用旧模型。

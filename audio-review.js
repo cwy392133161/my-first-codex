@@ -92,8 +92,10 @@
     elements.empty.hidden=found.length>0;
   }
 
-  if(manifest?.version>=2){
-    elements.version.textContent=`新版音频试听 · 待听辨确认 · 英式英语 · 共 ${keys.length} 段录音`;
+  if(manifest?.version>=3){
+    elements.version.textContent=`Azure Jenny · 美式英语 · 默认风格、正常语速 · 待人工听辨 · 共 ${keys.length} 段录音`;
+  }else if(manifest?.version===2){
+    elements.version.textContent=`旧版试听 · 英式英语 · 待人工听辨 · 共 ${keys.length} 段录音`;
   }else{
     elements.version.textContent=`当前清单为旧版 · 共 ${keys.length} 段录音。修正版发布后，请刷新本页。`;
   }

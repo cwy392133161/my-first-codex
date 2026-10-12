@@ -67,7 +67,7 @@ function initialize({recordKey,originalRecords}){
 }
 
 (async()=>{
-  if(process.env.AUDIO_REVIEW_ALLOW_OLD!=='1')assert.equal(manifest.version,2,'发布前必须使用重新构建的修正版音频');
+  assert.equal(manifest.version,3,'试听检查必须使用 Azure Jenny 音频');
   const server=await serverStart();
   const origin='http://127.0.0.1:'+server.address().port;
   let browser;
@@ -80,7 +80,7 @@ function initialize({recordKey,originalRecords}){
       const context=await browser.newContext({viewport:{width:390,height:844}});contexts.push(context);
       await context.addInitScript(initialize,{recordKey,originalRecords});
       if(options.missingAudio)await context.route('**/assets/audio/*.mp3',route=>route.fulfill({status:404,body:'Missing audio'}));
-      if(options.missingManifest)await context.route('**/data/audio-manifest.js?*',route=>route.fulfill({status:200,contentType:'text/javascript',body:'window.GardenAudioManifest = {version:2,clips:{}};'}));
+      if(options.missingManifest)await context.route('**/data/audio-manifest.js?*',route=>route.fulfill({status:200,contentType:'text/javascript',body:'window.GardenAudioManifest = {version:3,clips:{}};'}));
       const page=await context.newPage();
       page.on('pageerror',error=>errors.push(error.message));
       page.on('request',request=>requests.push({url:request.url(),method:request.method()}));
@@ -100,7 +100,8 @@ function initialize({recordKey,originalRecords}){
     const page=await fresh();
     assert.equal(await page.locator('#all-clips button').count(),Object.keys(manifest.clips).length);
     assert((await page.locator('#audio-version').innerText()).includes(String(Object.keys(manifest.clips).length)));
-    if(manifest.version===2)assert((await page.locator('#audio-version').innerText()).includes('待听辨确认'));
+    for(const label of ['Azure Jenny','美式英语','默认风格','正常语速','待人工听辨'])assert((await page.locator('#audio-version').innerText()).includes(label));
+    assert((await page.locator('.note').innerText()).includes('不能代替逐条人工听辨'));
     for(const key of ['hello','hi']){
       await findClip(page,key).click();await finished(page);
       assert.equal(await page.locator('#current-clip').innerText(),key);
@@ -173,6 +174,10 @@ function initialize({recordKey,originalRecords}){
     assert.equal(await missing.evaluate(()=>window.reviewPlayCalls.length),0);
     await recordsUnchanged(missing);
     assert.deepEqual(errors,[]);
+    for(const source of ['speech-text.js','data/audio-manifest.js','audio-player.js','audio-review.js']){
+      const loaded=requests.filter(request=>new URL(request.url).pathname==='/'+source);
+      assert(loaded.length>0&&loaded.every(request=>new URL(request.url).searchParams.get('v')==='azure-jenny-v3-20261012'),source+' 使用新版缓存参数');
+    }
     assert(requests.every(request=>request.method==='GET'&&new URL(request.url).origin===origin),'只读取同源文件，不调用外部接口');
     pass('音频 404 和空清单明确提示，不偷偷换成系统语音；所有场景无脚本异常和外部请求');
 
