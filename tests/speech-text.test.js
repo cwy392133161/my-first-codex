@@ -113,8 +113,12 @@ test('p/b 和 th/t 始终读完整示例词，不朗读字母名、括号或缺�
 
 test('构建覆盖新规范片段，Hello/Hi 优先，没有粘连词条或符号输入', () => {
   const data = collect();
-  assert.equal(data.texts.length, 1517, '原有朗读入口都保留');
-  assert.equal(data.clips.length, 398, '重新使用完整词与例句后，合并重复片段');
+  const previous = collect({includeUnit3:false});
+  assert.equal(previous.texts.length, 1517, '原有朗读入口都保留');
+  assert.equal(previous.clips.length, 398, '原有完整词与例句的去重片段');
+  assert.deepEqual(data.texts.slice(0, previous.texts.length), previous.texts, '新增单元在原有入口后追加');
+  assert(data.texts.length > previous.texts.length);
+  for (const clip of previous.clips) assert.equal(data.clips.find(item=>item.key===clip.key).text, clip.text, '复用时原有真实朗读文本不改变');
   assert.deepEqual(data.clips.slice(0, 3).map(clip => clip.key), ['hello', 'hi', 'wall']);
   assert.equal(new Set(data.clips.map(clip => clip.key)).size, data.clips.length);
   for (const clip of data.clips) {

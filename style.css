@@ -13,6 +13,9 @@
 .goal-text{margin:0;font-size:18px}
 .goal-card{text-align:center}
 .goal-card h1{font-size:28px}
+.goal-glossary{text-align:left;background:#f3f6ed;border-radius:16px;padding:14px;margin:18px 0}
+.goal-glossary summary{cursor:pointer;min-height:44px;font-size:18px;line-height:2}
+.goal-glossary p{font-size:18px;overflow-wrap:anywhere;margin:8px 0}
 .sentence-line{margin:16px 0}
 .sentence-line div,.say-model p{font-size:clamp(24px,6vw,34px);line-height:1.6;color:#355f65;overflow-wrap:anywhere}
 .sentence-line small{font-size:18px}
@@ -43,6 +46,31 @@
 .reading-passage summary{cursor:pointer;min-height:44px;font-size:17px;line-height:2}
 .reading-passage .speech-status{margin:8px 0}
 .phonics-note{background:#eef3eb;padding:14px;border-radius:14px;font-size:18px;text-align:left}
+.farm-animal-picture{width:100%;max-width:380px;background:#edf4e6;border:1px solid #d4e1cc;border-radius:24px;padding:20px 14px;text-align:center}
+.farm-animal-row{display:flex;gap:12px;justify-content:center;align-items:flex-end;flex-wrap:wrap;min-height:108px;font-size:76px;line-height:1.35}
+.farm-animal-row span{display:block;flex:none}.farm-animal-row svg{display:block;width:1.3em;height:1.3em}
+.farm-small .farm-animal-row{font-size:48px}
+.farm-visual-label{font-size:22px;line-height:1.6;margin-top:10px;font-weight:650;color:#355f65;overflow-wrap:anywhere}
+.farm-trait-label{font-size:18px;line-height:1.7;color:#627368;margin-top:6px;overflow-wrap:anywhere}
+.farm-entry .icon{font-size:36px}
+.farm-controls label{display:flex;flex-direction:column;gap:8px;font-size:18px;min-width:0}
+.farm-controls select{width:100%;font:inherit;font-size:18px;color:#30463d;background:white;border:1px solid #bdccbd;border-radius:12px;min-height:56px;padding:10px;min-width:0}
+.farm-choice{border:1px solid #dde5d8;border-radius:18px;margin:0 0 18px;padding:16px;display:grid;grid-template-columns:1fr;gap:16px;min-width:0}
+.farm-choice legend{font-size:20px;line-height:1.6;padding:0 6px}
+.farm-care{border-radius:18px;background:#e8f0dc;padding:18px;text-align:center;margin-top:20px}
+.farm-care strong{font-size:20px}
+.farm-care p{margin:8px 0;overflow-wrap:anywhere}
+.farm-care p[lang=en]{font-size:23px;color:#355f65}
+.farm-sheet{background:#f0f5e7;border:1px solid #d9e4d0;border-radius:26px;padding:20px 16px;margin:20px 0;text-align:center}
+.farm-sheet h2{font-size:32px;margin:8px 0 24px}
+.farm-plots{display:grid;grid-template-columns:1fr;gap:16px}
+.farm-plot{background:#fff;border-radius:20px;padding:18px 14px;min-width:0}
+.farm-plot .learning-visual{margin:16px auto}
+.farm-plot p[lang=en]{font-size:24px;color:#355f65;line-height:1.65;margin:12px 0;overflow-wrap:anywhere}
+.farm-plot .farm-chinese{font-size:17px;margin:0 0 16px;overflow-wrap:anywhere}
+.farm-show-button{width:100%}
+.farm-actions button{width:100%;margin:6px 0}
+@media(min-width:640px){.farm-choice{grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,2fr)}.farm-plots{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .person-picture,.body-picture{width:100%;max-width:280px}
 .person-picture svg,.body-picture svg,.booklet-picture svg{display:block;width:100%;height:auto}
 .sense-picture{text-align:center;font-size:96px;line-height:1.4}

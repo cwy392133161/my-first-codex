@@ -2,6 +2,8 @@
 
 本项目使用你已确认的 `en-US-JennyNeural`，默认风格、正常语速，在开发环境提前生成 MP3。孩子打开网站时只播放这些文件，不访问 Azure，不读取密钥。
 
+**当前 Unit 3 开发版：** 旧398段成品保留，新内容还需生成103段。生成器已支持新克隆直接严格核验并复用已提交录音；当前环境没有载入密钥。最新全量计划和接续步骤见 [UNIT3_HANDOFF.md](UNIT3_HANDOFF.md)。下文的398段生成与网络成功记录描述此前 Azure 任务，不表示新 Unit 3 已生成，也不表示其密钥自动带到新环境。
+
 生成工具最初保存在 `azure-speech-audio`；接续快照见 [AUDIO_HANDOFF.md](AUDIO_HANDOFF.md)。当前 `azure-jenny-audio-20261012` 工作分支复用已验证的云环境网络密钥、HTTPS REST 接口及环境代理，准备了完整 Azure MP3 替换；具体生成和检查结果见 [Azure 检查记录](AZURE_AUDIO_CHECKS.md)。正式网站尚未发布本次更新；原题号、首次作答记录、错题、备份格式和 `learning-garden-v1` 本地存储键保持原样。
 
 ## 在哪里安全填写密钥

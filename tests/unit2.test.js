@@ -69,7 +69,7 @@ assert.equal(hello.topics.reduce((sum, topic) => sum + hello.bank(topic.id).leng
 assert.equal(hello.topics.reduce((sum, topic) => sum + hello.lesson(topic.id).length, 0), 28);
 assert.equal(unit1.topics.reduce((sum, topic) => sum + unit1.bank(topic.id).length, 0), 124);
 assert.equal(unit1.topics.reduce((sum, topic) => sum + unit1.lesson(topic.id).length, 0), 43);
-assert.deepEqual(questions.topics.filter(topic => !newIds.includes(topic.id)), plain(oldQuestions.topics), '全部旧知识点完整 metadata 保留');
+assert.deepEqual(questions.topics.filter(topic => oldQuestions.topics.some(previous => previous.id === topic.id)), plain(oldQuestions.topics), '全部旧知识点完整 metadata 保留');
 const counts = { vocabulary: 0, hello: 0, unit1: 0, chinese: 0, math: 0 };
 const ids = new Set();
 for (const topic of oldQuestions.topics) {
@@ -445,7 +445,7 @@ for (const script of scripts) {
   assert(fs.existsSync(path.join(repository, script.source)), `项目内存在 ${script.source}`);
   assert(!/\b(?:fetch|XMLHttpRequest|WebSocket)\s*\(/.test(read(script.source)), '学习及备份没有外部网络加载');
 }
-const dependencies = ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js', 'data/questions.js', 'record-backup.js'];
+const dependencies = ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js', 'data/english-unit3.js', 'data/questions.js', 'record-backup.js'];
 assert.deepEqual(scripts.filter(script => dependencies.includes(script.source)).map(script => script.source), dependencies, '新旧数据经典脚本顺序正确');
 const sandbox = {};
 const context = vm.createContext(sandbox);

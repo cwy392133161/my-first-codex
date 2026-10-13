@@ -172,6 +172,89 @@ def cache_info(stage, clip):
         return None
 
 
+def manifest_voice():
+    profile = 'azure-jenny-v1-' + hashlib.sha256(json_bytes(CONFIG)).hexdigest()[:12]
+    return {'name': VOICE, 'language': LANGUAGE, 'source': 'Azure Speech',
+            'kind': 'pre-generated', 'profile': profile, 'style': 'default',
+            'rate': 'normal', 'format': OUTPUT_FORMAT}
+
+
+def committed_catalog(root):
+    """Read public Azure provenance without executing JavaScript or trusting old MP3s.
+
+    A checkout does not contain the private stage cache. The committed manifest
+    and audit can supply it, but only for this exact provider and configuration.
+    Archived pronunciation previews and other providers are never searched.
+    """
+    try:
+        source = (root / 'data/audio-manifest.js').read_text(encoding='utf-8')
+        match = re.search(r'\bconst\s+manifest\s*=\s*(\{.*\});\s*\n', source, re.DOTALL)
+        if not match:
+            return None
+        manifest = json.loads(match.group(1))
+        audit = json.loads((root / 'data/audio-audit.json').read_text(encoding='utf-8'))
+        if (not isinstance(manifest, dict) or manifest.get('version') != 3
+                or manifest.get('voice') != manifest_voice()
+                or not isinstance(manifest.get('clips'), dict)
+                or not isinstance(audit, dict) or audit.get('version') != 1
+                or audit.get('configuration') != CONFIG or audit.get('region') != REGION
+                or not isinstance(audit.get('clips'), list)):
+            return None
+        records = {}
+        for record in audit['clips']:
+            if isinstance(record, dict) and isinstance(record.get('digest'), str):
+                records.setdefault(record['digest'], []).append(record)
+        return {'clips': manifest['clips'], 'records': records}
+    except (OSError, ValueError, TypeError):
+        return None
+
+
+def committed_cache_info(root, clip, catalog):
+    """Require matching text, SSML digest, live mapping, hash and full decode."""
+    if not catalog:
+        return None
+    for record in catalog['records'].get(clip['digest'], []):
+        try:
+            # A new lookup alias may reuse an identical recording. Its original
+            # index must still be represented by the committed live manifest.
+            if (record.get('text') != clip['text'] or record.get('path') != clip['path']
+                    or catalog['clips'].get(record['key']) != clip['path']
+                    or fingerprint(make_ssml(record['text'])) != clip['digest']):
+                continue
+            file = root / clip['path']
+            if record.get('bytes') != file.stat().st_size or record.get('sha256') != sha256_file(file):
+                continue
+            actual = validate_audio(file)
+            if actual == {key: record[key] for key in ('bytes', 'sha256', 'duration')}:
+                return actual
+        except (OSError, ValueError, KeyError, TypeError, SafeError, subprocess.SubprocessError):
+            continue
+    return None
+
+
+def import_committed_clip(root, stage, clip, info):
+    """Copy a verified public recording atomically, without inventing quota usage."""
+    folder = stage / 'assets/audio'
+    folder.mkdir(parents=True, exist_ok=True)
+    temporary = None
+    try:
+        body = (root / clip['path']).read_bytes()
+        if len(body) != info['bytes'] or hashlib.sha256(body).hexdigest() != info['sha256']:
+            raise SafeError('已提交音频在导入期间发生变化；已停止，请重新检查后续跑。')
+        with tempfile.NamedTemporaryFile(dir=folder, suffix='.mp3', prefix='.pending-', delete=False) as file:
+            temporary = Path(file.name)
+            file.write(body)
+        if validate_audio(temporary) != info:
+            raise SafeError('已提交音频导入验证失败；没有接受这段录音。')
+        temporary.replace(stage / clip['path'])
+        atomic_json(stage / 'cache' / (clip['digest'] + '.json'), {
+            'digest': clip['digest'], 'configuration': CONFIG.copy(), **info,
+        })
+    finally:
+        if temporary and temporary.exists():
+            temporary.unlink()
+
+
 @contextmanager
 def single_instance(stage):
     stage.mkdir(parents=True, exist_ok=True)
@@ -339,10 +422,21 @@ def build(root, clips, *, dry_run=False, limit=0, transport=None, clock=time.tim
     prepared = prepare_clips(clips)
     stage = root / '.audio-build/azure'
     selected = prepared[:limit] if limit else prepared
-    cached = {clip['digest']: cache_info(stage, clip) for clip in selected}
+    catalog = committed_catalog(root)
+    cached, committed = {}, set()
+    for clip in selected:
+        if clip['digest'] not in cached:
+            info = cache_info(stage, clip)
+            if not info:
+                info = committed_cache_info(root, clip, catalog)
+                if info:
+                    committed.add(clip['digest'])
+            cached[clip['digest']] = info
     missing = {clip['digest']: clip for clip in selected if not cached[clip['digest']]}
     summary = {'totalClips': len(prepared), 'selectedClips': len(selected),
-               'newRequests': len(missing), 'reusedClips': len(selected) - len(missing),
+               'newRequests': len(missing),
+               'reusedClips': sum(bool(cached[c['digest']]) for c in selected),
+               'committedReusedClips': sum(c['digest'] in committed for c in selected),
                'spokenCharacters': sum(len(c['text']) for c in missing.values()),
                'conservativeCharacters': sum(len(c['ssml']) for c in missing.values()),
                'configuration': CONFIG.copy(), 'stage': '.audio-build/azure', 'complete': False}
@@ -361,10 +455,17 @@ def build(root, clips, *, dry_run=False, limit=0, transport=None, clock=time.tim
         raise SafeError('未配置 SPEECH_KEY。请在云环境设置的密钥区域安全填写，不要发在聊天里。')
     with single_instance(stage):
         ledger = RateLedger(stage / 'ledger.json', clock, sleep, budget, max_wait)
+        catalog = committed_catalog(root)  # Re-read provenance after acquiring the lock.
         verified = {}
+        imported = set()
         for index, clip in enumerate(selected):
             # Check again while holding the lock, because an earlier process may have finished.
             info = cache_info(stage, clip)
+            if not info:
+                info = committed_cache_info(root, clip, catalog)
+                if info:
+                    import_committed_clip(root, stage, clip, info)
+                    imported.add(clip['digest'])
             if not info:
                 key = os.environ.get('SPEECH_KEY')
                 if not key:
@@ -386,13 +487,11 @@ def build(root, clips, *, dry_run=False, limit=0, transport=None, clock=time.tim
             print(f'音频 {index + 1}/{len(selected)} 已验证。', flush=True)
         if limit:
             return {**summary, 'sampleOnly': True, 'verifiedClips': len(selected),
+                    'importedClips': len(imported),
                     'sentRequests': ledger.requests_sent,
                     'reservedCharacters': ledger.reserved_characters}
         # All current clips have passed full decode before preparing an inert site artifact.
-        profile = 'azure-jenny-v1-' + hashlib.sha256(json_bytes(CONFIG)).hexdigest()[:12]
-        manifest = {'version': 3, 'voice': {'name': VOICE, 'language': LANGUAGE,
-                    'source': 'Azure Speech', 'kind': 'pre-generated', 'profile': profile,
-                    'style': 'default', 'rate': 'normal', 'format': OUTPUT_FORMAT},
+        manifest = {'version': 3, 'voice': manifest_voice(),
                     'clips': {clip['key']: clip['path'] for clip in prepared}}
         audit = {'version': 1, 'configuration': CONFIG, 'region': REGION,
                  'datasetSha256': hashlib.sha256(json_bytes(prepared)).hexdigest(),
@@ -406,6 +505,7 @@ def build(root, clips, *, dry_run=False, limit=0, transport=None, clock=time.tim
         atomic_json(stage / 'data/audio-audit.json', audit)
         atomic_bytes(stage / 'data/audio-manifest.js', source.encode())
         summary.update(complete=True, verifiedClips=len(prepared),
+                       importedClips=len(imported),
                        sentRequests=ledger.requests_sent,
                        reservedCharacters=ledger.reserved_characters)
         atomic_json(stage / 'report.json', summary)

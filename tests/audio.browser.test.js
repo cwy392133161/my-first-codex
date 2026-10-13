@@ -65,12 +65,16 @@ async function legacyAudioFiles() {
   vm.runInNewContext(manifestSource.toString('utf8'), sandbox);
   const previous = sandbox.module.exports;
   assert.equal(previous.version, 2, '升级检查从真实交接版 v2 清单开始');
+  // Serve a coherent historical page, including its bank and app. Combining
+  // the old HTML (no Unit 3 dependency) with new scripts is not a real snapshot.
+  const historical = new Map([['/index.html', index], ['/data/audio-manifest.js', manifestSource],
+    ['/' + previous.clips.hello, await read(previous.clips.hello)]]);
+  const assets = [...index.toString('utf8').matchAll(/(?:src|href)="([^"#]+\.(?:js|css)(?:\?[^" ]*)?)"/g)]
+    .map(match => match[1].split('?')[0]);
+  for (const filename of new Set(assets)) historical.set('/' + filename, await read(filename));
   return {
     previous,
-    files: new Map([
-      ['/index.html', index], ['/data/audio-manifest.js', manifestSource],
-      ['/' + previous.clips.hello, await read(previous.clips.hello)]
-    ])
+    files: historical
   };
 }
 
@@ -296,7 +300,8 @@ function initialize(options) {
     for (const source of ['speech-text.js', 'data/audio-manifest.js', 'audio-player.js', 'app.js']) {
       const sourceRequests = requests.filter(request => new URL(request.url).pathname === '/' + source);
       assert(sourceRequests.length > 0, '真实页面确实加载新版脚本 ' + source);
-      assert(sourceRequests.every(request => new URL(request.url).searchParams.get('v') === 'azure-jenny-v3-20261012'),
+      const version = source === 'app.js' ? 'unit3-farm-v1-20261013' : 'azure-jenny-v3-20261012';
+      assert(sourceRequests.every(request => new URL(request.url).searchParams.get('v') === version),
         source + ' 带新版缓存参数，避免平板继续使用旧逻辑');
     }
     pass('wall、Hello / Hi 真实播放新版 MP3，使用更新后的缓存地址，无系统语音且记录不变');
@@ -469,6 +474,8 @@ function initialize(options) {
     await upgrading.reload();
     assert.equal(await upgrading.evaluate(() => GardenAudioManifest.version), 3, '同源刷新加载 v3，没有沿用已缓存 v2 清单');
     assert.equal(await upgrading.evaluate(() => GardenAudioManifest.voice.name), 'en-US-JennyNeural');
+    assert(await upgrading.evaluate(() => GardenQuestions.topics.some(topic=>topic.id==='unit3-hasgot')),
+      '同源升级获取包含 Unit 3 的题库，而不是旧缓存');
     assert.deepEqual(await saved(upgrading), afterListening, '刷新升级原样保留中文、英语首次记录与错题');
     assert.equal(await upgrading.evaluate(() => localStorage.getItem('audio-upgrade-setting')), 'keep-me');
     await goals(upgrading, 'hello');
@@ -479,6 +486,7 @@ function initialize(options) {
     assert.notEqual(manifest.clips.hello, legacy.previous.clips.hello, 'Azure Hello 与旧 Emma 文件地址不同');
     const upgradeRequests = server.servedRequests.slice(beforeUpgrade);
     assert(upgradeRequests.includes('/data/audio-manifest.js?v=azure-jenny-v3-20261012'), '新缓存参数请求当前清单');
+    assert(upgradeRequests.includes('/data/questions.js?v=unit3-farm-v1-20261013'), '题库缓存版本更新，加载新增目标');
     assert(upgradeRequests.includes('/' + manifest.clips.hello), '新哈希请求实际 Azure MP3');
     assert(!upgradeRequests.includes('/' + legacy.previous.clips.hello), '刷新后无需请求旧录音');
     assert.deepEqual(await saved(upgrading), afterListening, '新声音播放不改首次作答或错题，也没有清空数据');

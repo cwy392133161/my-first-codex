@@ -10,6 +10,7 @@ import io
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -120,6 +121,23 @@ class AzureAudioBuilderTests(unittest.TestCase):
         path = self.root / "data/audio-manifest.js"
         path.write_text("/* unchanged production manifest */\n", encoding="utf-8")
         return path
+
+    def install_committed_audio(self):
+        """Simulate a fresh checkout of verified public artifacts, without a key."""
+        self.build()
+        stage = self.root / '.audio-build/azure'
+        shutil.copytree(stage / 'assets', self.root / 'assets')
+        shutil.copytree(stage / 'data', self.root / 'data')
+        shutil.rmtree(self.root / '.audio-build')
+
+    def no_key_build(self, clips=None, **kwargs):
+        environment = {name: value for name, value in os.environ.items() if name != 'SPEECH_KEY'}
+        with mock.patch.dict(os.environ, environment, clear=True):
+            return self.builder.build(
+                self.root, self.clips() if clips is None else clips,
+                transport=lambda request: self.fail('Committed cache contacted Azure'),
+                clock=self.clock.monotonic, sleep=self.clock.sleep, **kwargs,
+            )
 
     def capture_failure(self, transport, **kwargs):
         stdout, stderr = io.StringIO(), io.StringIO()
@@ -233,6 +251,137 @@ class AzureAudioBuilderTests(unittest.TestCase):
         self.assertEqual(len(requested), 1)
         self.assertIn("Hi?", requested[0])
         self.assertEqual(self.staged_file(original[0]).stat().st_mtime_ns, hello_before)
+
+    def test_committed_audio_dry_run_and_verify_are_read_only_without_key_access(self):
+        self.install_committed_audio()
+        before = snapshot(self.root)
+        original_get = os.environ.get
+        def guarded_get(name, *args):
+            if name == 'SPEECH_KEY':
+                self.fail('Read-only cache inspection read the Speech key')
+            return original_get(name, *args)
+        with mock.patch.object(os.environ, 'get', side_effect=guarded_get):
+            report = self.no_key_build(dry_run=True)
+            verified = self.no_key_build(verify_only=True)
+            expanded = self.no_key_build(clips=self.clips('Hello!', 'Hi!', 'Goodbye!'),
+                                         dry_run=True)
+        self.assertEqual(report['newRequests'], 0)
+        self.assertEqual(report['reusedClips'], 2)
+        self.assertEqual(report['committedReusedClips'], 2)
+        self.assertTrue(verified['complete'])
+        self.assertEqual(verified['verifiedClips'], 2)
+        self.assertEqual(expanded['newRequests'], 1)
+        self.assertEqual(expanded['committedReusedClips'], 2)
+        self.assertEqual(snapshot(self.root), before)
+        self.assertFalse((self.root / '.audio-build').exists())
+
+    def test_committed_audio_imports_without_key_requests_or_reconstructed_quota(self):
+        self.install_committed_audio()
+        before = snapshot(self.root)
+        report = self.no_key_build()
+        self.assertTrue(report['complete'])
+        self.assertEqual(report['importedClips'], 2)
+        self.assertEqual(report['sentRequests'], 0)
+        self.assertEqual(report['reservedCharacters'], 0)
+        self.assertFalse((self.root / '.audio-build/azure/ledger.json').exists(),
+                         'Old Azure usage cannot be reconstructed from public MP3 files')
+        after = {path: data for path, data in snapshot(self.root).items()
+                 if not path.startswith('.audio-build')}
+        self.assertEqual(after, before, 'Import must leave all live files and metadata untouched')
+        prepared = self.builder.prepare_clips(self.clips())
+        for clip in prepared:
+            self.assertEqual(self.staged_file(clip).read_bytes(), (self.root / clip['path']).read_bytes())
+            self.assertIsNotNone(self.builder.cache_info(self.root / '.audio-build/azure', clip))
+        self.assertTrue(self.stage_manifest().is_file())
+
+    def test_missing_new_audio_without_key_never_imports_or_writes_partial_artifact(self):
+        self.install_committed_audio()
+        before = snapshot(self.root)
+        expanded = self.clips('Hello!', 'Hi!', 'Goodbye!')
+        with self.assertRaises(self.builder.SafeError):
+            self.no_key_build(clips=expanded)
+        self.assertEqual(snapshot(self.root), before)
+        with self.assertRaises(self.builder.SafeError):
+            self.no_key_build(clips=expanded, verify_only=True)
+        self.assertEqual(snapshot(self.root), before)
+
+    def test_committed_changed_text_same_index_generates_only_changed_recording(self):
+        self.install_committed_audio()
+        live = self.root / 'data/audio-manifest.js'
+        before = live.read_bytes()
+        changed = self.clips('Hello!', 'Hi?')
+        requested = []
+        report = self.build(clips=changed,
+                            transport=lambda request: requested.append(request.data) or self.mp3)
+        self.assertEqual(report['committedReusedClips'], 1)
+        self.assertEqual(report['importedClips'], 1)
+        self.assertEqual(report['sentRequests'], 1)
+        self.assertEqual(len(requested), 1)
+        self.assertIn(b'Hi?', requested[0])
+        self.assertEqual(live.read_bytes(), before)
+
+    def test_committed_identical_text_new_index_reuses_verified_original_recording(self):
+        self.install_committed_audio()
+        clips = self.clips() + [{'key': 'hello-new-alias', 'text': 'Hello!',
+                                 'sources': ['new-question:same-greeting']}]
+        report = self.no_key_build(clips=clips)
+        self.assertEqual(report['newRequests'], 0)
+        self.assertEqual(report['reusedClips'], 3)
+        self.assertEqual(report['committedReusedClips'], 3)
+        self.assertEqual(report['importedClips'], 2)
+        self.assertEqual(report['sentRequests'], 0)
+
+    def test_committed_cache_rejects_wrong_provider_configuration_mapping_and_text(self):
+        self.install_committed_audio()
+        audit_path = self.root / 'data/audio-audit.json'
+        manifest_path = self.root / 'data/audio-manifest.js'
+        audit_original = audit_path.read_bytes()
+        manifest_original = manifest_path.read_bytes()
+        mutations = [
+            ('provider', lambda audit: audit['configuration'].update(provider='Kokoro')),
+            ('voice', lambda audit: audit['configuration'].update(voice='en-US-OtherNeural')),
+            ('rate', lambda audit: audit['configuration'].update(rate='slow')),
+            ('actual-text', lambda audit: audit['clips'][0].update(text='Something else!')),
+            ('digest', lambda audit: audit['clips'][0].update(digest='0' * 64)),
+            ('path', lambda audit: audit['clips'][0].update(path='pronunciation-preview/assets/audio/old.mp3')),
+            ('sha256', lambda audit: audit['clips'][0].update(sha256='0' * 64)),
+            ('bytes', lambda audit: audit['clips'][0].update(bytes=500)),
+            ('duration', lambda audit: audit['clips'][0].update(duration=123)),
+        ]
+        for name, mutate in mutations:
+            with self.subTest(mutation=name):
+                audit = json.loads(audit_original)
+                mutate(audit)
+                audit_path.write_text(json.dumps(audit))
+                report = self.no_key_build(dry_run=True)
+                self.assertGreaterEqual(report['newRequests'], 1)
+                with self.assertRaises(self.builder.SafeError):
+                    self.no_key_build(verify_only=True)
+                audit_path.write_bytes(audit_original)
+        for old, replacement in [('en-US-JennyNeural', 'bf_emma'),
+                                 ('"source":"Azure Speech"', '"source":"Kokoro"'),
+                                 ('azure-jenny-v1-', 'wrong-profile-')]:
+            with self.subTest(manifest_change=old):
+                manifest_path.write_bytes(manifest_original.replace(old.encode(), replacement.encode()))
+                self.assertEqual(self.no_key_build(dry_run=True)['newRequests'], 2)
+                manifest_path.write_bytes(manifest_original)
+        self.assertFalse((self.root / '.audio-build').exists())
+
+    def test_committed_corrupt_audio_with_matching_hash_still_requires_full_decode(self):
+        self.install_committed_audio()
+        prepared = self.builder.prepare_clips(self.clips())
+        corrupted = self.root / prepared[0]['path']
+        corrupted.write_bytes(b'ID3' + bytes(1000))
+        audit_path = self.root / 'data/audio-audit.json'
+        audit = json.loads(audit_path.read_text())
+        audit['clips'][0].update(bytes=corrupted.stat().st_size,
+                                 sha256=hashlib.sha256(corrupted.read_bytes()).hexdigest())
+        audit_path.write_text(json.dumps(audit))
+        before = snapshot(self.root)
+        self.assertEqual(self.no_key_build(dry_run=True)['newRequests'], 1)
+        with self.assertRaises(self.builder.SafeError):
+            self.no_key_build(verify_only=True)
+        self.assertEqual(snapshot(self.root), before)
 
     def test_cache_tampering_and_truncated_audio_are_regenerated(self):
         self.build()
