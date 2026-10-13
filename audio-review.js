@@ -100,6 +100,7 @@
     elements.version.textContent=`当前清单为旧版 · 共 ${keys.length} 段录音。修正版发布后，请刷新本页。`;
   }
   group('问候与发音重点',['hello','hi','wall','close','read','minute','mother, father, brother','three']);
+  group('Unit 3 农场与问答',['donkey','duck','cat, cow','chicken, duck','it has got long ears',"it hasn't got a long tail",'has it got long ears','yes, it has',"no, it hasn't",'a baby sheep is a lamb','our farm has got two sheep']);
   group('数字',['one','two','three','four','five','six','seven','eight','nine','ten']);
   group('颜色',['black','blue','brown','green','grey','orange','pink','purple','red','white','yellow']);
   if(!keys.length){

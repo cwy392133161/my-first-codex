@@ -1,0 +1,95 @@
+{
+  "date": "2026-10-13",
+  "branch": "unit3-farm-learning",
+  "baseCommit": "15992d8d93be984bda7ae0e4a6db7a41d9189e3f",
+  "configuration": {
+    "provider": "Azure Speech",
+    "voice": "en-US-JennyNeural",
+    "language": "en-US",
+    "style": "default",
+    "rate": "normal",
+    "format": "audio-24khz-96kbitrate-mono-mp3",
+    "pipeline": 1
+  },
+  "totalClips": 501,
+  "textSources": 2029,
+  "existingClipsPreserved": 398,
+  "newClips": 103,
+  "newRequests": {
+    "initialSample": 1,
+    "continuation": 102,
+    "total": 103,
+    "retries": 0
+  },
+  "oldMP3RequestedFromAzure": 0,
+  "oldMP3ByteIdentityVerified": 398,
+  "readOnlyVerify": {
+    "verifiedClips": 501,
+    "newRequests": 0,
+    "reusedClips": 501
+  },
+  "newAudioBytes": 2815200,
+  "totalAudioBytes": 12719520,
+  "newAudioDurationSeconds": 234.6,
+  "totalAudioDurationSeconds": 1059.96,
+  "newSpokenCharacters": 2127,
+  "conservativeNewSSMLCharacters": 15547,
+  "datasetSha256": "bf6e236e30f991d1f3c229fdcacaf889fdef7a03217bfe83218006c3a075de62",
+  "samples": [
+    {
+      "key": "a baby chicken is a chick",
+      "text": "A baby chicken is a chick.",
+      "path": "assets/audio/822270812c1560c5f516.mp3"
+    },
+    {
+      "key": "it hasn't got a long tail",
+      "text": "It hasn't got a long tail.",
+      "path": "assets/audio/22ea685c686d075acb9b.mp3"
+    },
+    {
+      "key": "our farm has got three sheep",
+      "text": "Our farm has got three sheep.",
+      "path": "assets/audio/6521a4709ca44a4f393e.mp3"
+    },
+    {
+      "key": "cat, cow",
+      "text": "cat, cow",
+      "path": "assets/audio/fef0c980772629a02531.mp3"
+    }
+  ],
+  "humanPronunciationReviewedAll": false,
+  "deployedToOfficialSite": false,
+  "budgetNote": "Local conservative accounting for this incremental run, not Azure remaining quota or other tasks usage.",
+  "softwareChecks": {
+    "generatorRegressionTestsPassed": 33,
+    "coreNodeTestsPassed": 14,
+    "unchangedCompleteQuestionObjects": 1742,
+    "unchangedCoreSourceFiles": 8,
+    "storageKey": "learning-garden-v1",
+    "strictMappingSSMLHashDecodeClipsPassed": 501,
+    "allBrowserMedia": {
+      "clipsPassed": 501,
+      "mediaErrors": 0,
+      "playbackRate": 4,
+      "muted": true,
+      "parallelLanes": 8,
+      "elapsedSeconds": 47.124
+    },
+    "audioReviewBrowserGroupsPassed": 6,
+    "unit3BrowserGroupsPassed": 11,
+    "unit3RepresentativePlaybackRate": 1,
+    "backupBrowserGroupsPassed": 14,
+    "basicBrowserPassed": true,
+    "screenshotsVisuallyInspectedWidths": [
+      390,
+      1024
+    ],
+    "cacheUpgrade398To501Passed": true,
+    "oldHelloCacheReused": true,
+    "newUnit3NoNativeFallback": true,
+    "wrongReviewFirstAnswersRefreshBackupRestorePassed": true,
+    "mainAudioBrowserGroupsPassed": 14
+  },
+  "physicalHuaweiDeviceTested": false,
+  "fileSchemeBrowserCheck": "Skipped: managed Chromium policy blocks file:// navigation."
+}

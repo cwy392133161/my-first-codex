@@ -1,7 +1,8 @@
 'use strict';
 
 // Run with: node tests/unit3.browser.test.js
-// Real Chromium tests gameplay and local data. No speech mock is a pronunciation claim.
+// Real Chromium tests gameplay, local data and delivered MP3 playback at normal 1x.
+// Media events establish decoding/playback, never pronunciation accuracy.
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
 const http = require('node:http');
@@ -9,7 +10,7 @@ const fs = require('node:fs/promises');
 const path = require('node:path');
 const unit3 = require('../data/english-unit3.js');
 const questionAPI = require('../data/questions.js');
-const audio = require('../audio-player.js');
+const manifest = require('../data/audio-manifest.js');
 
 const root = path.resolve(__dirname, '..');
 const KEY = 'learning-garden-v1';
@@ -50,6 +51,29 @@ function initialize(options = {}) {
     Object.defineProperty(window, 'speechSynthesis', { configurable: true, value: undefined });
     Object.defineProperty(window, 'SpeechSynthesisUtterance', { configurable: true, value: undefined });
   }
+  const originalPlay = HTMLMediaElement.prototype.play;
+  const observed = new WeakSet(), current = new WeakMap();
+  window.unit3PlayCalls = [];
+  window.unit3AudioNodes = [];
+  window.unit3MaxPlaying = 0;
+  HTMLMediaElement.prototype.play = function (...args) {
+    const row = { src: this.src, rate: this.playbackRate, events: [], duration: 0, maximumTime: 0 };
+    current.set(this, row);window.unit3PlayCalls.push(row);
+    if (!observed.has(this)) {
+      observed.add(this);window.unit3AudioNodes.push(this);
+      for (const name of ['loadedmetadata', 'canplay', 'playing', 'timeupdate', 'ended', 'error']) {
+        this.addEventListener(name, () => {
+          const sample = current.get(this);
+          if (!sample.events.includes(name)) sample.events.push(name);
+          if (Number.isFinite(this.duration)) sample.duration = this.duration;
+          sample.maximumTime = Math.max(sample.maximumTime, this.currentTime);
+          if (name === 'playing') window.unit3MaxPlaying = Math.max(window.unit3MaxPlaying,
+            window.unit3AudioNodes.filter(node => !node.paused && !node.ended).length);
+        }, true); // Observe ended before the player's next-sentence callback.
+      }
+    }
+    return originalPlay.apply(this, args);
+  };
 }
 async function serve() {
   const server = http.createServer(async (request, response) => {
@@ -68,6 +92,9 @@ async function serve() {
 }
 
 (async () => {
+  assert.equal(manifest.version, 3, '完成版使用 Azure v3 清单');
+  assert.equal(manifest.voice.name, 'en-US-JennyNeural');
+  assert.equal(Object.keys(manifest.clips).length, 501, '完成版必须交付全部 501 段，不能用旧 398 段代替');
   const server = await serve(), origin = `http://127.0.0.1:${server.address().port}`;
   let browser;
   const passed = [];
@@ -101,6 +128,31 @@ async function serve() {
       return q;
     };
     const leave = async () => { await click('leave'); await page.locator('dialog[open] [data-confirm]').click(); };
+    const audioKey = text => text.replace(/[‘’]/g, "'").trim().replace(/[.!?]+$/, '').toLowerCase();
+    const playToEnd = async (action, expectedTexts) => {
+      const before = await current();
+      const prior = await page.evaluate(() => window.unit3PlayCalls.length);
+      assert.equal(await page.locator(`button[data-action="${action}"]`).first().isDisabled(), false, '已交付录音的按钮可以播放');
+      await click(action);
+      await page.waitForFunction(({ prior, length }) => {
+        const calls = window.unit3PlayCalls.slice(prior);
+        return calls.length === length && calls.every(call => call.events.includes('ended'))
+          && /读完/.test(document.querySelector('.speech-status')?.textContent || '');
+      }, { prior, length: expectedTexts.length }, { timeout: 75000 });
+      const calls = await page.evaluate(prior => window.unit3PlayCalls.slice(prior), prior);
+      assert.deepEqual(calls.map(call => new URL(call.src).pathname),
+        expectedTexts.map(text => '/' + manifest.clips[audioKey(text)]), '实际播放地址按朗读句子的顺序对应清单');
+      for (const call of calls) {
+        assert.equal(call.rate, 1, '教学示范正常 1 倍速播放');
+        assert(call.duration > 0 && call.maximumTime > 0);
+        for (const event of ['loadedmetadata', 'canplay', 'playing', 'timeupdate', 'ended']) assert(call.events.includes(event));
+        assert(!call.events.includes('error'));
+      }
+      assert.equal(await page.evaluate(() => window.unit3MaxPlaying), 1, '朗读片段不能叠放');
+      assert.equal(await page.evaluate(() => window.unit3NativeCalls), 0);
+      assert.deepEqual(await current(), before, '实际听读不能写入或覆盖首次记录');
+      return calls;
+    };
     const noOverflow = async label => {
       assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${label} 没有横向溢出`);
       for (const button of await page.locator('.choices button').all()) {
@@ -186,21 +238,45 @@ async function serve() {
     }
     passed.push('真实七目标逐题 5 题及 10 题总结、答错两步反馈、重复点击锁与首次正确率');
 
-    const pendingListening = newQuestions.find(q => q.kind === 'listening' && audio.plan(q.speech).length === 0);
-    assert(pendingListening, '当前新增听辨确有待生成 MP3 的情境供验证');
-    await overview(); await prefer(pendingListening.id); await start(pendingListening.topic);
-    assert.equal((await displayed()).id, pendingListening.id);
-    assert.equal(await page.locator('.listening-text').isVisible(), true, '没有新 MP3 时立即显示文字，不等待语音超时');
-    assert((await page.locator('.listening-text').innerText()).includes(pendingListening.fallbackPrompt));
-    assert.equal(await page.locator('button[data-action="listen"]').isDisabled(), true, '待准备音频按钮禁用');
-    assert((await page.locator('.speech-status').innerText()).includes('准备'));
-    await choice(pendingListening.answer).click(); await leave();
-    const reading = newQuestions.find(q => q.topic === 'unit3-reading' && q.passage);
-    await overview(); await prefer(reading.id); await start(reading.topic);
-    for (const line of reading.passage) assert((await page.locator('.reading-passage').innerText()).includes(line));
-    assert.equal(await page.locator('button[data-action="read-passage"]').isDisabled(), true);
-    await choice(reading.answer).click(); await leave();
-    passed.push('华为无系统语音模拟：缺 MP3 即时文字听辨，阅读原文可用，未把原生合成当已验证发音');
+    const grammarExamples = [
+      ['unit3-hasgot-listen-ears', ['It has got long ears.']],
+      ['unit3-hasgot-listen-no-tail', ["It hasn't got a long tail."]],
+      ['unit3-hasgot-listen-yes', ['Has it got wings?', 'Yes, it has.']],
+      ['unit3-hasgot-listen-no', ['Has it got a tail?', "No, it hasn't."]]
+    ];
+    const listening = newQuestions.find(q => q.id === grammarExamples[1][0]);
+    for (const [id, texts] of grammarExamples) {
+      const q = newQuestions.find(question => question.id === id);
+      await overview(); await prefer(q.id); await start(q.topic);
+      assert.equal((await displayed()).id, q.id);
+      assert.equal(await page.locator('.listening-text').isVisible(), false, 'MP3 可用时听辨答案默认隐藏');
+      assert(!(await page.locator('.question').innerText()).includes(q.speech));
+      await playToEnd('listen', texts);
+      assert.equal(await page.locator('.listening-text').isVisible(), false, '听完也不自动泄漏听辨文字');
+      await click('show-listening-text');
+      assert((await page.locator('.listening-text').innerText()).includes(q.fallbackPrompt));
+      await choice(q.answer).click(); await leave();
+    }
+    passed.push('has / hasn’t got 陈述和 Yes / No 问答真实 MP3 正常播放、句子地址顺序对应、听辨隐藏答案');
+
+    await overview(); await learn('unit3-phonics');
+    for (const [index, text] of ['cat, cow', 'donkey', 'chicken, duck', 'cat, cow, donkey, chicken, duck'].entries()) {
+      if (index) await click('goal-next');
+      assert.equal(await page.locator('button[data-action="speak"]').first().getAttribute('data-text'), text);
+      await playToEnd('speak', [text]);
+    }
+    passed.push('c / k / ck 卡片播放完整 cat、cow、donkey、chicken、duck 示例词，不读字母名或括号');
+
+    const readingIds = ['unit3-reading-chick-name', 'unit3-reading-duckling-name', 'unit3-reading-lamb-name', 'unit3-reading-calf-and-baby-name'];
+    const reading = newQuestions.find(q => q.id === readingIds[0]);
+    for (const id of readingIds) {
+      const q = newQuestions.find(question => question.id === id);
+      await overview(); await prefer(q.id); await start(q.topic);
+      for (const line of q.passage) assert((await page.locator('.reading-passage').innerText()).includes(line));
+      await playToEnd('read-passage', q.passage);
+      await choice(q.answer).click(); await leave();
+    }
+    passed.push('四篇 chick / duckling / lamb / calf 与 human baby 阅读原文完整真实 MP3 连续播放、作答正确对应');
 
     await overview();
     const beforeFarm = await current();
@@ -255,6 +331,19 @@ async function serve() {
     await page.locator('#farm-chinese').setChecked(false);
     for (const line of await page.locator('[data-farm-chinese]').all()) assert.equal(await line.isVisible(), false);
     await page.locator('#farm-chinese').setChecked(true);
+    await playToEnd('read-farm', [...expected.flat(), 'We are kind to animals.']);
+    const priorFarm = await page.evaluate(() => window.unit3PlayCalls.length);
+    await click('read-farm');
+    await page.waitForFunction(prior => window.unit3PlayCalls[prior]?.events.includes('playing'), priorFarm);
+    await click('read-farm');
+    await page.waitForFunction(prior => window.unit3PlayCalls[prior + 1]?.events.includes('playing'), priorFarm);
+    assert.equal(await page.evaluate(() => window.unit3MaxPlaying), 1, '连续点击农场介绍会先停止旧声音');
+    await click('farm-edit');
+    assert(await page.evaluate(() => window.unit3AudioNodes.every(node => node.paused || node.ended)), '编辑或离开立即停止介绍');
+    const cancelledFarm = await page.evaluate(() => window.unit3PlayCalls.length);
+    await page.waitForTimeout(800);
+    assert.equal(await page.evaluate(() => window.unit3PlayCalls.length), cancelledFarm, '取消后不继续后续句子');
+    await click('farm-show');
     await click('farm-say-done');
     assert.equal(await page.locator('button[data-action="farm-say-done"]').isDisabled(), true);
     assert.deepEqual(await current(), beforeFarm, '展示与自愿介绍农场不计答题成绩');
@@ -264,7 +353,7 @@ async function serve() {
     await click('farm-show'); assert.equal(await sheet.textContent(), shown, '修改返回保留内存草稿');
     await click('unit3-goals');
     assert.deepEqual(await current(), beforeFarm, '取消并返回学习目标不写记录');
-    passed.push('小农场三组选择、真实数量图、单复数描述、产品句、中文切换、草稿返回及不计分');
+    passed.push('小农场三组选择、数量/单复数/产品句、完整 MP3 介绍、连续点击和切页停止、草稿返回及不计分');
 
     await page.reload();
     assert((await current()).wrong.includes(retryWrong.id) && (await current()).wrong.includes(twiceWrong.id));
@@ -310,22 +399,91 @@ async function serve() {
       await click('farm-show'); await noOverflow(`${width}px 农场展示`);
       await page.screenshot({ path: `/tmp/unit3-farm-${width}.png`, fullPage: true });
     }
-    assert.deepEqual(errors, [], '浏览器无脚本错误');
-    assert(requests.every(request => request.method === 'GET' && new URL(request.url).origin === origin), '仅本地静态读取，没有外部上传或语音接口');
     passed.push('390px 手机和 1024px 平板目标、卡片、题目、农场均不溢出，无外部请求');
 
     const nativeContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
     await nativeContext.addInitScript(initialize, { nativeSpeech: true });
+    await nativeContext.route('**/assets/audio/*.mp3', route => route.fulfill({ status: 404, body: 'Unavailable test audio' }));
     const nativePage = await nativeContext.newPage();
+    nativePage.on('pageerror', error => errors.push(error.message));
+    nativePage.on('request', request => requests.push({ method: request.method(), url: request.url() }));
     await nativePage.goto(origin);
-    await nativePage.evaluate(id => sessionStorage.setItem('unit3PreferredQuestion', id), pendingListening.id);
-    await nativePage.locator('button[data-action="subject"][data-id="english"]').click();
-    await nativePage.locator('button[data-action="unit3-goals"]').click();
-    await nativePage.locator(`.goal-unit[data-topic="${pendingListening.topic}"] button[data-action="start"]`).click();
+    await nativePage.evaluate(({ key, data }) => localStorage.setItem(key, JSON.stringify(data)), { key: KEY, data: legacy });
+    await nativePage.reload();
+    const nativeClick = action => nativePage.locator(`button[data-action="${action}"]`).first().click();
+    const nativeOverview = async () => {
+      await nativePage.locator('#home-link').click();
+      const confirmation = nativePage.locator('dialog[open] [data-confirm]');
+      if (await confirmation.count()) await confirmation.click();
+      await nativePage.locator('button[data-action="subject"][data-id="english"]').click();
+      await nativeClick('unit3-goals');
+    };
+    const nativeStart = async q => {
+      await nativeOverview();
+      await nativePage.evaluate(id => sessionStorage.setItem('unit3PreferredQuestion', id), q.id);
+      await nativePage.locator(`.goal-unit[data-topic="${q.topic}"] button[data-action="start"]`).click();
+    };
+    const failWithoutNative = async action => {
+      assert.equal(await nativePage.locator(`button[data-action="${action}"]`).first().isDisabled(), false);
+      await nativeClick(action);
+      await nativePage.waitForFunction(() => [...document.querySelectorAll('.speech-status')].some(status => status.textContent.includes('暂时无法播放')), null, { timeout: 15000 });
+      assert.equal(await nativePage.evaluate(() => window.unit3NativeCalls), 0, 'Unit 3 MP3 报错也不能改用未经确认的系统发音');
+      assert.deepEqual(await nativePage.evaluate(key => JSON.parse(localStorage.getItem(key)), KEY), legacy, '失败不能改写已有学习记录');
+    };
+    await nativeStart(listening);
+    assert.equal(await nativePage.locator('.listening-text').isVisible(), false);
+    await failWithoutNative('listen');
+    assert.equal(await nativePage.locator('.listening-text').isVisible(), true);
+    assert((await nativePage.locator('.listening-text').innerText()).includes(listening.fallbackPrompt));
+    await nativeOverview();
+    await nativePage.locator('.goal-unit[data-topic="unit3-hasgot"] button[data-action="goal-learn"]').click();
+    await failWithoutNative('speak');
+    await nativeStart(reading);await failWithoutNative('read-passage');
+    await nativeOverview();await nativeClick('farm');await nativeClick('farm-show');await failWithoutNative('read-farm');
+    // A missing manifest entry is different from a failed media download.
+    // Redraw the question after removing only its local test-context entries.
+    await nativePage.evaluate(() => { for (const key of Object.keys(GardenAudioManifest.clips)) delete GardenAudioManifest.clips[key]; });
+    await nativeStart(listening);
     assert.equal(await nativePage.locator('.listening-text').isVisible(), true);
     assert.equal(await nativePage.locator('button[data-action="listen"]').isDisabled(), true);
-    assert.equal(await nativePage.evaluate(() => window.unit3NativeCalls), 0, '有 native API 也不冒用未经确认的系统声线朗读 Unit 3');
-    passed.push('缺 Unit 3 MP3 且设备有原生语音时仍使用文字，不静默切换已拒绝的发音');
+    assert.equal(await nativePage.evaluate(() => window.unit3NativeCalls), 0);
+    assert.deepEqual(await nativePage.evaluate(key => JSON.parse(localStorage.getItem(key)), KEY), legacy);
+    passed.push('Unit 3 听辨/卡片/阅读/农场 MP3 404 和清单缺项明确文字降级，即使系统语音存在也不回退、不改记录');
+
+    const lifecycleContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await lifecycleContext.addInitScript(initialize);
+    const lifecyclePage = await lifecycleContext.newPage();
+    lifecyclePage.on('pageerror', error => errors.push(error.message));
+    lifecyclePage.on('request', request => requests.push({ method: request.method(), url: request.url() }));
+    await lifecyclePage.goto(origin);
+    await lifecyclePage.evaluate(({ key, data, id }) => {
+      localStorage.setItem(key, JSON.stringify(data));sessionStorage.setItem('unit3PreferredQuestion', id);
+    }, { key: KEY, data: legacy, id: reading.id });
+    await lifecyclePage.reload();
+    await lifecyclePage.locator('button[data-action="subject"][data-id="english"]').click();
+    await lifecyclePage.locator('button[data-action="unit3-goals"]').click();
+    await lifecyclePage.locator('.goal-unit[data-topic="unit3-reading"] button[data-action="start"]').click();
+    for (const event of ['pagehide', 'visibilitychange']) {
+      const prior = await lifecyclePage.evaluate(() => window.unit3PlayCalls.length);
+      await lifecyclePage.locator('button[data-action="read-passage"]').click();
+      await lifecyclePage.waitForFunction(prior => window.unit3PlayCalls[prior]?.events.includes('playing'), prior);
+      await lifecyclePage.evaluate(event => {
+        if (event === 'pagehide') window.dispatchEvent(new Event(event));
+        else {
+          Object.defineProperty(document, 'hidden', { configurable: true, value: true });
+          Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' });
+          document.dispatchEvent(new Event(event));
+        }
+      }, event);
+      assert(await lifecyclePage.evaluate(() => window.unit3AudioNodes.every(node => node.paused || node.ended)));
+      const stopped = await lifecyclePage.evaluate(() => window.unit3PlayCalls.length);
+      await lifecyclePage.waitForTimeout(800);
+      assert.equal(await lifecyclePage.evaluate(() => window.unit3PlayCalls.length), stopped, '离开或后台后不继续阅读下一句');
+      assert.deepEqual(await lifecyclePage.evaluate(key => JSON.parse(localStorage.getItem(key)), KEY), legacy);
+    }
+    passed.push('真实 Unit 3 阅读播放遇 pagehide 或隐藏 visibilitychange 立即停止，不继续后句且历史记录不变');
+    assert.deepEqual(errors, [], '浏览器无脚本错误');
+    assert(requests.every(request => request.method === 'GET' && new URL(request.url).origin === origin), '仅本地静态读取，没有外部上传或语音接口');
     for (const group of passed) console.log(`通过：${group}`);
     console.log(`Unit 3 浏览器检查通过：${passed.length} 组。`);
   } finally {

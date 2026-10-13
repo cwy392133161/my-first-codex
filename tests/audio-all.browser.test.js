@@ -15,7 +15,7 @@ const manifest=require('../data/audio-manifest.js');
 (async()=>{
   assert.equal(manifest.version,3);
   assert.equal(manifest.voice.name,'en-US-JennyNeural');
-  assert.equal(Object.keys(manifest.clips).length,398);
+  assert.equal(Object.keys(manifest.clips).length,501);
   const paths=new Set(Object.values(manifest.clips));
   const server=http.createServer(async(req,res)=>{
     try{
@@ -78,7 +78,7 @@ const manifest=require('../data/audio-manifest.js');
     await page.locator('#run').click();
     await page.waitForFunction(()=>window.complete,null,{timeout:240000});
     const results=await page.evaluate(()=>window.results);
-    assert.equal(results.length,398);
+    assert.equal(results.length,501);
     assert.deepEqual(errors,[]);
     const failed=results.filter(result=>result.failure||result.events.includes('error')
       ||!(result.duration>0)||!(result.maximumTime>0)
@@ -90,7 +90,7 @@ const manifest=require('../data/audio-manifest.js');
       },null,2));
     }
     assert.deepEqual(failed,[]);
-    console.log(`通过：398 段在真实 Chromium 中有 metadata、canplay、playing、timeupdate 和 ended，无媒体错误（4倍速、静音、8路并行，${((Date.now()-started)/1000).toFixed(1)} 秒）。这是播放与解码检查，不是逐条发音确认。`);
+    console.log(`通过：501 段在真实 Chromium 中有 metadata、canplay、playing、timeupdate 和 ended，无媒体错误（4倍速、静音、8路并行，${((Date.now()-started)/1000).toFixed(1)} 秒）。这是播放与解码检查，不是逐条发音确认。`);
   }finally{
     await browser?.close();
     await new Promise(resolve=>server.close(resolve));

@@ -1,6 +1,7 @@
 'use strict';
 
 // Run after rebuilding recordings: node tests/audio-review.browser.test.js
+// Real playback checks do not certify pronunciation by human listening.
 const assert=require('node:assert/strict');
 const {chromium}=require('playwright');
 const http=require('node:http');
@@ -10,6 +11,7 @@ const {pathToFileURL}=require('node:url');
 const manifest=require('../data/audio-manifest.js');
 const root=path.resolve(__dirname,'..');
 const recordKey='learning-garden-v1';
+const audioCache='azure-jenny-unit3-v1-20261013';
 const originalRecords='{"attempts":[{"question":"pinyin-59","correct":false}],"sessions":[],"wrong":["pinyin-59"]}';
 const exact=value=>new RegExp('^'+value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$');
 
@@ -47,20 +49,37 @@ function initialize({recordKey,originalRecords}){
   const observed=new WeakSet();
   window.reviewAudio=[];
   window.reviewPlayCalls=[];
+  window.reviewPlaybackChecks=[];
   window.reviewPauseCalls=0;
   window.reviewMaxPlaying=0;
   HTMLMediaElement.prototype.play=function(...args){
     if(!observed.has(this)){
       observed.add(this);
-      const row={node:this,playing:0,ended:0,maxTime:0,duration:0};window.reviewAudio.push(row);
+      const row={node:this,playing:0,ended:0,maxTime:0,duration:0,currentCall:null};window.reviewAudio.push(row);
       this.addEventListener('playing',()=>{
         row.playing++;window.reviewMaxPlaying=Math.max(window.reviewMaxPlaying,window.reviewAudio.filter(item=>!item.node.paused&&!item.node.ended).length);
       });
-      this.addEventListener('loadedmetadata',()=>{row.duration=this.duration;});
+      for(const event of ['loadedmetadata','canplay','playing','ended'])this.addEventListener(event,()=>{
+        if(row.currentCall&&row.currentCall.src===this.currentSrc){
+          row.currentCall.events.push(event);
+          if(Number.isFinite(this.duration))row.currentCall.duration=this.duration;
+          if(Number.isFinite(this.currentTime))row.currentCall.maxTime=Math.max(row.currentCall.maxTime,this.currentTime);
+        }
+      // Observe this clip before the player's onended switches/removes src.
+      },true);
+      this.addEventListener('loadedmetadata',()=>{if(Number.isFinite(this.duration))row.duration=this.duration;});
       this.addEventListener('ended',()=>{row.ended++;});
-      this.addEventListener('timeupdate',()=>{row.maxTime=Math.max(row.maxTime,this.currentTime);});
+      this.addEventListener('timeupdate',()=>{
+        if(Number.isFinite(this.currentTime)){
+          row.maxTime=Math.max(row.maxTime,this.currentTime);
+          if(row.currentCall&&row.currentCall.src===this.currentSrc)row.currentCall.maxTime=Math.max(row.currentCall.maxTime,this.currentTime);
+        }
+      },true);
     }
     window.reviewPlayCalls.push(this.src);
+    const call={src:this.src,events:[],duration:0,maxTime:0,playbackRate:this.playbackRate};
+    window.reviewPlaybackChecks.push(call);
+    window.reviewAudio.find(row=>row.node===this).currentCall=call;
     return originalPlay.apply(this,args);
   };
   HTMLMediaElement.prototype.pause=function(...args){window.reviewPauseCalls++;return originalPause.apply(this,args);};
@@ -68,6 +87,7 @@ function initialize({recordKey,originalRecords}){
 
 (async()=>{
   assert.equal(manifest.version,3,'试听检查必须使用 Azure Jenny 音频');
+  assert.equal(Object.keys(manifest.clips).length,501,'试听页交付完整 501 段录音');
   const server=await serverStart();
   const origin='http://127.0.0.1:'+server.address().port;
   let browser;
@@ -128,6 +148,37 @@ function initialize({recordKey,originalRecords}){
     assert.equal(await page.locator('#all-clips button').count(),Object.keys(manifest.clips).length);
     pass('可搜索全部音频，大小写、空格、缩写与空结果提示正确');
 
+    const unit3Keys=['donkey','duck','cat, cow','chicken, duck','it has got long ears',"it hasn't got a long tail",
+      'has it got long ears','yes, it has',"no, it hasn't",'a baby sheep is a lamb','our farm has got two sheep'];
+    const unit3Heading=page.locator('#priority-clips h3').filter({hasText:exact('Unit 3 农场与问答')});
+    assert.equal(await unit3Heading.count(),1,'家长试听入口明确包含新的 Unit 3 优先组');
+    const unit3Priority=page.locator('#priority-clips h3:text-is("Unit 3 农场与问答") + .priority-list');
+    assert.deepEqual(await unit3Priority.locator('button[data-clip]').evaluateAll(buttons=>buttons.map(button=>button.dataset.clip)),
+      unit3Keys,'优先试听组覆盖新增语法、完整词、宝宝与农场句子');
+    for(const key of ['cat, cow','donkey','chicken, duck','has it got long ears',"no, it hasn't",
+      'a baby sheep is a lamb','our farm has got two sheep']){
+      await unit3Priority.locator('button[data-clip]').filter({has:page.locator('span[lang=en]',{hasText:exact(key)})}).click();
+      await finished(page);
+      assert.equal(await page.locator('#current-clip').innerText(),key);
+      const call=await page.evaluate(()=>window.reviewPlaybackChecks.at(-1));
+      assert.equal(call.src,origin+'/'+manifest.clips[key],'优先按钮实际播放对应本地 MP3');
+      assert(Number.isFinite(call.duration)&&call.duration>0&&call.maxTime>0
+        &&['loadedmetadata','canplay','playing','ended'].every(event=>call.events.includes(event)),
+      '每段优先试听真实解码，有播放进度和结束事件');
+      assert.equal(call.playbackRate,1,'优先试听使用正常一倍速度');
+    }
+    await page.locator('#audio-search').fill(' HASN’T ');
+    const negatives=Object.keys(manifest.clips).filter(key=>key.includes("hasn't"));
+    assert.equal(await page.locator('#all-clips button').count(),negatives.length,'Unit 3 弯引号否定句可以搜索');
+    assert.equal(await page.locator('#all-clips button[data-clip="it hasn\'t got a long tail"]').count(),1);
+    await page.locator('#audio-search').fill('baby');
+    const babies=Object.keys(manifest.clips).filter(key=>key.includes('baby'));
+    assert.equal(await page.locator('#all-clips button').count(),babies.length);
+    assert.equal(await page.locator('#all-clips button[data-clip="a baby sheep is a lamb"]').count(),1);
+    await page.locator('#audio-search').fill('');
+    await recordsUnchanged(page);
+    pass('Unit 3 优先试听组真实播放 c/k/ck 整词、问答、宝宝和农场新句，否定缩写与宝宝搜索正确');
+
     const before=await page.evaluate(()=>window.reviewPlayCalls.length);
     await findClip(page,'hello').evaluate(button=>{button.click();button.click();button.click();});
     assert.equal(await page.evaluate(()=>window.reviewPlayCalls.length),before+1,'同一按钮连续点击只启动一次');
@@ -176,7 +227,7 @@ function initialize({recordKey,originalRecords}){
     assert.deepEqual(errors,[]);
     for(const source of ['speech-text.js','data/audio-manifest.js','audio-player.js','audio-review.js']){
       const loaded=requests.filter(request=>new URL(request.url).pathname==='/'+source);
-      assert(loaded.length>0&&loaded.every(request=>new URL(request.url).searchParams.get('v')==='azure-jenny-v3-20261012'),source+' 使用新版缓存参数');
+      assert(loaded.length>0&&loaded.every(request=>new URL(request.url).searchParams.get('v')===audioCache),source+' 使用新版缓存参数');
     }
     assert(requests.every(request=>request.method==='GET'&&new URL(request.url).origin===origin),'只读取同源文件，不调用外部接口');
     pass('音频 404 和空清单明确提示，不偷偷换成系统语音；所有场景无脚本异常和外部请求');
@@ -204,6 +255,7 @@ function initialize({recordKey,originalRecords}){
       pass('file:// 本地直接打开也能播放真实 Hello，平板布局正常，仅使用项目内文件');
     }
     console.log(`通过 ${passed} 组家长试听页检查。`);
+    console.log('以上为真实 MP3 播放及对应关系检查，不能代替逐条人工发音听辨。');
   }finally{
     await Promise.all(contexts.map(context=>context.close().catch(()=>{})));
     await browser?.close();await new Promise(resolve=>server.close(resolve));

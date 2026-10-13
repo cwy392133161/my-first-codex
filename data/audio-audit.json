@@ -10,7 +10,7 @@
     "pipeline": 1
   },
   "region": "eastus",
-  "datasetSha256": "94fef5163036eb3239872f8190ade76e48fd8161fa9e7275e387f2728acbe246",
+  "datasetSha256": "bf6e236e30f991d1f3c229fdcacaf889fdef7a03217bfe83218006c3a075de62",
   "clips": [
     {
       "key": "hello",
@@ -432,6 +432,184 @@
       "duration": 2.064
     },
     {
+      "key": "a baby chicken is a chick",
+      "text": "A baby chicken is a chick.",
+      "digest": "822270812c1560c5f51662a629bb76e6407c3e5a8b7f87a6c10df8449104cec4",
+      "path": "assets/audio/822270812c1560c5f516.mp3",
+      "sources": [
+        "answer:unit3-reading-chick-name",
+        "reading:unit3-reading-chick-name",
+        "reading:unit3-reading-chick-egg",
+        "reading:unit3-reading-chick-care",
+        "model:unit3-lesson-reading-chick",
+        "lesson:unit3-lesson-reading-chick"
+      ],
+      "bytes": 30816,
+      "sha256": "943203b7641613f67223c0d7f14de7f42eee99594e244e12f924ebf2bfdcdee5",
+      "duration": 2.568
+    },
+    {
+      "key": "a baby cow is a calf",
+      "text": "A baby cow is a calf.",
+      "digest": "35817f29a1d9113c7729c11330d82f74a70ae63afdb8ff7ad803b14cb144de3f",
+      "path": "assets/audio/35817f29a1d9113c7729.mp3",
+      "sources": [
+        "answer:unit3-reading-calf-and-baby-name",
+        "reading:unit3-reading-calf-and-baby-name",
+        "reading:unit3-reading-calf-and-baby-same",
+        "reading:unit3-reading-calf-and-baby-care",
+        "model:unit3-lesson-reading-calf-and-baby",
+        "lesson:unit3-lesson-reading-calf-and-baby"
+      ],
+      "bytes": 29376,
+      "sha256": "64c5dabb4e7de35b6cc0f3dfce940a893a9fe6be5b43f8111ec4316bf2f6d71d",
+      "duration": 2.448
+    },
+    {
+      "key": "a baby duck is a duckling",
+      "text": "A baby duck is a duckling.",
+      "digest": "0fbb383c52503f121aaccf90f7d8369cb9054085fdd4b7245d6f6e773fab41af",
+      "path": "assets/audio/0fbb383c52503f121aac.mp3",
+      "sources": [
+        "answer:unit3-reading-duckling-name",
+        "reading:unit3-reading-duckling-name",
+        "reading:unit3-reading-duckling-egg",
+        "reading:unit3-reading-duckling-size",
+        "model:unit3-lesson-reading-duckling",
+        "lesson:unit3-lesson-reading-duckling"
+      ],
+      "bytes": 29952,
+      "sha256": "f71525d0f34f578079997f13ec777fadc5dd0208ca9231e8f37a0cff457a6c54",
+      "duration": 2.496
+    },
+    {
+      "key": "a baby sheep is a lamb",
+      "text": "A baby sheep is a lamb.",
+      "digest": "c229d615a8424deeac106cbfcb9c0e0cd68ffb6988bae6c5ce451720459e2b80",
+      "path": "assets/audio/c229d615a8424deeac10.mp3",
+      "sources": [
+        "answer:unit3-reading-lamb-name",
+        "reading:unit3-reading-lamb-name",
+        "reading:unit3-reading-lamb-born",
+        "reading:unit3-reading-lamb-different",
+        "model:unit3-lesson-reading-lamb",
+        "lesson:unit3-lesson-reading-lamb"
+      ],
+      "bytes": 28224,
+      "sha256": "4d2ff58cd9511b5b9811bcc01759840b2f4ddd15617d16e4180e180ee0f1fae5",
+      "duration": 2.352
+    },
+    {
+      "key": "a calf is born from its mother",
+      "text": "A calf is born from its mother.",
+      "digest": "cfab20c4721a403972daa2a4c4dbcaa7c0a7ed1b0915c4b92656243d3cc97196",
+      "path": "assets/audio/cfab20c4721a403972da.mp3",
+      "sources": [
+        "reading:unit3-reading-calf-and-baby-name",
+        "reading:unit3-reading-calf-and-baby-same",
+        "reading:unit3-reading-calf-and-baby-care",
+        "model:unit3-lesson-reading-calf-and-baby",
+        "lesson:unit3-lesson-reading-calf-and-baby"
+      ],
+      "bytes": 31968,
+      "sha256": "016b278c73cb2b46c01ef07ca2c2c84989153689890b05075a152ae5da2e98f8",
+      "duration": 2.664
+    },
+    {
+      "key": "a chick comes out of an egg",
+      "text": "A chick comes out of an egg.",
+      "digest": "16f0d9b356599a3549586737c57968e829f4e601831a1523aa08c5554972feda",
+      "path": "assets/audio/16f0d9b356599a354958.mp3",
+      "sources": [
+        "reading:unit3-reading-chick-name",
+        "answer:unit3-reading-chick-egg",
+        "reading:unit3-reading-chick-egg",
+        "reading:unit3-reading-chick-care",
+        "model:unit3-lesson-reading-chick",
+        "lesson:unit3-lesson-reading-chick"
+      ],
+      "bytes": 29376,
+      "sha256": "f9cda0e518d0cfbc57b42308e5b3677dc1bba6b40cdd244a2c5195111a42e91e",
+      "duration": 2.448
+    },
+    {
+      "key": "a duckling comes out of an egg",
+      "text": "A duckling comes out of an egg.",
+      "digest": "109370c80c459995b21da0ca8c62333e426d10fca943cb616e5a03a155a16780",
+      "path": "assets/audio/109370c80c459995b21d.mp3",
+      "sources": [
+        "reading:unit3-reading-duckling-name",
+        "answer:unit3-reading-duckling-egg",
+        "reading:unit3-reading-duckling-egg",
+        "reading:unit3-reading-duckling-size",
+        "model:unit3-lesson-reading-duckling",
+        "lesson:unit3-lesson-reading-duckling"
+      ],
+      "bytes": 30816,
+      "sha256": "b00c793a2e6ec94804d928645189db1b0538abdd5dfe84b416832b53b629404a",
+      "duration": 2.568
+    },
+    {
+      "key": "a funny toy dog",
+      "text": "a funny toy dog",
+      "digest": "06427671e769ec3a2960e03da3ac34748eb0e10211e0be38f8ad5b2bce1bfc1a",
+      "path": "assets/audio/06427671e769ec3a2960.mp3",
+      "sources": [
+        "answer:unit3-describe-language-order-funny"
+      ],
+      "bytes": 25632,
+      "sha256": "d5af6e34b5c68fe646196a7a5fc40767a0518c0dbfd0f55e9d9e361d8a0868f2",
+      "duration": 2.136
+    },
+    {
+      "key": "a human baby is born from a mother, too",
+      "text": "A human baby is born from a mother, too.",
+      "digest": "86cd2c6da59c14446eb301a81b8cf196fc22b5ba1d4df2f7466556dd650afcf6",
+      "path": "assets/audio/86cd2c6da59c14446eb3.mp3",
+      "sources": [
+        "reading:unit3-reading-calf-and-baby-name",
+        "answer:unit3-reading-calf-and-baby-same",
+        "reading:unit3-reading-calf-and-baby-same",
+        "reading:unit3-reading-calf-and-baby-care",
+        "model:unit3-lesson-reading-calf-and-baby",
+        "lesson:unit3-lesson-reading-calf-and-baby"
+      ],
+      "bytes": 41760,
+      "sha256": "b985a402e6247ce7eb8d5ce41225d2d7678f1d2188bb251cf058cf8b3d198c6a",
+      "duration": 3.48
+    },
+    {
+      "key": "a lamb is born from its mother",
+      "text": "A lamb is born from its mother.",
+      "digest": "84d6f6d3f0631d330df2f58cd2cd97c8a8094a6cf3224367ce173156870a5aa7",
+      "path": "assets/audio/84d6f6d3f0631d330df2.mp3",
+      "sources": [
+        "reading:unit3-reading-lamb-name",
+        "answer:unit3-reading-lamb-born",
+        "reading:unit3-reading-lamb-born",
+        "reading:unit3-reading-lamb-different",
+        "model:unit3-lesson-reading-lamb",
+        "lesson:unit3-lesson-reading-lamb"
+      ],
+      "bytes": 31392,
+      "sha256": "748336f08fc5bcf9eceecd5c9a82782b444381998e20e8cd8fe54b7b0f56aa26",
+      "duration": 2.616
+    },
+    {
+      "key": "a little duck",
+      "text": "a little duck",
+      "digest": "debc1dc5b6ef24ee2ee74225e05dc56ade4badc33e24dafa749daf2af7a2c70c",
+      "path": "assets/audio/debc1dc5b6ef24ee2ee7.mp3",
+      "sources": [
+        "answer:unit3-describe-language-order-little",
+        "model:unit3-lesson-describe-order",
+        "lesson:unit3-lesson-describe-order"
+      ],
+      "bytes": 22464,
+      "sha256": "dcc2cb1b16d360bcdb72538ad8d9ee7dd2918e4609423f9df13dfb048bff1dc7",
+      "duration": 1.872
+    },
+    {
       "key": "a ruler is next to the books",
       "text": "A ruler is next to the books.",
       "digest": "003e358e3b05ed9a6414db6b67429b01769d5ed674e91857b1a4cc6cebf402a8",
@@ -521,11 +699,42 @@
         "word:english3:angry",
         "question:english3-angry-meaning",
         "answer:english3-angry-meaning",
-        "answer:english3-angry-word"
+        "answer:english3-angry-word",
+        "answer:unit3-describe-meaning-angry",
+        "question:unit3-describe-listen-angry",
+        "answer:unit3-describe-listen-angry",
+        "lesson:unit3-lesson-describe-angry"
       ],
       "bytes": 22464,
       "sha256": "6b3141950ecbddda736356486fe9779de0dc8e2642ba10d0ea0d7ab724d829b6",
       "duration": 1.872
+    },
+    {
+      "key": "animals give us many things",
+      "text": "Animals give us many things.",
+      "digest": "2db81c66b0485eb5e2807f92434e0f26b36ba0da89251cb31d0335347952ab39",
+      "path": "assets/audio/2db81c66b0485eb5e280.mp3",
+      "sources": [
+        "answer:unit3-gifts-care-depend",
+        "model:unit3-lesson-gifts-together",
+        "lesson:unit3-lesson-gifts-together"
+      ],
+      "bytes": 31680,
+      "sha256": "2c3109b2843739aa6a413e80434cb855a08377a69304a374b5871177c90cc5de",
+      "duration": 2.64
+    },
+    {
+      "key": "animals need food and water",
+      "text": "Animals need food and water.",
+      "digest": "daadf6e81405e17e25d7079cd2e74b252b2c758bba56860ab0df42b20074d229",
+      "path": "assets/audio/daadf6e81405e17e25d7.mp3",
+      "sources": [
+        "model:unit3-lesson-gifts-care",
+        "lesson:unit3-lesson-gifts-care"
+      ],
+      "bytes": 30240,
+      "sha256": "c9aff4622accb3d86ba7cf5bfa173509e7d9f32000076426994ea28154f9d6dd",
+      "duration": 2.52
     },
     {
       "key": "apple",
@@ -624,6 +833,32 @@
       "duration": 1.872
     },
     {
+      "key": "be kind",
+      "text": "Be kind.",
+      "digest": "9af36580ad2f70a4285e76418c60b8b4a82244fa9fa5c5dd0fc3361b93cec934",
+      "path": "assets/audio/9af36580ad2f70a4285e.mp3",
+      "sources": [
+        "answer:unit3-describe-language-respect"
+      ],
+      "bytes": 22464,
+      "sha256": "46be2c21b85d70746eb0cb98b794fc7cc9ab56122f0455357c2c3342daae69d3",
+      "duration": 1.872
+    },
+    {
+      "key": "be kind to animals",
+      "text": "Be kind to animals.",
+      "digest": "977470f42bc74bd0dc61b35d2fec8edf0ef8d5d13c24d75a62f5d958a084329a",
+      "path": "assets/audio/977470f42bc74bd0dc61.mp3",
+      "sources": [
+        "answer:unit3-gifts-care-kind",
+        "model:unit3-lesson-gifts-care",
+        "lesson:unit3-lesson-gifts-care"
+      ],
+      "bytes": 26208,
+      "sha256": "381052e7b6a7e902db32c3e4ca86c12dc75d16b60675de326d6c8e51c93aad19",
+      "duration": 2.184
+    },
+    {
       "key": "bean",
       "text": "bean",
       "digest": "816a07bef72b7c7964c5a104800e7ff5494535537e94cb3dbdcdd638cd600364",
@@ -647,7 +882,11 @@
         "word:english3:beautiful",
         "question:english3-beautiful-meaning",
         "answer:english3-beautiful-meaning",
-        "answer:english3-beautiful-word"
+        "answer:english3-beautiful-word",
+        "answer:unit3-describe-meaning-beautiful",
+        "question:unit3-describe-listen-beautiful",
+        "answer:unit3-describe-listen-beautiful",
+        "lesson:unit3-lesson-describe-beautiful"
       ],
       "bytes": 22464,
       "sha256": "b081e7c8f63e44cc15ce5bf0afaaf4285625c5a4ea2a528ccdb2880ec1f66757",
@@ -667,6 +906,22 @@
       "bytes": 22464,
       "sha256": "6c906f89402c5ea2dce1654e1d48bd05a8bd95aaadeb90bebd3d768288e80c81",
       "duration": 1.872
+    },
+    {
+      "key": "bees give us honey",
+      "text": "Bees give us honey.",
+      "digest": "7ea19de967232376eb43f8df5ba46a46a658a975b6b4c1878df3a16d2e1b83d1",
+      "path": "assets/audio/7ea19de967232376eb43.mp3",
+      "sources": [
+        "answer:unit3-gifts-match-honey",
+        "question:unit3-gifts-listen-honey",
+        "answer:unit3-gifts-listen-honey",
+        "model:unit3-lesson-gifts-honey",
+        "lesson:unit3-lesson-gifts-honey"
+      ],
+      "bytes": 24192,
+      "sha256": "8833523dedb1a6ba6c5df9965e0607cd1dc7966c5009f345ea6275862cbdce63",
+      "duration": 2.016
     },
     {
       "key": "big",
@@ -955,6 +1210,23 @@
       "duration": 1.872
     },
     {
+      "key": "calves and babies need care",
+      "text": "Calves and babies need care.",
+      "digest": "406a3154e68d4949c886d53e2174c8f9cfa026339cd568d539745e42fc1d310f",
+      "path": "assets/audio/406a3154e68d4949c886.mp3",
+      "sources": [
+        "reading:unit3-reading-calf-and-baby-name",
+        "reading:unit3-reading-calf-and-baby-same",
+        "answer:unit3-reading-calf-and-baby-care",
+        "reading:unit3-reading-calf-and-baby-care",
+        "model:unit3-lesson-reading-calf-and-baby",
+        "lesson:unit3-lesson-reading-calf-and-baby"
+      ],
+      "bytes": 30816,
+      "sha256": "370d8a75506800ddad4bea7984aaa40a6ca7fe5a8ab3b2a4479b1397e26b122a",
+      "duration": 2.568
+    },
+    {
       "key": "cameron",
       "text": "Cameron",
       "digest": "c03de336c61784c234213897e02455523fa7a31f621be84e02d3f69f8784f538",
@@ -994,11 +1266,48 @@
         "answer:unit2-phonics-group-cat",
         "answer:unit2-phonics-spell-cat",
         "question:unit2-phonics-listen-cat",
-        "answer:unit2-phonics-listen-cat"
+        "answer:unit2-phonics-listen-cat",
+        "answer:unit3-animals-meaning-cat",
+        "answer:unit3-animals-word-cat",
+        "question:unit3-animals-listen-cat",
+        "answer:unit3-animals-listen-cat",
+        "lesson:unit3-lesson-animals-cat",
+        "answer:unit3-phonics-group-cat",
+        "answer:unit3-phonics-complete-cat",
+        "question:unit3-phonics-listen-cat",
+        "answer:unit3-phonics-listen-cat",
+        "answer:unit3-spelling-count-cat",
+        "answer:unit3-spelling-complete-cat",
+        "model:unit3-lesson-spelling-count",
+        "lesson:unit3-lesson-spelling-count"
       ],
       "bytes": 22464,
       "sha256": "b78385b6ea0a070e9f7215be6152d215397fcce28ef92afb652da0241d6bbcbd",
       "duration": 1.872
+    },
+    {
+      "key": "cat, cow",
+      "text": "cat, cow",
+      "digest": "fef0c980772629a025318e1432422829d044e9f31453e6735ac767d8b5e93079",
+      "path": "assets/audio/fef0c980772629a02531.mp3",
+      "sources": [
+        "model:unit3-lesson-phonics-c"
+      ],
+      "bytes": 24192,
+      "sha256": "d33651cee50535627eb5566cf495740f57ebb882444d0818627e2e27dc5bcbf6",
+      "duration": 2.016
+    },
+    {
+      "key": "cat, cow, donkey, chicken, duck",
+      "text": "cat, cow, donkey, chicken, duck",
+      "digest": "5d3e82451be86e6a9f2264aac54c0607679c37f814814e8c4eacc495890e71fa",
+      "path": "assets/audio/5d3e82451be86e6a9f22.mp3",
+      "sources": [
+        "model:unit3-lesson-phonics-together"
+      ],
+      "bytes": 46368,
+      "sha256": "cef17a7674fbf73a9e0f26c7732f413aad1823521a7e82de2f90a5e4f4f6e33d",
+      "duration": 3.864
     },
     {
       "key": "cat, sister",
@@ -1060,11 +1369,54 @@
         "answer:english3-chicken-word",
         "question:english4-chicken-meaning",
         "answer:english4-chicken-meaning",
-        "answer:english4-chicken-word"
+        "answer:english4-chicken-word",
+        "answer:unit3-animals-meaning-chicken",
+        "answer:unit3-animals-word-chicken",
+        "question:unit3-animals-listen-chicken",
+        "answer:unit3-animals-listen-chicken",
+        "lesson:unit3-lesson-animals-chicken",
+        "answer:unit3-phonics-group-chicken",
+        "answer:unit3-phonics-complete-chicken",
+        "question:unit3-phonics-listen-chicken",
+        "answer:unit3-phonics-listen-chicken",
+        "answer:unit3-phonics-chicken-parts",
+        "answer:unit3-spelling-count-chicken",
+        "answer:unit3-spelling-complete-chicken",
+        "model:unit3-lesson-spelling-chicken",
+        "lesson:unit3-lesson-spelling-chicken"
       ],
       "bytes": 22464,
       "sha256": "5cb2b816f981d921ca3f9e584dda8b17c69011697a23a23ea5d726211b233d23",
       "duration": 1.872
+    },
+    {
+      "key": "chicken, duck",
+      "text": "chicken, duck",
+      "digest": "131e38e3e58980559bb250745c4bf86546a3401d44dbeda1269a83ae93f0bade",
+      "path": "assets/audio/131e38e3e58980559bb2.mp3",
+      "sources": [
+        "model:unit3-lesson-phonics-ck"
+      ],
+      "bytes": 24768,
+      "sha256": "1246da5e4c63011eefcd45b03050a0275e590a118ecc8e37ad166267c2662096",
+      "duration": 2.064
+    },
+    {
+      "key": "chickens give us eggs",
+      "text": "Chickens give us eggs.",
+      "digest": "e1d5339e3f96e9feaaebd1868515db77f9a8faf6a888a963f98edb9677616db4",
+      "path": "assets/audio/e1d5339e3f96e9feaaeb.mp3",
+      "sources": [
+        "answer:unit3-gifts-match-eggs",
+        "question:unit3-gifts-listen-eggs",
+        "answer:unit3-gifts-listen-eggs",
+        "model:unit3-lesson-gifts-eggs",
+        "lesson:unit3-lesson-gifts-eggs",
+        "farm"
+      ],
+      "bytes": 27648,
+      "sha256": "982db528d30733a5fd1c90f9e59c0397e39eb338d41b1add2c84e460b915dd1e",
+      "duration": 2.304
     },
     {
       "key": "chip",
@@ -1168,11 +1520,39 @@
         "word:english3:cow",
         "question:english3-cow-meaning",
         "answer:english3-cow-meaning",
-        "answer:english3-cow-word"
+        "answer:english3-cow-word",
+        "answer:unit3-animals-meaning-cow",
+        "answer:unit3-animals-word-cow",
+        "question:unit3-animals-listen-cow",
+        "answer:unit3-animals-listen-cow",
+        "lesson:unit3-lesson-animals-cow",
+        "answer:unit3-phonics-group-cow",
+        "answer:unit3-phonics-complete-cow",
+        "question:unit3-phonics-listen-cow",
+        "answer:unit3-phonics-listen-cow",
+        "answer:unit3-spelling-count-cow",
+        "answer:unit3-spelling-complete-cow"
       ],
       "bytes": 22464,
       "sha256": "a5345a2b6ecb641dc5b32bccd3ae7d7d3e8a548623e99a4a7d0c7dd38fa7c2dc",
       "duration": 1.872
+    },
+    {
+      "key": "cows give us milk",
+      "text": "Cows give us milk.",
+      "digest": "b89af73aeb1c38408800468ad6eb912e5600ba251d1076265e2e7ad15443a530",
+      "path": "assets/audio/b89af73aeb1c38408800.mp3",
+      "sources": [
+        "answer:unit3-gifts-match-milk",
+        "question:unit3-gifts-listen-milk",
+        "answer:unit3-gifts-listen-milk",
+        "model:unit3-lesson-gifts-milk",
+        "lesson:unit3-lesson-gifts-milk",
+        "farm"
+      ],
+      "bytes": 25344,
+      "sha256": "fbd6bba9a2d5802bb1f03e56fb20fd962907712de3d605e586fab88dafd05815",
+      "duration": 2.112
     },
     {
       "key": "crayon",
@@ -1267,7 +1647,14 @@
         "word:english3:dog",
         "question:english3-dog-meaning",
         "answer:english3-dog-meaning",
-        "answer:english3-dog-word"
+        "answer:english3-dog-word",
+        "answer:unit3-animals-meaning-dog",
+        "answer:unit3-animals-word-dog",
+        "question:unit3-animals-listen-dog",
+        "answer:unit3-animals-listen-dog",
+        "lesson:unit3-lesson-animals-dog",
+        "answer:unit3-spelling-count-dog",
+        "answer:unit3-spelling-complete-dog"
       ],
       "bytes": 22464,
       "sha256": "e70fa7a00b4e9920fc64cbef950190b8a2ed6f1c0ccf7a89d9a89494c6c7dc74",
@@ -1282,7 +1669,20 @@
         "word:english3:donkey",
         "question:english3-donkey-meaning",
         "answer:english3-donkey-meaning",
-        "answer:english3-donkey-word"
+        "answer:english3-donkey-word",
+        "answer:unit3-animals-meaning-donkey",
+        "answer:unit3-animals-word-donkey",
+        "question:unit3-animals-listen-donkey",
+        "answer:unit3-animals-listen-donkey",
+        "lesson:unit3-lesson-animals-donkey",
+        "answer:unit3-phonics-group-donkey",
+        "answer:unit3-phonics-complete-donkey",
+        "question:unit3-phonics-listen-donkey",
+        "answer:unit3-phonics-listen-donkey",
+        "answer:unit3-phonics-donkey-position",
+        "model:unit3-lesson-phonics-k",
+        "answer:unit3-spelling-count-donkey",
+        "answer:unit3-spelling-complete-donkey"
       ],
       "bytes": 22464,
       "sha256": "ff3a8def0dbad43f93ea2fab90a18acd7b4942de3ab2dd21541f8838d0443af0",
@@ -1315,7 +1715,19 @@
         "word:english3:duck",
         "question:english3-duck-meaning",
         "answer:english3-duck-meaning",
-        "answer:english3-duck-word"
+        "answer:english3-duck-word",
+        "answer:unit3-animals-meaning-duck",
+        "answer:unit3-animals-word-duck",
+        "question:unit3-animals-listen-duck",
+        "answer:unit3-animals-listen-duck",
+        "lesson:unit3-lesson-animals-duck",
+        "answer:unit3-phonics-group-duck",
+        "answer:unit3-phonics-complete-duck",
+        "question:unit3-phonics-listen-duck",
+        "answer:unit3-phonics-listen-duck",
+        "answer:unit3-phonics-duck-letter-count",
+        "answer:unit3-spelling-count-duck",
+        "answer:unit3-spelling-complete-duck"
       ],
       "bytes": 22464,
       "sha256": "558bb7a5409b7b075be91e73508c1f059376827d627e5785b4cbcda052e9b0aa",
@@ -1354,6 +1766,19 @@
       ],
       "bytes": 22464,
       "sha256": "fb75d9530c6b97fb2d4795f7c55fc27913da1c24020cdf319195f338d2270d94",
+      "duration": 1.872
+    },
+    {
+      "key": "eggs",
+      "text": "eggs",
+      "digest": "fb291dd7b4ed8be7a94d8440ff3ebb807c67c4e104f53dde6c39ee16fa35941c",
+      "path": "assets/audio/fb291dd7b4ed8be7a94d.mp3",
+      "sources": [
+        "answer:unit3-gifts-word-eggs",
+        "lesson:unit3-lesson-gifts-eggs"
+      ],
+      "bytes": 22464,
+      "sha256": "b14c22fcd4eef39c1af66eb38d880fa648f1fbba680fa3e771750cf4727bb6fe",
       "duration": 1.872
     },
     {
@@ -1585,7 +2010,11 @@
         "word:english3:funny",
         "question:english3-funny-meaning",
         "answer:english3-funny-meaning",
-        "answer:english3-funny-word"
+        "answer:english3-funny-word",
+        "answer:unit3-describe-meaning-funny",
+        "question:unit3-describe-listen-funny",
+        "answer:unit3-describe-listen-funny",
+        "lesson:unit3-lesson-describe-funny"
       ],
       "bytes": 22464,
       "sha256": "3734027e6641f14a878fafec90204718d2e77e15abed51706d06cf16d5f07a4a",
@@ -1615,7 +2044,14 @@
         "word:english3:goat",
         "question:english3-goat-meaning",
         "answer:english3-goat-meaning",
-        "answer:english3-goat-word"
+        "answer:english3-goat-word",
+        "answer:unit3-animals-meaning-goat",
+        "answer:unit3-animals-word-goat",
+        "question:unit3-animals-listen-goat",
+        "answer:unit3-animals-listen-goat",
+        "lesson:unit3-lesson-animals-goat",
+        "answer:unit3-spelling-count-goat",
+        "answer:unit3-spelling-complete-goat"
       ],
       "bytes": 22464,
       "sha256": "fbc4700fb0d3ac0ce491ef02b09af5a2bad8a6f9c286e6c6fe0291b98817c37a",
@@ -1826,7 +2262,11 @@
         "word:english3:happy",
         "question:english3-happy-meaning",
         "answer:english3-happy-meaning",
-        "answer:english3-happy-word"
+        "answer:english3-happy-word",
+        "answer:unit3-describe-meaning-happy",
+        "question:unit3-describe-listen-happy",
+        "answer:unit3-describe-listen-happy",
+        "lesson:unit3-lesson-describe-happy"
       ],
       "bytes": 22464,
       "sha256": "dc234c3a97c7b8f98022df5ec2a493a230af10e41484a89cf21d9a194c617398",
@@ -1843,6 +2283,64 @@
       "bytes": 22464,
       "sha256": "d548f9551112a5825145ed34e6d20b6a3e749c0ccb3415dd28e049ed8287c06f",
       "duration": 1.872
+    },
+    {
+      "key": "has it got a long tail",
+      "text": "Has it got a long tail?",
+      "digest": "f18243159def0329d25c07505a9d0b659b162bc39b2001f7ad3d26884730a025",
+      "path": "assets/audio/f18243159def0329d25c.mp3",
+      "sources": [
+        "model:unit3-lesson-hasgot-answer-no",
+        "lesson:unit3-lesson-hasgot-answer-no"
+      ],
+      "bytes": 27072,
+      "sha256": "c60f04028b12c71f446b03e7853744dbd2b032a67be6f31fc6317238f2c3a26e",
+      "duration": 2.256
+    },
+    {
+      "key": "has it got a tail",
+      "text": "Has it got a tail?",
+      "digest": "21a8cc86e8552a424055e928b91d50da3c5efabf2d07dce9c6aad269f2ef4c50",
+      "path": "assets/audio/21a8cc86e8552a424055.mp3",
+      "sources": [
+        "answer:unit3-hasgot-language-ask-order",
+        "question:unit3-hasgot-listen-no",
+        "answer:unit3-hasgot-listen-no"
+      ],
+      "bytes": 24480,
+      "sha256": "ddf9348a0f8bd6d0ee962b4e7fb8c3b147c9e3f4c02a178f7c77daff15ef7351",
+      "duration": 2.04
+    },
+    {
+      "key": "has it got long ears",
+      "text": "Has it got long ears?",
+      "digest": "9430b9c0403199d38a9d136ff106436a19fff3f9b8fc0afa1e0c8886d2cc5c9c",
+      "path": "assets/audio/9430b9c0403199d38a9d.mp3",
+      "sources": [
+        "answer:unit3-hasgot-language-ask",
+        "model:unit3-lesson-hasgot-question",
+        "lesson:unit3-lesson-hasgot-question",
+        "model:unit3-lesson-hasgot-answer-yes",
+        "lesson:unit3-lesson-hasgot-answer-yes"
+      ],
+      "bytes": 26496,
+      "sha256": "c907f5e79ee0a992120b0ac5c454fe4576c016c83555dfb24d04f3d58842eb7a",
+      "duration": 2.208
+    },
+    {
+      "key": "has it got wings",
+      "text": "Has it got wings?",
+      "digest": "7879f4d71edf3513c67065145a16760d486238f4c3fb01f49775760f746fa0b1",
+      "path": "assets/audio/7879f4d71edf3513c670.mp3",
+      "sources": [
+        "answer:unit3-hasgot-language-yes",
+        "answer:unit3-hasgot-language-no",
+        "question:unit3-hasgot-listen-yes",
+        "answer:unit3-hasgot-listen-yes"
+      ],
+      "bytes": 25056,
+      "sha256": "528bd983730d3e57f968760b5bc37294aeb060a66fe8e6ef169c5953b6b1ae0b",
+      "duration": 2.088
     },
     {
       "key": "have you got black hair",
@@ -2101,7 +2599,9 @@
         "word:english3:honey",
         "question:english3-honey-meaning",
         "answer:english3-honey-meaning",
-        "answer:english3-honey-word"
+        "answer:english3-honey-word",
+        "answer:unit3-gifts-word-honey",
+        "lesson:unit3-lesson-gifts-honey"
       ],
       "bytes": 22464,
       "sha256": "631f5289afb0c90517bb2e1ea24aca88d2e0bb7117acf52ecface1da799e404f",
@@ -2116,7 +2616,14 @@
         "word:english3:horse",
         "question:english3-horse-meaning",
         "answer:english3-horse-meaning",
-        "answer:english3-horse-word"
+        "answer:english3-horse-word",
+        "answer:unit3-animals-meaning-horse",
+        "answer:unit3-animals-word-horse",
+        "question:unit3-animals-listen-horse",
+        "answer:unit3-animals-listen-horse",
+        "lesson:unit3-lesson-animals-horse",
+        "answer:unit3-spelling-count-horse",
+        "answer:unit3-spelling-complete-horse"
       ],
       "bytes": 22464,
       "sha256": "6a0987b61306ef71d59495c1d0fc7f472cef4709c55be9e0fc4dcef4c2ee1c30",
@@ -2630,6 +3137,225 @@
       "duration": 1.872
     },
     {
+      "key": "it does not come out of an egg",
+      "text": "It does not come out of an egg.",
+      "digest": "d5088a7cbe70e775df97a427e1768d39b26f1b8d005e8088372d1336ae2e53ff",
+      "path": "assets/audio/d5088a7cbe70e775df97.mp3",
+      "sources": [
+        "reading:unit3-reading-lamb-name",
+        "reading:unit3-reading-lamb-born",
+        "answer:unit3-reading-lamb-different",
+        "reading:unit3-reading-lamb-different",
+        "model:unit3-lesson-reading-lamb",
+        "lesson:unit3-lesson-reading-lamb"
+      ],
+      "bytes": 29088,
+      "sha256": "0c32babfefb15813f6456d6c111852c7ed4f18eba7c727dc956c99fb8ae855e6",
+      "duration": 2.424
+    },
+    {
+      "key": "it grows",
+      "text": "It grows.",
+      "digest": "748a28ec4afead812b7d7ee26ad97fd101967182ac21231dfcb0176ad985313c",
+      "path": "assets/audio/748a28ec4afead812b7d.mp3",
+      "sources": [
+        "reading:unit3-reading-duckling-name",
+        "reading:unit3-reading-duckling-egg",
+        "reading:unit3-reading-duckling-size",
+        "model:unit3-lesson-reading-duckling",
+        "lesson:unit3-lesson-reading-duckling"
+      ],
+      "bytes": 22464,
+      "sha256": "3cad8228a63de43374f8eaa44f01b498223ae8209d6dca198f3916974fc99ee7",
+      "duration": 1.872
+    },
+    {
+      "key": "it has got a long tail",
+      "text": "It has got a long tail.",
+      "digest": "c11c65db79a32486cc51a410fe9dcbc3fe674c1a3e5739b8ad095a166f1af39a",
+      "path": "assets/audio/c11c65db79a32486cc51.mp3",
+      "sources": [
+        "answer:unit3-hasgot-language-tail"
+      ],
+      "bytes": 28224,
+      "sha256": "3c11e3272395b2bbb3780ac5a2df0b836267b7d4f99770c80d3644c338e72066",
+      "duration": 2.352
+    },
+    {
+      "key": "it has got a tail",
+      "text": "It has got a tail.",
+      "digest": "930c1a44fc7d71a32b20e979408c826e8949edd1a6a077bc6deb4c6878a68b09",
+      "path": "assets/audio/930c1a44fc7d71a32b20.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 25056,
+      "sha256": "339b0c2e35efd527689fd33194df3bea5be46ca0a7dfb7eb173f76bc1a232af9",
+      "duration": 2.088
+    },
+    {
+      "key": "it has got blue eyes",
+      "text": "It has got blue eyes.",
+      "digest": "9b2066ddba0f93fe60ab58f11690d7bdc5540603ef289662863fa3bda53adc7d",
+      "path": "assets/audio/9b2066ddba0f93fe60ab.mp3",
+      "sources": [
+        "answer:unit3-hasgot-language-it-meaning"
+      ],
+      "bytes": 27072,
+      "sha256": "9bd3d5c3e34f0b604374be371a6c76bb2b91b81438d7c26ad524d7e8e227875a",
+      "duration": 2.256
+    },
+    {
+      "key": "it has got long ears",
+      "text": "It has got long ears.",
+      "digest": "219d339b92c16bfb361aa6ed779ee66a088912a6e12fab3699e303df6134618f",
+      "path": "assets/audio/219d339b92c16bfb361a.mp3",
+      "sources": [
+        "answer:unit3-hasgot-language-complete-has",
+        "answer:unit3-hasgot-language-short-has",
+        "answer:unit3-hasgot-language-ears",
+        "question:unit3-hasgot-listen-ears",
+        "answer:unit3-hasgot-listen-ears",
+        "model:unit3-lesson-hasgot-yes",
+        "lesson:unit3-lesson-hasgot-yes"
+      ],
+      "bytes": 27072,
+      "sha256": "7d2fd7a479aa724a6826a4c6f98c7f4a38ae2bb0c5286932f2abf32e4679e783",
+      "duration": 2.256
+    },
+    {
+      "key": "it has got wings",
+      "text": "It has got wings.",
+      "digest": "21a0b5de4035a1c2b60a3ed067eec6b98f83d1d0d1968fb49e2ccfece6e6b4b4",
+      "path": "assets/audio/21a0b5de4035a1c2b60a.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 25632,
+      "sha256": "02e0d81630a1a0aed015abffe5541dd8266a6c26f81b2f389ef6f85b29e30c7a",
+      "duration": 2.136
+    },
+    {
+      "key": "it hasn't got a long tail",
+      "text": "It hasn't got a long tail.",
+      "digest": "22ea685c686d075acb9b4552db8fc51f0ca41c806fce439da604a118bad8ef89",
+      "path": "assets/audio/22ea685c686d075acb9b.mp3",
+      "sources": [
+        "answer:unit3-hasgot-language-negative",
+        "question:unit3-hasgot-listen-no-tail",
+        "answer:unit3-hasgot-listen-no-tail",
+        "model:unit3-lesson-hasgot-not",
+        "lesson:unit3-lesson-hasgot-not"
+      ],
+      "bytes": 29952,
+      "sha256": "14340ad6222e83f8581349b528185950b3fe3a458e996465e32b2a724262bd45",
+      "duration": 2.496
+    },
+    {
+      "key": "it hasn't got a tail",
+      "text": "It hasn't got a tail.",
+      "digest": "e8598340e2f9896ecd7ab2c8e16877f2e510f04454e0f30b3b0fea800f3b7b70",
+      "path": "assets/audio/e8598340e2f9896ecd7a.mp3",
+      "sources": [
+        "answer:unit3-hasgot-language-short-not"
+      ],
+      "bytes": 27360,
+      "sha256": "fe5b0cb255c1e4312e72fcc1e9ae6cc9dec867466667e4085cb962742a7e7b2b",
+      "duration": 2.28
+    },
+    {
+      "key": "it hasn't got long ears",
+      "text": "It hasn't got long ears.",
+      "digest": "1477222f36a63aec550ecfde5e799a99b88314821e8b5b48ef8b69e95f754ea5",
+      "path": "assets/audio/1477222f36a63aec550e.mp3",
+      "sources": [
+        "answer:unit3-hasgot-language-no-meaning"
+      ],
+      "bytes": 29088,
+      "sha256": "9891e7273a44f0eefdbe7bf817cc2340dabac89ad1bfbd0d9daecbfcc0ce8aab",
+      "duration": 2.424
+    },
+    {
+      "key": "it hasn't got small feet",
+      "text": "It hasn't got small feet.",
+      "digest": "acaef2a12ea4b6163bc4bcf4a1e810c6ea70eeeca37adc0c49cffe6e11fd2ebc",
+      "path": "assets/audio/acaef2a12ea4b6163bc4.mp3",
+      "sources": [
+        "answer:unit3-hasgot-language-feet",
+        "model:unit3-lesson-hasgot-feet",
+        "lesson:unit3-lesson-hasgot-feet"
+      ],
+      "bytes": 29664,
+      "sha256": "acdf7db267f190756eae1eafe078ca2523f5c75d921c485c64e5b750ceff47de",
+      "duration": 2.472
+    },
+    {
+      "key": "it is big",
+      "text": "It is big.",
+      "digest": "1354d08dcf856d0f7d82e16c93a68f5ca492f87a914d9d86dd2069ffb31e3004",
+      "path": "assets/audio/1354d08dcf856d0f7d82.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 22464,
+      "sha256": "c9b2f046f3c19209f5bb024ebd041f541ce1eeec8da20eff8a473b3bbd959a3b",
+      "duration": 1.872
+    },
+    {
+      "key": "it is happy",
+      "text": "It is happy.",
+      "digest": "ddb4e25ca3634b2b3b19fceba356ace0c1ab6a1baa6bf1ae4232f5901c04e90d",
+      "path": "assets/audio/ddb4e25ca3634b2b3b19.mp3",
+      "sources": [
+        "answer:unit3-describe-language-is-happy",
+        "model:unit3-lesson-describe-is",
+        "lesson:unit3-lesson-describe-is",
+        "answer:unit3-hasgot-language-has-versus-is",
+        "farm"
+      ],
+      "bytes": 22464,
+      "sha256": "1921b9fcdaf575c1d025d9f53d71848dbc2a4c7fb3a1b033a7fae32c2ecf1e29",
+      "duration": 1.872
+    },
+    {
+      "key": "it is not a small dog",
+      "text": "It is not a small dog.",
+      "digest": "3731b404e7484cf03788890656b8936dc1fc1d7c67460b9f5f6c4da7e09c3bbb",
+      "path": "assets/audio/3731b404e7484cf03788.mp3",
+      "sources": [
+        "answer:unit3-describe-language-negative-is",
+        "model:unit3-lesson-describe-not",
+        "lesson:unit3-lesson-describe-not"
+      ],
+      "bytes": 27936,
+      "sha256": "22f7e8e31fd7bec76a4191e78b6ba49692dd55ce318962409656fa0f792fbb88",
+      "duration": 2.328
+    },
+    {
+      "key": "it is sad",
+      "text": "It is sad.",
+      "digest": "70ac893659532c6a8fed7563c286f42974744d0122b776f618f3c2b8e83c2e8c",
+      "path": "assets/audio/70ac893659532c6a8fed.mp3",
+      "sources": [
+        "answer:unit3-describe-language-singular-sad"
+      ],
+      "bytes": 22464,
+      "sha256": "b59d76a56a4b85011e7daacf982972b4343653c06adb918ef5fc45810a8cd16d",
+      "duration": 1.872
+    },
+    {
+      "key": "it is small",
+      "text": "It is small.",
+      "digest": "9d07a2ef31150e7df70bd99d1083f180d0beb5f49c9c1e9b2265413376206a7c",
+      "path": "assets/audio/9d07a2ef31150e7df70b.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 22464,
+      "sha256": "cd35a866516d4b3d3ec08ba05737c61824f0283ba53c6bbfaf788c2d00c17c81",
+      "duration": 1.872
+    },
+    {
       "key": "it isn't next to the bag",
       "text": "It isn't next to the bag.",
       "digest": "60bd6ee7f02881f26d94633eb4441bd939b476d2c52c19a886b7dc31410cea6d",
@@ -2652,6 +3378,23 @@
       "bytes": 25632,
       "sha256": "7b519b12b422d96191f6faa686478b115db1ea01ece36409ec728ad60fab4d70",
       "duration": 2.136
+    },
+    {
+      "key": "it needs care",
+      "text": "It needs care.",
+      "digest": "f9327717fe1abdf3e1fb11b86227af700d51a078f872a94f8c867bf2dde0f732",
+      "path": "assets/audio/f9327717fe1abdf3e1fb.mp3",
+      "sources": [
+        "reading:unit3-reading-chick-name",
+        "reading:unit3-reading-chick-egg",
+        "answer:unit3-reading-chick-care",
+        "reading:unit3-reading-chick-care",
+        "model:unit3-lesson-reading-chick",
+        "lesson:unit3-lesson-reading-chick"
+      ],
+      "bytes": 23040,
+      "sha256": "a55e9f421b1c62b1adca663237697d5d4da491aac67f423fe7a9aea30f9afe53",
+      "duration": 1.92
     },
     {
       "key": "it's a book",
@@ -2746,6 +3489,18 @@
       "bytes": 22464,
       "sha256": "31098293bac96e44ed9bd25842a2b14af16074d5add4b8fbe888125fdd570789",
       "duration": 1.872
+    },
+    {
+      "key": "it's got long ears",
+      "text": "It's got long ears.",
+      "digest": "267c4570a53b55ca868e409aa91975530129c40fea520442c58158e3df587db0",
+      "path": "assets/audio/267c4570a53b55ca868e.mp3",
+      "sources": [
+        "lesson:unit3-lesson-hasgot-yes"
+      ],
+      "bytes": 26208,
+      "sha256": "3389be20be0cb733bd3eed9b0bef72fec8fb617a6b83902331bd15d2746eb5c9",
+      "duration": 2.184
     },
     {
       "key": "it's in the bag",
@@ -3076,7 +3831,11 @@
         "word:english3:little",
         "question:english3-little-meaning",
         "answer:english3-little-meaning",
-        "answer:english3-little-word"
+        "answer:english3-little-word",
+        "answer:unit3-describe-meaning-little",
+        "question:unit3-describe-listen-little",
+        "answer:unit3-describe-listen-little",
+        "lesson:unit3-lesson-describe-little"
       ],
       "bytes": 22464,
       "sha256": "0d41bb4fa5b5aa5f3b8b6bbcc489a10e1234ceb1d7b0e203bb2027bf2b68beb4",
@@ -3200,7 +3959,9 @@
         "word:english3:milk",
         "question:english3-milk-meaning",
         "answer:english3-milk-meaning",
-        "answer:english3-milk-word"
+        "answer:english3-milk-word",
+        "answer:unit3-gifts-word-milk",
+        "lesson:unit3-lesson-gifts-milk"
       ],
       "bytes": 22464,
       "sha256": "6b80735bc66e112abe5c5a9637e3d63b347b73891b13372e5d0768926f588bf6",
@@ -3371,6 +4132,22 @@
       "duration": 2.28
     },
     {
+      "key": "no, it hasn't",
+      "text": "No, it hasn't.",
+      "digest": "bb06067edc62427c288aa2d4b9ade76b40733d4fbd53fdfb4c2a0f0e77125803",
+      "path": "assets/audio/bb06067edc62427c288a.mp3",
+      "sources": [
+        "answer:unit3-hasgot-language-no",
+        "question:unit3-hasgot-listen-no",
+        "answer:unit3-hasgot-listen-no",
+        "model:unit3-lesson-hasgot-answer-no",
+        "lesson:unit3-lesson-hasgot-answer-no"
+      ],
+      "bytes": 27648,
+      "sha256": "9b360851144a798fbb19d21e705405968a49d8c1b95ed103cd4d2da59c24c1a0",
+      "duration": 2.304
+    },
+    {
       "key": "noah shows ana a picture",
       "text": "Noah shows Ana a picture.",
       "digest": "eacdd036057dd6711e42812d722339563de139d1a8e5db9ba9a807fd3db3d7f6",
@@ -3434,6 +4211,32 @@
       ],
       "bytes": 22464,
       "sha256": "b7f407686dcd98990f595f075dc96840786be76af409536ab72c84657b633648",
+      "duration": 1.872
+    },
+    {
+      "key": "one foot",
+      "text": "one foot.",
+      "digest": "ae52581622f479702d162146e6aad45d5b428af62c80ebc2f2b16352b0c57f48",
+      "path": "assets/audio/ae52581622f479702d16.mp3",
+      "sources": [
+        "model:unit3-lesson-hasgot-feet",
+        "lesson:unit3-lesson-hasgot-feet"
+      ],
+      "bytes": 22464,
+      "sha256": "cf003e7ab6c9fc74d6bbb7979c28c163a0f839c87f362e6ea586de235d1c63c3",
+      "duration": 1.872
+    },
+    {
+      "key": "one sheep",
+      "text": "one sheep.",
+      "digest": "2add04b264509d0a6f0faf500865a84049eb11754c7f081bb5f3676c6255cd70",
+      "path": "assets/audio/2add04b264509d0a6f0f.mp3",
+      "sources": [
+        "model:unit3-lesson-spelling-sheep",
+        "lesson:unit3-lesson-spelling-sheep"
+      ],
+      "bytes": 22464,
+      "sha256": "84006b61c48675cf0ff3bd92084bda257819ca4488c93e822af1ac57de9dbba8",
       "duration": 1.872
     },
     {
@@ -3522,6 +4325,222 @@
       "bytes": 36000,
       "sha256": "d76360c112ce43da969a7bc54df31cd1726829e9f7b9513932252248a44355ea",
       "duration": 3.0
+    },
+    {
+      "key": "our farm has got one chicken",
+      "text": "Our farm has got one chicken.",
+      "digest": "2158cd4a35f0ea51b5250f9471f77d547962189eeda26e2a13f2d4a91833c54d",
+      "path": "assets/audio/2158cd4a35f0ea51b525.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 31680,
+      "sha256": "6af6ad540dd6020b1aa0a58ff57e4dcf9988ea72893797faf6e50412040c3ff7",
+      "duration": 2.64
+    },
+    {
+      "key": "our farm has got one cow",
+      "text": "Our farm has got one cow.",
+      "digest": "96a605e45af548cc68bb519ef9877124806207591140c9963d54fd7c13f2b426",
+      "path": "assets/audio/96a605e45af548cc68bb.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 30816,
+      "sha256": "56811c003e0877f2c5ae26142e158e8006f9059008142e3c0d54ff8a9508edb7",
+      "duration": 2.568
+    },
+    {
+      "key": "our farm has got one donkey",
+      "text": "Our farm has got one donkey.",
+      "digest": "f81f7724eca6773ccd66347a345e69c2e1cdf323089a882bf76af29ff0ed1322",
+      "path": "assets/audio/f81f7724eca6773ccd66.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 32544,
+      "sha256": "4298de5f51bd7e359ea36859123544ba3e93da3f93dd9cfca23919083dae1f07",
+      "duration": 2.712
+    },
+    {
+      "key": "our farm has got one duck",
+      "text": "Our farm has got one duck.",
+      "digest": "f86bd88eb7523bbd76ab65fb16b5e2d799bff04b1c98436ef9e6af7c2f9f857e",
+      "path": "assets/audio/f86bd88eb7523bbd76ab.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 30528,
+      "sha256": "bcc73bf05139bdc87152b7f4d0a876da039cae626833f5a6d14c17977e322841",
+      "duration": 2.544
+    },
+    {
+      "key": "our farm has got one goat",
+      "text": "Our farm has got one goat.",
+      "digest": "43d6f0829171cfda0620ccfed5cf5f846fee392f5158d3af9fede55191a97ce2",
+      "path": "assets/audio/43d6f0829171cfda0620.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 30528,
+      "sha256": "ece869104cf59eaf6066d4c180bb3e6d39f18b38fd7ef7973b551fa553def9eb",
+      "duration": 2.544
+    },
+    {
+      "key": "our farm has got one sheep",
+      "text": "Our farm has got one sheep.",
+      "digest": "af83ee1db5f4684d3785f3c6ad2b71541bdc6a3600cc814e5ec3d7710ef023dc",
+      "path": "assets/audio/af83ee1db5f4684d3785.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 30816,
+      "sha256": "cf3d124cff6e516bb3c367ec50d5926734865fa486dbbb1a13068ff48a535367",
+      "duration": 2.568
+    },
+    {
+      "key": "our farm has got three chickens",
+      "text": "Our farm has got three chickens.",
+      "digest": "07c9b5d2680d7927e625a5e9e09ae50f940e2c6e90c3eea2ed12fb0db85a747e",
+      "path": "assets/audio/07c9b5d2680d7927e625.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 33696,
+      "sha256": "d9d2e9aad4d7b9bdeb28c1db74c3a379df453f09faa04704f594d3d06a1cdd21",
+      "duration": 2.808
+    },
+    {
+      "key": "our farm has got three cows",
+      "text": "Our farm has got three cows.",
+      "digest": "b7fab34cdd9c31a87aba141c1d784031a4f76f831daa0a58b82ae0fc9506c000",
+      "path": "assets/audio/b7fab34cdd9c31a87aba.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 32544,
+      "sha256": "6f8d89e4b077cc77c314903d61e73f4ce1f6f6b2c37c5970c9971c0d3bc85068",
+      "duration": 2.712
+    },
+    {
+      "key": "our farm has got three donkeys",
+      "text": "Our farm has got three donkeys.",
+      "digest": "e6f631884acaa14e24e83747fad38346cf30d49204665b96734860d04e951455",
+      "path": "assets/audio/e6f631884acaa14e24e8.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 34560,
+      "sha256": "e47753ae1699a0ba2052ebaaa17db88a2a2f0d999b1076d7a04ffb2081c51327",
+      "duration": 2.88
+    },
+    {
+      "key": "our farm has got three ducks",
+      "text": "Our farm has got three ducks.",
+      "digest": "b5df56a5357dca656e88795640dfe72d0fbe79395abfbb4dc7afe16965e37968",
+      "path": "assets/audio/b5df56a5357dca656e88.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 31680,
+      "sha256": "2f298179cdf7e93662912f604133fbe9f046815d50e63183ccf91d6bf5286a08",
+      "duration": 2.64
+    },
+    {
+      "key": "our farm has got three goats",
+      "text": "Our farm has got three goats.",
+      "digest": "9ff4915f5355bdfd868e67e7196d4c4227ea7b4f9619a2a9563bbfdeb0d7b0f3",
+      "path": "assets/audio/9ff4915f5355bdfd868e.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 31680,
+      "sha256": "31660ec4270e50c58fdeea939ef30ff6919505a969c3d0daf029ff6b6c1fe92f",
+      "duration": 2.64
+    },
+    {
+      "key": "our farm has got three sheep",
+      "text": "Our farm has got three sheep.",
+      "digest": "6521a4709ca44a4f393e0560666b7e5a4b6b1f675c04ead7138559b539869e27",
+      "path": "assets/audio/6521a4709ca44a4f393e.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 30528,
+      "sha256": "d462c17c408bd027e67c07d3bd50860b72143c4eff2ae57ca753e39103e1a37a",
+      "duration": 2.544
+    },
+    {
+      "key": "our farm has got two chickens",
+      "text": "Our farm has got two chickens.",
+      "digest": "7a43b15127245136104b566ebeace1df8bb7eec9d671ccc479044a4c1c88d1cb",
+      "path": "assets/audio/7a43b15127245136104b.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 33408,
+      "sha256": "54a44aa156c49654e2686a432b0afddcc7663b83c3a6ded867a4c5444b4d65d7",
+      "duration": 2.784
+    },
+    {
+      "key": "our farm has got two cows",
+      "text": "Our farm has got two cows.",
+      "digest": "929ce4580750817d5f03f04872a34ee250fe969a4236d47b0117e8d22b7d775f",
+      "path": "assets/audio/929ce4580750817d5f03.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 31968,
+      "sha256": "4ce5908c77f9277fca422c1194a3f1195f13722fe25e75baaf226e69672e9997",
+      "duration": 2.664
+    },
+    {
+      "key": "our farm has got two donkeys",
+      "text": "Our farm has got two donkeys.",
+      "digest": "ab661cd324a5addb289f606f64828bc68ebfc813cbca8ce9037b7abcf97b76da",
+      "path": "assets/audio/ab661cd324a5addb289f.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 33984,
+      "sha256": "55e0e5d0b65ab7b11bc5fc73bf4e9b2a5f4164fe24315ea446b1a9a00bd0fd91",
+      "duration": 2.832
+    },
+    {
+      "key": "our farm has got two ducks",
+      "text": "Our farm has got two ducks.",
+      "digest": "aaad69375d264d5a25474206df11dd082c9d478dfd3eb6fa50dcd3721a2d6c4b",
+      "path": "assets/audio/aaad69375d264d5a2547.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 31680,
+      "sha256": "7817c77e402bff8864721026c5bb7ed923f09a68f94ab923ef1f2fb5c6f37ce9",
+      "duration": 2.64
+    },
+    {
+      "key": "our farm has got two goats",
+      "text": "Our farm has got two goats.",
+      "digest": "a6e22da3f6f8f3ce76115ff63220cfccdfdad6b3c1ba78acab5a8ed3e0480b05",
+      "path": "assets/audio/a6e22da3f6f8f3ce7611.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 31104,
+      "sha256": "4b5272082f5fee84f4d98ca2bd4afb486d88f02f9fc6de290f19b45583cc2ad2",
+      "duration": 2.592
+    },
+    {
+      "key": "our farm has got two sheep",
+      "text": "Our farm has got two sheep.",
+      "digest": "026a0fc33737ff6798ff218b13b3bc718780106e8b9e4c025e8b6efed70b9c06",
+      "path": "assets/audio/026a0fc33737ff6798ff.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 29952,
+      "sha256": "c9582306edfc6a2b3cb03ee1bd9e215a94b801813264f4a4304ef6797499e47c",
+      "duration": 2.496
     },
     {
       "key": "paper",
@@ -3880,7 +4899,11 @@
         "word:english3:sad",
         "question:english3-sad-meaning",
         "answer:english3-sad-meaning",
-        "answer:english3-sad-word"
+        "answer:english3-sad-word",
+        "answer:unit3-describe-meaning-sad",
+        "question:unit3-describe-listen-sad",
+        "answer:unit3-describe-listen-sad",
+        "lesson:unit3-lesson-describe-sad"
       ],
       "bytes": 22464,
       "sha256": "359461b52f9249b0bc4d073615a76430e28813818814d1356cd1935c3be874a0",
@@ -4080,11 +5103,37 @@
         "word:english3:sheep",
         "question:english3-sheep-meaning",
         "answer:english3-sheep-meaning",
-        "answer:english3-sheep-word"
+        "answer:english3-sheep-word",
+        "answer:unit3-animals-meaning-sheep",
+        "answer:unit3-animals-word-sheep",
+        "question:unit3-animals-listen-sheep",
+        "answer:unit3-animals-listen-sheep",
+        "lesson:unit3-lesson-animals-sheep",
+        "answer:unit3-spelling-count-sheep",
+        "answer:unit3-spelling-complete-sheep",
+        "model:unit3-lesson-spelling-count",
+        "lesson:unit3-lesson-spelling-count"
       ],
       "bytes": 22464,
       "sha256": "e6be9ca2124694d69ef40cf6d2e7a2c2a3e36f81d79d24903a6a67365e37ccee",
       "duration": 1.872
+    },
+    {
+      "key": "sheep give us wool",
+      "text": "Sheep give us wool.",
+      "digest": "19aeed108450225f6cb9ad0bf3a27df6fed0f2585c1536effbd1aeac209e66b4",
+      "path": "assets/audio/19aeed108450225f6cb9.mp3",
+      "sources": [
+        "answer:unit3-gifts-match-wool",
+        "question:unit3-gifts-listen-wool",
+        "answer:unit3-gifts-listen-wool",
+        "model:unit3-lesson-gifts-wool",
+        "lesson:unit3-lesson-gifts-wool",
+        "farm"
+      ],
+      "bytes": 24768,
+      "sha256": "45ed7322cccc67add4078cf8cf2c8e393dc8547f659a8c3ccc76c6cf19779a5f",
+      "duration": 2.064
     },
     {
       "key": "shelly",
@@ -4201,7 +5250,14 @@
         "word:english3:spider",
         "question:english3-spider-meaning",
         "answer:english3-spider-meaning",
-        "answer:english3-spider-word"
+        "answer:english3-spider-word",
+        "answer:unit3-animals-meaning-spider",
+        "answer:unit3-animals-word-spider",
+        "question:unit3-animals-listen-spider",
+        "answer:unit3-animals-listen-spider",
+        "lesson:unit3-lesson-animals-spider",
+        "answer:unit3-spelling-count-spider",
+        "answer:unit3-spelling-complete-spider"
       ],
       "bytes": 22464,
       "sha256": "41c6de9d714293e8f174c7dbf3dff37cdd4698a1cd43afb480a3d237ed9a7130",
@@ -4607,6 +5663,39 @@
       "duration": 2.592
     },
     {
+      "key": "the duckling is little",
+      "text": "The duckling is little.",
+      "digest": "aa5cca6f09143e6489e7e1a7c85f60eec3f6e1025fa2d98dcbfd2c458c272572",
+      "path": "assets/audio/aa5cca6f09143e6489e7.mp3",
+      "sources": [
+        "reading:unit3-reading-duckling-name",
+        "reading:unit3-reading-duckling-egg",
+        "answer:unit3-reading-duckling-size",
+        "reading:unit3-reading-duckling-size",
+        "model:unit3-lesson-reading-duckling",
+        "lesson:unit3-lesson-reading-duckling"
+      ],
+      "bytes": 26208,
+      "sha256": "bed5a48503cd1d6ff3a7de37c243cb908680112d0cb16bd0178b8c5c6b12e579",
+      "duration": 2.184
+    },
+    {
+      "key": "the lamb grows",
+      "text": "The lamb grows.",
+      "digest": "7c1e50eba6c59fdcb3fff74e98103c6d8ab42771ffabcf58733c5682eee34e33",
+      "path": "assets/audio/7c1e50eba6c59fdcb3ff.mp3",
+      "sources": [
+        "reading:unit3-reading-lamb-name",
+        "reading:unit3-reading-lamb-born",
+        "reading:unit3-reading-lamb-different",
+        "model:unit3-lesson-reading-lamb",
+        "lesson:unit3-lesson-reading-lamb"
+      ],
+      "bytes": 23616,
+      "sha256": "24de37bf46cc0b3eb6d477304d6aea15612e0e90b522c95d05d9cebdc0899fcf",
+      "duration": 1.968
+    },
+    {
       "key": "the pen is in the bag",
       "text": "The pen is in the bag.",
       "digest": "3c6f33b11f2b4c6fc93f163f354a60d13d31c393912d29d66360ce0ccc76bee4",
@@ -4973,6 +6062,108 @@
       "duration": 2.496
     },
     {
+      "key": "the story has an ugly toy",
+      "text": "The story has an ugly toy.",
+      "digest": "7c0abf12892172d7fa7300b0d08b86cd6cf735db42ea4ec5f8a3c9346289f232",
+      "path": "assets/audio/7c0abf12892172d7fa73.mp3",
+      "sources": [
+        "model:unit3-lesson-describe-ugly",
+        "lesson:unit3-lesson-describe-ugly"
+      ],
+      "bytes": 30816,
+      "sha256": "aa6de0a0c5818583a1208691ccf4de941a2ed528e89942203ca6de336fb6c9b9",
+      "duration": 2.568
+    },
+    {
+      "key": "the toy cat is angry",
+      "text": "The toy cat is angry.",
+      "digest": "1c3aa08f6a6be97509af2647cf8b091ec1e8bbc49aef96ad27cc954e133fb555",
+      "path": "assets/audio/1c3aa08f6a6be97509af.mp3",
+      "sources": [
+        "model:unit3-lesson-describe-angry",
+        "lesson:unit3-lesson-describe-angry"
+      ],
+      "bytes": 28224,
+      "sha256": "daad6843786c578ab5af028bc6942e6eddb6e6f535c8ed09aee498c04eda6c66",
+      "duration": 2.352
+    },
+    {
+      "key": "the toy cat is happy",
+      "text": "The toy cat is happy.",
+      "digest": "20a8ba15ba0ea0f2e85b7561e818f158f1c93a7f14e665c44e053b8d5c9acbcc",
+      "path": "assets/audio/20a8ba15ba0ea0f2e85b.mp3",
+      "sources": [
+        "lesson:unit3-lesson-describe-is"
+      ],
+      "bytes": 27648,
+      "sha256": "8a3e47b37a9f6c921ea922cbe77faddb2ad0ab86350356c126d22edd7c3e072b",
+      "duration": 2.304
+    },
+    {
+      "key": "the toy dog is funny",
+      "text": "The toy dog is funny.",
+      "digest": "b8d4d2f0e39b8fd534ab82423cc64ada1e92abe525006e5bccfc8687c93416cb",
+      "path": "assets/audio/b8d4d2f0e39b8fd534ab.mp3",
+      "sources": [
+        "model:unit3-lesson-describe-funny",
+        "lesson:unit3-lesson-describe-funny"
+      ],
+      "bytes": 27360,
+      "sha256": "02c558da1cc7628433b9a7cd0d3812d019d888e2e9350fdd25be3bbd1d3d97cd",
+      "duration": 2.28
+    },
+    {
+      "key": "the toy duck is happy",
+      "text": "The toy duck is happy.",
+      "digest": "493b7d34af844e632037549f8b40863a3751f93366acc5e8d32f3d5ee2af56b8",
+      "path": "assets/audio/493b7d34af844e632037.mp3",
+      "sources": [
+        "model:unit3-lesson-describe-happy",
+        "lesson:unit3-lesson-describe-happy"
+      ],
+      "bytes": 27072,
+      "sha256": "33a1117fbf937b84671434fbd5f7aba9b60465b4908ef02e1afe77f43efb7997",
+      "duration": 2.256
+    },
+    {
+      "key": "the toy ducks are tired",
+      "text": "The toy ducks are tired.",
+      "digest": "c6e748494889ce27522595cacc0cf963009639ca8f877d70036614c788068c15",
+      "path": "assets/audio/c6e748494889ce275225.mp3",
+      "sources": [
+        "lesson:unit3-lesson-describe-are"
+      ],
+      "bytes": 28224,
+      "sha256": "f36060cc5a2f9e610be1c21a78a243a962e35b7e5c0899567d56b38920a7e52c",
+      "duration": 2.352
+    },
+    {
+      "key": "the toy goat is sad",
+      "text": "The toy goat is sad.",
+      "digest": "be907fb197835df9c5b60957733d858855576d3cfd296f24900c8da7d0fa21fa",
+      "path": "assets/audio/be907fb197835df9c5b6.mp3",
+      "sources": [
+        "model:unit3-lesson-describe-sad",
+        "lesson:unit3-lesson-describe-sad"
+      ],
+      "bytes": 26208,
+      "sha256": "1d9cffac53899cdf9605e9643aee2572e3b49ab4e4594a4590c8a39ad3884eda",
+      "duration": 2.184
+    },
+    {
+      "key": "the toy horse is tired",
+      "text": "The toy horse is tired.",
+      "digest": "73057f9ccc0fda60a6088daa76e977556815584705fc5826e1cbe1af4b5cbc34",
+      "path": "assets/audio/73057f9ccc0fda60a608.mp3",
+      "sources": [
+        "model:unit3-lesson-describe-tired",
+        "lesson:unit3-lesson-describe-tired"
+      ],
+      "bytes": 28512,
+      "sha256": "44e13e666478e7d70e0313baa39427101b00a8f4d977a22f2b4e16815bbc888c",
+      "duration": 2.376
+    },
+    {
       "key": "then",
       "text": "then",
       "digest": "9943713bdb02f824cfed761b2fabc3b9742dea180a90f2188f8b20fcc4c81aef",
@@ -4986,6 +6177,111 @@
       "bytes": 22464,
       "sha256": "6d326438d6205595060b2eaa66e2d717f775398e232510a1afb46c69c768d0ed",
       "duration": 1.872
+    },
+    {
+      "key": "they are big",
+      "text": "They are big.",
+      "digest": "80f5cccd75d112dc51cef2ec61c0f5446e9e799595e492d1062534f47b6e98ff",
+      "path": "assets/audio/80f5cccd75d112dc51ce.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 22464,
+      "sha256": "130b718d51376bf8db2a1da4a1c844621b9cbba16e1f8af6a3cd7c5b60865a91",
+      "duration": 1.872
+    },
+    {
+      "key": "they are happy",
+      "text": "They are happy.",
+      "digest": "db80b8c13e61a20c179c3cf683ad58ead3dad2afabae6708b03683f060cdc474",
+      "path": "assets/audio/db80b8c13e61a20c179c.mp3",
+      "sources": [
+        "answer:unit3-describe-language-plural-happy",
+        "farm"
+      ],
+      "bytes": 22464,
+      "sha256": "26124cdf242241a7dbc85095a2cd1b23cd89c879c2df11e7c7e032a6a6275bdb",
+      "duration": 1.872
+    },
+    {
+      "key": "they are little ducks",
+      "text": "They are little ducks.",
+      "digest": "4b581155e2d5d7cf979279cfee9b4168dea7abacf0057cd9d19b177adeb52f14",
+      "path": "assets/audio/4b581155e2d5d7cf9792.mp3",
+      "sources": [
+        "answer:unit3-describe-language-order-plural",
+        "model:unit3-lesson-describe-little",
+        "lesson:unit3-lesson-describe-little",
+        "model:unit3-lesson-describe-order",
+        "lesson:unit3-lesson-describe-order"
+      ],
+      "bytes": 25056,
+      "sha256": "d97435b739fc8268347a606d24f8e44827d2b1a7e62acb025d6841edbb221dac",
+      "duration": 2.088
+    },
+    {
+      "key": "they are not little ducks",
+      "text": "They are not little ducks.",
+      "digest": "b535b86a20e582df2a2c60f2495ee4ec2c6868f6551a83489a0df4b78fdac0d4",
+      "path": "assets/audio/b535b86a20e582df2a2c.mp3",
+      "sources": [
+        "answer:unit3-describe-language-negative-are",
+        "model:unit3-lesson-describe-not",
+        "lesson:unit3-lesson-describe-not"
+      ],
+      "bytes": 27360,
+      "sha256": "7de3b1899cd1f3e66c87e64dd97717c761402787cad4d57d336dc9610bd56d29",
+      "duration": 2.28
+    },
+    {
+      "key": "they are small",
+      "text": "They are small.",
+      "digest": "9dd7f8191395ab07465e95c81797f044cfa85e270fda3f298c214b6bb3737f64",
+      "path": "assets/audio/9dd7f8191395ab07465e.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 22464,
+      "sha256": "9d74f057a42919e2ebca2d879a5004a01cccd1c0c124c7e8ec6bb43ea7f0344f",
+      "duration": 1.872
+    },
+    {
+      "key": "they are tired",
+      "text": "They are tired.",
+      "digest": "3f3599b1e944b6fe5a3276f979f14ce43c4b65d30f6d6572a25592b589b4d3b4",
+      "path": "assets/audio/3f3599b1e944b6fe5a32.mp3",
+      "sources": [
+        "answer:unit3-describe-language-are-tired",
+        "model:unit3-lesson-describe-are",
+        "lesson:unit3-lesson-describe-are"
+      ],
+      "bytes": 22464,
+      "sha256": "334e00cca7e8ffeb0362eb1733665eeff93209fa08d00f00ecc428457b4711ec",
+      "duration": 1.872
+    },
+    {
+      "key": "they have got tails",
+      "text": "They have got tails.",
+      "digest": "c6a9a1feebf39e3d7fe1717bc3806cdb4f99e12efaff7a45d73277f44ec7c7ae",
+      "path": "assets/audio/c6a9a1feebf39e3d7fe1.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 25632,
+      "sha256": "adb30cc0a1fb8a068b7176d3332e0ac196638a30b71088ec54d976ff8ce9815b",
+      "duration": 2.136
+    },
+    {
+      "key": "they have got wings",
+      "text": "They have got wings.",
+      "digest": "58f545b38c75c2177e3bd712ca5f1a50ffa2878e8269b28715e70a41a22267f2",
+      "path": "assets/audio/58f545b38c75c2177e3b.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 26208,
+      "sha256": "17e0a7030a95e105364405e764094769d6a359d68c3252025bafcdd9d5b1cb83",
+      "duration": 2.184
     },
     {
       "key": "they haven't got blue eyes",
@@ -5155,6 +6451,19 @@
       "duration": 2.232
     },
     {
+      "key": "this is a beautiful picture",
+      "text": "This is a beautiful picture.",
+      "digest": "33027c0ea0c727daf8c432b2ec6324178d7bd80e765dd040db0401bc2fcf9d9d",
+      "path": "assets/audio/33027c0ea0c727daf8c4.mp3",
+      "sources": [
+        "model:unit3-lesson-describe-beautiful",
+        "lesson:unit3-lesson-describe-beautiful"
+      ],
+      "bytes": 29376,
+      "sha256": "23b8c87bd55d75d70da4e5bf14f8c6c48ab179e1d1346c4cc728c872562881c3",
+      "duration": 2.448
+    },
+    {
       "key": "this is a board",
       "text": "This is a board.",
       "digest": "28643dd04caff3522e344ae1677faf9c2d80386ee6a91d9dffa6c66e1304a80f",
@@ -5200,6 +6509,19 @@
       "duration": 2.16
     },
     {
+      "key": "this is a cat",
+      "text": "This is a cat.",
+      "digest": "5d6cc6104e4703b5fd02bd378d48fa1cd79d19ddba000a526b62a4f045b71a9f",
+      "path": "assets/audio/5d6cc6104e4703b5fd02.mp3",
+      "sources": [
+        "model:unit3-lesson-animals-cat",
+        "lesson:unit3-lesson-animals-cat"
+      ],
+      "bytes": 23616,
+      "sha256": "57a1a11a7802f3182c5ad63476fab981d0d1cccd6372d89a198efbd6119a0b10",
+      "duration": 1.968
+    },
+    {
       "key": "this is a chair",
       "text": "This is a chair.",
       "digest": "8e727cfd5a2f4e869be139d3637b793c0198bab558ebceb9dc131679c4bf6be2",
@@ -5212,6 +6534,37 @@
       "bytes": 23328,
       "sha256": "f020f192fb4c6e55a61a9a307b3899ecba16ada8947ac4385a36e845558aedee",
       "duration": 1.944
+    },
+    {
+      "key": "this is a chicken",
+      "text": "This is a chicken.",
+      "digest": "31a2ab8015470695b847c9fdd42e4585b488d7e47c76b1aefe6a7ed7b2cefd64",
+      "path": "assets/audio/31a2ab8015470695b847.mp3",
+      "sources": [
+        "model:unit3-lesson-animals-chicken",
+        "lesson:unit3-lesson-animals-chicken",
+        "reading:unit3-reading-chick-name",
+        "reading:unit3-reading-chick-egg",
+        "reading:unit3-reading-chick-care",
+        "model:unit3-lesson-reading-chick",
+        "lesson:unit3-lesson-reading-chick"
+      ],
+      "bytes": 23904,
+      "sha256": "a5fcd9724f72d80437fb2d7bd227b26e7e154531a9123a24dd6ada95d897f372",
+      "duration": 1.992
+    },
+    {
+      "key": "this is a cow",
+      "text": "This is a cow.",
+      "digest": "38d279e6bd50e634c4ead6634734438f3ee1fafe5c0a76396ce4b10adaef97b6",
+      "path": "assets/audio/38d279e6bd50e634c4ea.mp3",
+      "sources": [
+        "model:unit3-lesson-animals-cow",
+        "lesson:unit3-lesson-animals-cow"
+      ],
+      "bytes": 23040,
+      "sha256": "d100123f823a8dd804eaaa6c2a554f347521814bda5d031bd87be8ff8fe45ad9",
+      "duration": 1.92
     },
     {
       "key": "this is a crayon",
@@ -5242,6 +6595,32 @@
       "duration": 1.944
     },
     {
+      "key": "this is a dog",
+      "text": "This is a dog.",
+      "digest": "bf3e364a1ea609952e03e9791a280b1abc6b0d17582a810c09e771b97037febc",
+      "path": "assets/audio/bf3e364a1ea609952e03.mp3",
+      "sources": [
+        "model:unit3-lesson-animals-dog",
+        "lesson:unit3-lesson-animals-dog"
+      ],
+      "bytes": 23040,
+      "sha256": "6b590bf521b9d06d5fc8f973724bdde966b3fef942cd88c58dbc2f420178299b",
+      "duration": 1.92
+    },
+    {
+      "key": "this is a donkey",
+      "text": "This is a donkey.",
+      "digest": "5c26383908a77db8d48f03f9770492337d45f382377baed40f2d71c030abc0b4",
+      "path": "assets/audio/5c26383908a77db8d48f.mp3",
+      "sources": [
+        "model:unit3-lesson-animals-donkey",
+        "lesson:unit3-lesson-animals-donkey"
+      ],
+      "bytes": 24480,
+      "sha256": "be1634ead1c0a3395a362d76f80bca918faac288b52fa25bfeb6efad986f8187",
+      "duration": 2.04
+    },
+    {
       "key": "this is a door",
       "text": "This is a door.",
       "digest": "6022db405e7322949d51950423576ee1b56c8707c2071d15e6e91665ebbba8e9",
@@ -5254,6 +6633,45 @@
       "bytes": 23040,
       "sha256": "2880d0fced16ec06cc60e37d75db96630c64a068908d1b6428b5e52953e31db1",
       "duration": 1.92
+    },
+    {
+      "key": "this is a duck",
+      "text": "This is a duck.",
+      "digest": "72f1bf2364bc88d066a661ec0f1c7ee86dea3b299e178858f6cf7969d712751a",
+      "path": "assets/audio/72f1bf2364bc88d066a6.mp3",
+      "sources": [
+        "model:unit3-lesson-animals-duck",
+        "lesson:unit3-lesson-animals-duck"
+      ],
+      "bytes": 23040,
+      "sha256": "f336a16aefcc9e9ba55648a7f710432ba6ecc71f6781958cc6161097ee1bef37",
+      "duration": 1.92
+    },
+    {
+      "key": "this is a goat",
+      "text": "This is a goat.",
+      "digest": "de00efc92cff85347f84b569d2f852709d51d1f8a82a1f726b2c66ece66ef6a8",
+      "path": "assets/audio/de00efc92cff85347f84.mp3",
+      "sources": [
+        "model:unit3-lesson-animals-goat",
+        "lesson:unit3-lesson-animals-goat"
+      ],
+      "bytes": 23040,
+      "sha256": "af05b26451f63aa6af880c200eb86408fa2ca475b1156a55ea682901908980c2",
+      "duration": 1.92
+    },
+    {
+      "key": "this is a horse",
+      "text": "This is a horse.",
+      "digest": "2450c1fe471658f24316bb24946715622ba2fff674a4d73684e91003423d2dd6",
+      "path": "assets/audio/2450c1fe471658f24316.mp3",
+      "sources": [
+        "model:unit3-lesson-animals-horse",
+        "lesson:unit3-lesson-animals-horse"
+      ],
+      "bytes": 24192,
+      "sha256": "0e54b0a0c6fe5ddf6bc06c4ba9c04251b71f4f23a24f81e32ab783ac1a9e1b96",
+      "duration": 2.016
     },
     {
       "key": "this is a pen",
@@ -5310,6 +6728,32 @@
       "bytes": 23616,
       "sha256": "239804e19786fbf6ff11976195aa68fe99653cf2fbbffa126c6ccdc4a9c8a3cf",
       "duration": 1.968
+    },
+    {
+      "key": "this is a sheep",
+      "text": "This is a sheep.",
+      "digest": "485c031de785c74ca4573701b3d2bc16136ddfbd27b4362d94dc924d7ba3e2b6",
+      "path": "assets/audio/485c031de785c74ca457.mp3",
+      "sources": [
+        "model:unit3-lesson-animals-sheep",
+        "lesson:unit3-lesson-animals-sheep"
+      ],
+      "bytes": 23040,
+      "sha256": "a576bbc61148237866c21378f386f6b82ed1bc5bb1347e43d68ffbad6ea7e032",
+      "duration": 1.92
+    },
+    {
+      "key": "this is a spider",
+      "text": "This is a spider.",
+      "digest": "225f92107954a949956c9f74e0c9c3ef7cb5e788f6bbd507891846f9c50a563a",
+      "path": "assets/audio/225f92107954a949956c.mp3",
+      "sources": [
+        "model:unit3-lesson-animals-spider",
+        "lesson:unit3-lesson-animals-spider"
+      ],
+      "bytes": 24192,
+      "sha256": "8b6d6808d481deda71ca0367e37d667879cb41b09959e1c04559c3f9e5f0c79d",
+      "duration": 2.016
     },
     {
       "key": "this is a window",
@@ -5566,6 +7010,31 @@
       "duration": 2.064
     },
     {
+      "key": "three chickens",
+      "text": "three chickens",
+      "digest": "2f2b132ac1553b6a418bc9df8b83a2c8e036ebb0d088b111be892d8afb431a95",
+      "path": "assets/audio/2f2b132ac1553b6a418b.mp3",
+      "sources": [
+        "answer:unit3-spelling-plural-chicken"
+      ],
+      "bytes": 23328,
+      "sha256": "4466f424e85c07b994cf55ee3c94a842de7af19629bab40dcbe5a52093e9a526",
+      "duration": 1.944
+    },
+    {
+      "key": "three sheep",
+      "text": "three sheep.",
+      "digest": "44a4cf2efaecca09c903534e2791a6834b0e8091f5694bcadfcffb695b044f53",
+      "path": "assets/audio/44a4cf2efaecca09c903.mp3",
+      "sources": [
+        "model:unit3-lesson-spelling-sheep",
+        "lesson:unit3-lesson-spelling-sheep"
+      ],
+      "bytes": 22464,
+      "sha256": "99236d5f9ebaa92512cf8cd62f900a57d5de5ebec0701dfb7632f398a225a5b7",
+      "duration": 1.872
+    },
+    {
       "key": "tired",
       "text": "tired",
       "digest": "39af5c5c19a6269f6c3e790cd070a19b1f36ebe342793c887c739dc76cdfc14a",
@@ -5574,7 +7043,11 @@
         "word:english3:tired",
         "question:english3-tired-meaning",
         "answer:english3-tired-meaning",
-        "answer:english3-tired-word"
+        "answer:english3-tired-word",
+        "answer:unit3-describe-meaning-tired",
+        "question:unit3-describe-listen-tired",
+        "answer:unit3-describe-listen-tired",
+        "lesson:unit3-lesson-describe-tired"
       ],
       "bytes": 22464,
       "sha256": "e1aaeb7f6d26c38632e097b9e2a8fdd46dfc0b12874ae12bef4cd9f096f0fc44",
@@ -5653,6 +7126,33 @@
       "duration": 1.872
     },
     {
+      "key": "two feet",
+      "text": "two feet.",
+      "digest": "fb1ecdf8a11200e03252a8c4cf3c1bf1ab2ff295d2d97cbc10b1f8e02025879a",
+      "path": "assets/audio/fb1ecdf8a11200e03252.mp3",
+      "sources": [
+        "model:unit3-lesson-hasgot-feet",
+        "lesson:unit3-lesson-hasgot-feet"
+      ],
+      "bytes": 22464,
+      "sha256": "5c4703481296cfc3244a7d0d66d73e3a995ea95aa1f74a2a3f9c34ed3f589f3a",
+      "duration": 1.872
+    },
+    {
+      "key": "two sheep",
+      "text": "two sheep",
+      "digest": "bc665e02797fc08a8f0201a3f6e8e4614702101661da5e5050df5c4b97982904",
+      "path": "assets/audio/bc665e02797fc08a8f02.mp3",
+      "sources": [
+        "answer:unit3-spelling-plural-sheep",
+        "model:unit3-lesson-spelling-sheep",
+        "lesson:unit3-lesson-spelling-sheep"
+      ],
+      "bytes": 22464,
+      "sha256": "d5a5b7e4c452f3d818e8bfd9cb5906feea367780d3492ba34624f5fd9bcd3209",
+      "duration": 1.872
+    },
+    {
       "key": "ugly",
       "text": "ugly",
       "digest": "4cf917bdef1d6eabfce8f257ecd5d242da72da146ef91a5684f1ee35a2f6229f",
@@ -5661,7 +7161,11 @@
         "word:english3:ugly",
         "question:english3-ugly-meaning",
         "answer:english3-ugly-meaning",
-        "answer:english3-ugly-word"
+        "answer:english3-ugly-word",
+        "answer:unit3-describe-meaning-ugly",
+        "question:unit3-describe-listen-ugly",
+        "answer:unit3-describe-listen-ugly",
+        "lesson:unit3-lesson-describe-ugly"
       ],
       "bytes": 22464,
       "sha256": "ba003534d1ce51eb77fc07dc8064ec8640b419d01ebee243bd439abdce11b048",
@@ -5711,6 +7215,32 @@
       "bytes": 22464,
       "sha256": "d2d51871cceeae39d826f1a93f4193eb6ab7112f6ea9651a1dc22373d0dd5066",
       "duration": 1.872
+    },
+    {
+      "key": "we are kind to animals",
+      "text": "We are kind to animals.",
+      "digest": "95e6f9f597cf7b379a5191db32a47b196f06aacb8a4c9c5d89df57f00524edf5",
+      "path": "assets/audio/95e6f9f597cf7b379a51.mp3",
+      "sources": [
+        "farm"
+      ],
+      "bytes": 27648,
+      "sha256": "9cb8953d7ca4203233b05fd593d79b4fa421d24afd5e324b3979c83bb9e0ead9",
+      "duration": 2.304
+    },
+    {
+      "key": "we care for animals",
+      "text": "We care for animals.",
+      "digest": "d02d7072a8b945b7bf8d8e455cc04b008039af9ba89f436e8cac46a12f7f3570",
+      "path": "assets/audio/d02d7072a8b945b7bf8d.mp3",
+      "sources": [
+        "answer:unit3-gifts-care-depend",
+        "model:unit3-lesson-gifts-together",
+        "lesson:unit3-lesson-gifts-together"
+      ],
+      "bytes": 27072,
+      "sha256": "796d52429598f20e4b03ff4f30e8154247d57b811e670d0277716fba0634e453",
+      "duration": 2.256
     },
     {
       "key": "we listen to him",
@@ -6122,7 +7652,9 @@
         "word:english3:wool",
         "question:english3-wool-meaning",
         "answer:english3-wool-meaning",
-        "answer:english3-wool-word"
+        "answer:english3-wool-word",
+        "answer:unit3-gifts-word-wool",
+        "lesson:unit3-lesson-gifts-wool"
       ],
       "bytes": 22464,
       "sha256": "c74e8b9df7da95fccfb00862d89e982f78962140f88cfc5100c4a8ae166ee276",
@@ -6196,6 +7728,22 @@
       "bytes": 26208,
       "sha256": "dd654113f1967ec53e61f8e34c19ec61492bc421db4f2d110fdbd68515483ad0",
       "duration": 2.184
+    },
+    {
+      "key": "yes, it has",
+      "text": "Yes, it has.",
+      "digest": "0bf3ac080a0bd4f2e217a3cabae2fbf34fded8c43127e9adad36628bfdbdfb05",
+      "path": "assets/audio/0bf3ac080a0bd4f2e217.mp3",
+      "sources": [
+        "answer:unit3-hasgot-language-yes",
+        "question:unit3-hasgot-listen-yes",
+        "answer:unit3-hasgot-listen-yes",
+        "model:unit3-lesson-hasgot-answer-yes",
+        "lesson:unit3-lesson-hasgot-answer-yes"
+      ],
+      "bytes": 26784,
+      "sha256": "13f42e597a8294297e60cfc108c7287590bfb9cabf2587bd39b90089ceb597c8",
+      "duration": 2.232
     },
     {
       "key": "yes, thank you",

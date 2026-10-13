@@ -1,5 +1,7 @@
 # Unit 3 开发版与音频接续
 
+> 本文保留 `15992d8` 的交接快照：当时103段缺录音和缺密钥的状态属于历史。接续任务已复用安全Azure配置，仅补齐103段，501段只读验证通过，原398个MP3字节与路径保留。当前完整清单无待生成项目，计划应为newRequests=0、reusedClips=501。实际生成与检查结果见 [UNIT3_AUDIO_CHECKS.md](UNIT3_AUDIO_CHECKS.md)。本次只提交开发分支，不更新正式网站。
+
 日期：2026-10-13。开发分支：`unit3-farm-learning`。基于最新 Azure 交接提交 `637ada427ed6fcacf120af60228a348847b81d6a`。本次只推送开发分支，不更新正式 Pages 来源 `learning-record-backup`、`learning-garden-windows` 或 `main`。
 
 ## 已实现

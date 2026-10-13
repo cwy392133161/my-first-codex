@@ -2,8 +2,7 @@
 
 // node tests/audio.test.js
 // node tests/audio.test.js --decode  (also needs FFmpeg; decodes every MP3)
-// --allow-pending explicitly verifies delivered audio plus the pending registry.
-// Without this flag, every current reading must have a real delivered MP3.
+// Strict full delivery: every current Unit 3 reading must have a real MP3.
 // Enumerate real reading sources independently of the audio build helper.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -22,11 +21,10 @@ const manifest = require('../data/audio-manifest.js');
 const audio = require('../audio-player.js');
 const audit = require('../data/audio-audit.json');
 const collect = require('../scripts/audio-texts.js').collect;
-const allowPending = process.argv.includes('--allow-pending');
-const collected = collect({ includeUnit3: !allowPending });
-const fullInputs = collect();
-const pendingRegistry = allowPending ? require('../data/audio-pending.json') : null;
-const pendingKeys = new Set(pendingRegistry?.clips.map(clip => clip.key) || []);
+assert(!process.argv.includes('--allow-pending'), '全量交付检查不再支持待生成审查模式。');
+const collected = collect();
+assert.equal(collected.clips.length, 501, '完整当前计划含 Unit 3，共501段');
+assert.equal(collected.texts.length, 2029, '2029个实际朗读入口全部纳入交付检查');
 
 const repository = path.resolve(__dirname, '..');
 const normalize = text => text.replace(/[\u2018\u2019]/g, "'").replace(/\s+/g, ' ')
@@ -61,16 +59,6 @@ function checkPlan(text, label, remember = false) {
   assert.equal(typeof text, 'string', `${label} 有英文朗读文本`);
   assert(text.trim(), `${label} 朗读文本非空`);
   const pieces = spokenPieces(text);
-  if (allowPending && pieces.some(piece => !Object.hasOwn(manifest.clips, normalize(piece)))) {
-    for (const piece of pieces) {
-      const key = normalize(piece);
-      assert(Object.hasOwn(manifest.clips, key) || pendingKeys.has(key), `${label} 缺口必须在待生成清单中：${piece}`);
-    }
-    assert.deepEqual(audio.plan(text), [], `${label} 未录制完成时不虚报可播放`);
-    sourceCount++;
-    if (remember) staticSources.push({ text, label });
-    return;
-  }
   const expected = pieces.map(piece => {
     const key = normalize(piece);
     assert(key, `${label} 不包含空片段`);
@@ -122,7 +110,7 @@ function expectedSSML(text) {
     + '<voice name="en-US-JennyNeural">' + spoken + '</voice></speak>';
 }
 assert.equal(audit.clips.length, collected.clips.length,
-  `全量录音尚未完成：当前需要 ${collected.clips.length} 段，已交付 ${audit.clips.length} 段；开发审查请显式使用 --allow-pending。`);
+  `全量录音尚未完成：当前需要 ${collected.clips.length} 段，已交付 ${audit.clips.length} 段；当前所有朗读必须生成、验证并交付。`);
 const currentInputs = new Map(collected.clips.map(clip => [clip.key, clip]));
 const auditedClips = new Map();
 for (const clip of audit.clips) {
@@ -145,29 +133,7 @@ const prepared = audit.clips.map(clip => ({
 }));
 assert.equal(audit.datasetSha256, hashJSON(prepared), '审核数据完整对应当前数据集和逐段 SSML');
 assert(manifest.clips && typeof manifest.clips === 'object');
-if (allowPending) {
-  const completePrepared = fullInputs.clips.map(clip => {
-    const ssml = expectedSSML(clip.text);
-    const digest = hashJSON({ ssml, format: configuration.format, pipeline: 1 });
-    return { key: clip.key, text: clip.text, ssml, digest,
-      path: `assets/audio/${digest.slice(0, 20)}.mp3`, sources: clip.sources };
-  });
-  const missing = completePrepared.filter(clip => {
-    const existing = auditedClips.get(clip.key);
-    if (existing) assert.equal(existing.digest, clip.digest, `复用 ${clip.key} 的真实 SSML 不改变`);
-    return !existing;
-  }).map(({ssml, ...clip}) => clip);
-  assert.equal(pendingRegistry.status, 'pending');
-  assert.deepEqual(pendingRegistry.configuration, configuration);
-  assert.equal(pendingRegistry.region, 'eastus');
-  assert.equal(pendingRegistry.totalClips, fullInputs.clips.length);
-  assert.equal(pendingRegistry.availableClips, audit.clips.length);
-  assert.equal(pendingRegistry.pendingClips, missing.length);
-  assert.equal(pendingRegistry.textSources, fullInputs.texts.length);
-  assert.equal(pendingRegistry.datasetSha256, hashJSON(completePrepared));
-  assert.deepEqual(pendingRegistry.clips, missing, '待生成清单精确对应全量当前文本，不允许遗漏或重复');
-  assert.equal(pendingKeys.size, missing.length);
-}
+assert(!fs.existsSync(path.join(repository, 'data/audio-pending.json')), '全量音频完成后不能保留待生成清单。');
 
 // Word aliases include all optional extension words, not only the home defaults.
 let wordCount = 0;
@@ -326,12 +292,13 @@ for (const required of ['data/english.js', 'data/english-hello.js', 'data/englis
   assert.equal(paths.filter(filename => filename === required).length, 1, `${required} 加载一次`);
 }
 for (const changed of ['speech-text.js', 'data/audio-manifest.js', 'audio-player.js']) {
-  assert.equal(sources.find(source => source.split(/[?#]/)[0] === changed), changed + '?v=azure-jenny-v3-20261012',
+  assert.equal(sources.find(source => source.split(/[?#]/)[0] === changed), changed + '?v=azure-jenny-unit3-v1-20261013',
     `${changed} 有缓存版本，避免平板沿用旧脚本`);
 }
-assert(sources.includes('app.js?v=unit3-farm-v1-20261013'), '新增课程脚本有自己的缓存版本');
-assert(sources.includes('data/questions.js?v=unit3-farm-v1-20261013'), '题库新依赖和新编号不能继续命中旧版缓存');
-assert(html.includes('style.css?v=unit3-farm-v1-20261013'), '新增课程样式有缓存版本');
+assert(sources.includes('data/english-unit3.js?v=unit3-farm-audio-v2-20261013'), '新增课程内容有独立缓存版本');
+assert(sources.includes('app.js?v=unit3-farm-audio-v2-20261013'), '新增课程脚本有自己的缓存版本');
+assert(sources.includes('data/questions.js?v=unit3-farm-audio-v2-20261013'), '题库新依赖和新编号不能继续命中旧版缓存');
+assert(html.includes('style.css?v=unit3-farm-audio-v2-20261013'), '新增课程样式有缓存版本');
 assert(paths.indexOf('speech-text.js') < paths.indexOf('data/audio-manifest.js'));
 assert(paths.indexOf('data/audio-manifest.js') < paths.indexOf('audio-player.js'));
 assert(paths.indexOf('audio-player.js') < paths.indexOf('app.js'));
@@ -357,11 +324,10 @@ for (const required of ['Azure Speech', 'en-US-JennyNeural', '美式英语', '�
 assert(!notice.includes('发音修正版使用 Kokoro'), '当前来源说明不再把 Azure 成品归属到旧声线');
 const reviewHTML = fs.readFileSync(path.join(repository, 'audio-review.html'), 'utf8');
 for (const source of ['speech-text.js', 'data/audio-manifest.js', 'audio-player.js', 'audio-review.js']) {
-  assert(reviewHTML.includes(`src="${source}?v=azure-jenny-v3-20261012"`), '试听页使用新版脚本缓存地址');
+  assert(reviewHTML.includes(`src="${source}?v=azure-jenny-unit3-v1-20261013"`), '试听页使用新版脚本缓存地址');
 }
 
 console.log(`音频静态检查通过：${entries.length} 段，${staticCount} 个固定朗读入口，${posterCount} 种海报、${bookletCount} 种小手册，${(totalBytes / 1024 / 1024).toFixed(2)} MiB。`);
-if (allowPending) console.log(`审查分支模式：保留的 ${entries.length} 段成品已核验；另有 ${pendingKeys.size} 段待生成，不代表全量音频完成。`);
 
 async function decodeEveryFile() {
   let next = 0;
