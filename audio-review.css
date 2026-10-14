@@ -1,36 +1,37 @@
 :root{font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;color:#30463d;background:#f8f6ee;font-synthesis:none}
 *{box-sizing:border-box}
-body{margin:0}
+body{margin:0;-webkit-text-size-adjust:100%}
 header,main{max-width:880px;margin:auto;padding:20px 24px}
 header a{color:#355f48;font-size:18px;line-height:2;text-decoration:none}
 main{padding-top:0}
-h1{font-size:clamp(30px,7vw,42px);margin:8px 0}
+h1{font-size:30px;font-size:clamp(30px,7vw,42px);margin:8px 0}
 h2{font-size:26px;margin:0 0 18px}
 h3{font-size:18px;margin:20px 0 10px}
 p{line-height:1.7}
 button,input{font:inherit}
 button,a,input{-webkit-tap-highlight-color:transparent}
+button:focus,a:focus,input:focus{outline:3px solid #547cbb;outline-offset:3px}
 button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid #547cbb;outline-offset:3px}
 .intro{padding:24px;background:#e7efdf;border-radius:26px}
 .eyebrow{font-size:15px;color:#647b65;margin:0}
 .version{font-weight:700;margin-bottom:6px}
 .note{font-size:15px;color:#657565;margin:6px 0 0}
 .panel{background:white;border:1px solid #e7e8dc;border-radius:24px;padding:24px;margin-top:20px}
-.playback{position:sticky;top:8px;z-index:2;display:flex;align-items:center;gap:16px;background:#edf4f8;border:1px solid #cddce2;border-radius:20px;padding:16px 20px;margin-top:20px;box-shadow:0 4px 10px #30463d0a}
-.playback div{flex:1;min-width:0}
-#current-clip{font-size:22px;font-weight:700;margin:0;overflow-wrap:anywhere}
-#playback-status{font-size:15px;line-height:1.6;margin:6px 0 0;overflow-wrap:anywhere}
+.playback{position:sticky;top:8px;z-index:2;display:flex;align-items:center;background:#edf4f8;border:1px solid #cddce2;border-radius:20px;padding:16px 20px;margin-top:20px;box-shadow:0 4px 10px #30463d0a}
+.playback div{flex:1;min-width:0;margin-right:16px}
+#current-clip{font-size:22px;font-weight:700;margin:0;word-wrap:break-word;overflow-wrap:break-word;overflow-wrap:anywhere}
+#playback-status{font-size:15px;line-height:1.6;margin:6px 0 0;word-wrap:break-word;overflow-wrap:break-word;overflow-wrap:anywhere}
 .playback.error{background:#fff0e7;border-color:#e4c6b5}
 button{cursor:pointer;min-height:56px;border:1px solid #cbd8c5;border-radius:15px;color:#30463d;background:#eef4e8;padding:14px 18px;font-weight:650}
 button:hover{filter:brightness(.98)}
 button:disabled{cursor:default}
 #stop-audio{flex:none;background:white;font-size:17px}
 #stop-audio:disabled{opacity:.55}
-.clip-list{display:grid;grid-template-columns:1fr;gap:10px}
-.priority-list{display:flex;flex-wrap:wrap;gap:10px}
-.clip-button{display:flex;align-items:center;gap:8px;font-size:21px;line-height:1.5;overflow-wrap:anywhere;text-align:left;min-width:0}
+.clip-list{display:grid;grid-template-columns:1fr;grid-gap:10px;gap:10px}
+.priority-list{display:flex;flex-wrap:wrap;margin:-5px}.priority-list>.clip-button{margin:5px;max-width:calc(100% - 10px)}
+.clip-button{display:flex;align-items:center;font-size:21px;line-height:1.5;word-wrap:break-word;overflow-wrap:break-word;overflow-wrap:anywhere;text-align:left;min-width:0}
 .clip-button[aria-pressed="true"]{background:#48755b;color:white;border-color:#48755b}
-.clip-button .listen-icon{display:inline-block;flex:none;font-size:18px}
+.clip-button .listen-icon{display:inline-block;flex:none;font-size:18px;margin-right:8px}
 .clip-button span[lang=en]{min-width:0}
 .priority-list .clip-button{flex:1 1 130px;justify-content:center;text-align:center}
 label{display:block;font-size:18px;line-height:1.6;margin-bottom:10px}
@@ -38,5 +39,8 @@ input{width:100%;min-height:56px;padding:12px 15px;border:1px solid #b6c8b6;bord
 .count{font-size:15px;color:#6e7f70;margin:14px 0}
 #no-results{color:#6e7f70}
 footer{text-align:center;padding:16px 24px 30px;font-size:14px;line-height:1.8;color:#7b897a}
-@media(min-width:640px){.clip-list{grid-template-columns:1fr 1fr}}
-@media(max-width:520px){header,main{padding-left:16px;padding-right:16px}.intro,.panel{padding:20px}.playback{padding:14px;gap:10px}.playback div{min-width:0}#stop-audio{padding:12px;font-size:16px}#current-clip{font-size:20px}.clip-button{font-size:20px}}
+@media(min-width:640px){.clip-list{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media(max-width:520px){header,main{padding-left:16px;padding-right:16px}.intro,.panel{padding:20px}.playback{padding:14px}.playback div{min-width:0;margin-right:10px}#stop-audio{padding:12px;font-size:16px}#current-clip{font-size:20px}.clip-button{font-size:20px}}
+
+header,main,.panel,.clip-list>*{min-width:0}
+main p,main h1,main h2,main h3{word-wrap:break-word;overflow-wrap:break-word;overflow-wrap:anywhere}

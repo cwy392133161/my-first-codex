@@ -4,6 +4,8 @@
 
 ## 如何打开
 
+iPhone 6 Plus（iOS 12.5.x）可通过 Safari 添加到主屏幕，以独立 Web App 打开。安装、备份和全屏确认步骤见 [iPhone 使用说明](IOS12_WEBAPP.md)。安装前先保留学习记录备份；主屏幕版与 Safari 标签页的存储可能分开，原 Safari 记录不会被本次更新清空。
+
 **最简单的方法：** 下载整个仓库并解压，双击 `index.html`，用 Chrome、Edge、Safari 或 Firefox 打开即可。不需要安装依赖，也不需要联网。
 
 **推荐的方法：** 如果电脑已安装 Python，在仓库目录打开终端，输入：
@@ -239,6 +241,8 @@ node tests/audio-review.browser.test.js
 node tests/audio-all.browser.test.js
 node tests/browser.test.js
 node tests/backup.browser.test.js
+node tests/ios12.test.js
+node tests/ios12.browser.test.js
 ```
 
 浏览器检查覆盖错误后的重试、重复点击、错题重练、首次正确率、刷新保存、空记录、清空确认和手机布局。

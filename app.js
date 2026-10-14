@@ -2,14 +2,14 @@
   'use strict';
   const {topics,bank,shuffle}=GardenQuestions;
   const app=document.querySelector('#app'), key='learning-garden-v1';
-  let state={attempts:[],sessions:[],wrong:[]}, count=5, run=null, storageWarning='', importBusy=false, includeExtra=false, englishMode='mixed', study=null, speechToken=0, speechStartTimer=null, speechEndTimer=null, posterDraft=null, bookletDraft=null, farmDraft=null;
+  let state={attempts:[],sessions:[],wrong:[]}, count=5, run=null, storageWarning='', importBusy=false, includeExtra=false, englishMode='mixed', study=null, speechToken=0, speechStartTimer=null, speechEndTimer=null, posterDraft=null, bookletDraft=null, farmDraft=null, dialogCleanup=null;
   try { const saved=JSON.parse(localStorage.getItem(key)); if(saved && Array.isArray(saved.attempts) && Array.isArray(saved.sessions) && Array.isArray(saved.wrong)) state=saved; }
   catch { storageWarning='浏览器记录暂时无法读取。本次仍可练习，请确认浏览器允许本地存储。'; }
   const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const topicName=id=>topics.find(t=>t.id===id)?.name || id;
+  const topicName=id=>{const topic=topics.find(t=>t.id===id);return topic && topic.name || id;};
   const resolve=id=>{const topic=topics.find(t=>id.startsWith(t.id+'-'));return topic ? bank(topic.id).find(q=>q.id===id) : null;};
   function save(nextState=state){try{localStorage.setItem(key,JSON.stringify(nextState));state=nextState;storageWarning='';return true;}catch{storageWarning='记录未能保存，可能是浏览器存储受限或已满。离开页面后本次记录可能丢失。';return false;}}
-  function draw(html){stopSpeech();app.innerHTML=html+(storageWarning?`<p class="notice" role="alert">${escape(storageWarning)}</p>`:'');}
+  function draw(html){stopSpeech();if(dialogCleanup)dialogCleanup();document.body.classList.remove('print-poster','print-booklet');app.innerHTML=html+(storageWarning?`<p class="notice" role="alert">${escape(storageWarning)}</p>`:'');}
   function back(){return '<button class="back" data-action="home">← 回到首页</button>';}
   function home(){run=null;study=null;draw(`<section class="hero"><span class="flower" aria-hidden="true">🌼</span><div class="eyebrow">一年级 · 上学期基础练习</div><h1>今天，学一点新本领</h1><p>慢慢想，勇敢试。每一次练习都算进步。</p></section><div class="grid"><button class="tile" data-action="subject" data-id="math"><span class="icon">🍎</span><strong>数学练习</strong><small>分与合 · 加减法 · 比大小</small></button><button class="tile peach" data-action="subject" data-id="chinese"><span class="icon">📚</span><strong>语文练习</strong><small>基础拼音 · 字词搭配</small></button><button class="tile mint" data-action="subject" data-id="english"><span class="icon">🌍</span><strong>英语学习</strong><small>Power Up · Hello 与 Unit 1–4</small></button><button class="tile lavender" data-action="review"><span class="icon">🌷</span><strong>错题复习</strong><small>${state.wrong.length ? `${state.wrong.length} 道题，陪你再试一试` : '一步一步，把知识学牢'}</small></button><button class="tile blue" data-action="records"><span class="icon">🌿</span><strong>学习记录</strong><small>家长查看 · 发现小进步</small></button></div>`);}
   function subject(id){study=null;if(id==='hello'){helloGoals();return;}if(id==='unit1'){unit1Goals();return;}if(['unit2','unit3','review02'].includes(id)){goalOverview(id);return;}if(id==='english'){englishUnits();return;}draw(`${back()}<h1>${id==='math'?'数学练习':'语文练习'}</h1><p>选一个知识点，开始今天的小练习。</p><div class="row count" aria-label="每次题数"><span>每次练习</span>${[5,10].map(n=>`<button data-action="count" data-id="${id}" data-count="${n}" aria-pressed="${count===n}">${n} 题</button>`).join('')}</div><div class="grid">${topics.filter(t=>t.subject===id).map(t=>`<button class="tile" data-action="start" data-id="${t.id}"><span class="icon">${t.icon}</span><strong>${t.name}</strong><small>${t.description}</small>${t.subject==='chinese'?`<small>固定题 ${bank(t.id).length} 道</small>`:''}</button>`).join('')}</div><p class="muted">原创基础题库，可按孩子的教材调整。</p>`);}
@@ -17,13 +17,13 @@
   function start(topic,reviewing=false){study=null;const pool=reviewing?state.wrong.map(resolve).filter(Boolean):topic.startsWith('english')?englishPool(topic):bank(topic);run={id:`${Date.now()}-${Math.random()}`,questions:shuffle(pool).slice(0,count).map(q=>({...q,choices:shuffle(q.choices)})),index:0,firstCorrect:0,recovered:0,reviewing,tries:0,phase:'answer',selected:null};if(!run.questions.length){review();return;}question();}
   function question() {
     const q=run.questions[run.index], listening=q.kind==='listening', recordedOnly=q.topic.startsWith('unit3-');
-    const englishQuestion=topics.find(t=>t.id===q.topic)?.subject==='english';
+    const questionTopic=topics.find(t=>t.id===q.topic), englishQuestion=Boolean(questionTopic && questionTopic.subject==='english');
     const audio=listening
       ? `<div class="audio-tools"><button class="primary" data-action="listen" ${audioButtonAttrs(q.speech,recordedOnly)}>🔊 听题目</button><button class="secondary" data-action="show-listening-text">显示文字提示</button><p class="speech-status muted" role="status" aria-live="polite">${audioPreparation(q.speech,recordedOnly)}</p><p class="listening-text" ${run.listeningText?'':'hidden'}>${escape(q.fallbackPrompt)}</p></div>`
       : q.speech || (run.phase==='done' && q.answerSpeech)
         ? `<div class="audio-tools"><button class="secondary" data-action="speak" data-text="${escape(q.speech || q.answerSpeech)}" ${audioButtonAttrs(q.speech || q.answerSpeech,recordedOnly)}>🔊 听一听</button><p class="speech-status muted" role="status" aria-live="polite">${audioPreparation(q.speech || q.answerSpeech,recordedOnly)}</p></div>` : '';
     draw(`<button class="back" data-action="leave">← 结束这次练习</button><div class="row"><strong>${run.reviewing?'错题复习':topicName(q.topic)}</strong><span class="muted">第 ${run.index+1} / ${run.questions.length} 题</span></div><div class="progress" aria-label="练习进度"><div style="width:${(run.index/run.questions.length)*100}%"></div></div><section class="panel"><div class="question" data-question-id="${escape(q.id)}">${escape(q.prompt)}</div>${q.visual?'<div class="question-visual">'+visual(q.visual)+'</div>':''}${reading(q)}${listening?audio:''}<div class="choices ${englishQuestion?'english-choices':''}">${q.choices.map(c=>`<button data-action="answer" data-answer="${escape(c)}" ${run.phase!=='answer'?'disabled':''} class="${run.selected===c?'selected':''} ${c.length>2?'long-answer':''}">${escape(c)}</button>`).join('')}</div>${listening?'':audio}<div id="feedback" aria-live="polite">${feedback(q)}</div></section><p class="muted">不着急，认真想一想。</p>`);
-    if (listening && !window.GardenAudio?.has(q.speech) && (recordedOnly || !speechAvailable())) {
+    if (listening && !(window.GardenAudio && window.GardenAudio.has(q.speech)) && (recordedOnly || !speechAvailable())) {
       showListeningText();
       app.querySelector('.speech-status').textContent=recordedOnly?'这段新朗读正在准备，已显示文字提示，可以继续练习。':'当前没有可用音频，已显示文字提示，可以继续练习。';
     }
@@ -42,15 +42,15 @@
     return '';
   }
   function reading(q) {
-    if (!q.passage?.length) return q.glossary?.length?`<details class="goal-glossary"><summary>看看词语帮助</summary><p>${q.glossary.map(word=>`${escape(word.english)}：${escape(word.chinese)}`).join('；')}</p></details>`:'';
+    if (!(q.passage && q.passage.length)) return (q.glossary && q.glossary.length)?`<details class="goal-glossary"><summary>看看词语帮助</summary><p>${q.glossary.map(word=>`${escape(word.english)}：${escape(word.chinese)}`).join('；')}</p></details>`:'';
     const audio=q.passage.join(' '), recordedOnly=q.topic.startsWith('unit3-');
-    return `<section class="reading-passage"><strong>读一读 · 原创小故事</strong>${q.passage.map(line=>`<p lang="en">${escape(line)}</p>`).join('')}<button class="secondary" data-action="read-passage" data-text="${escape(audio)}" ${audioButtonAttrs(audio,recordedOnly)}>🔊 听故事</button><p class="speech-status muted" role="status" aria-live="polite">${audioPreparation(audio,recordedOnly)}</p>${q.glossary?.length?`<details><summary>看看词语帮助</summary><p>${q.glossary.map(word=>`${escape(word.english)}：${escape(word.chinese)}`).join('；')}</p></details>`:''}</section>`;
+    return `<section class="reading-passage"><strong>读一读 · 原创小故事</strong>${q.passage.map(line=>`<p lang="en">${escape(line)}</p>`).join('')}<button class="secondary" data-action="read-passage" data-text="${escape(audio)}" ${audioButtonAttrs(audio,recordedOnly)}>🔊 听故事</button><p class="speech-status muted" role="status" aria-live="polite">${audioPreparation(audio,recordedOnly)}</p>${(q.glossary && q.glossary.length)?`<details><summary>看看词语帮助</summary><p>${q.glossary.map(word=>`${escape(word.english)}：${escape(word.chinese)}`).join('；')}</p></details>`:''}</section>`;
   }
   function audioButtonAttrs(text,recordedOnly=false) {
-    return recordedOnly?`data-recorded-only="true" ${window.GardenAudio?.has(GardenSpeechText.text(text))?'':'disabled aria-label="这段新朗读正在准备"'}`:'';
+    return recordedOnly?`data-recorded-only="true" ${(window.GardenAudio && window.GardenAudio.has(GardenSpeechText.text(text)))?'':'disabled aria-label="这段新朗读正在准备"'}`:'';
   }
   function audioPreparation(text,recordedOnly=false) {
-    return recordedOnly && !window.GardenAudio?.has(GardenSpeechText.text(text))?'这段新朗读正在准备，先看文字练习。':'';
+    return recordedOnly && !(window.GardenAudio && window.GardenAudio.has(GardenSpeechText.text(text)))?'这段新朗读正在准备，先看文字练习。':'';
   }
   function farmVisual(item) {
     const icons={cat:'🐈',chicken:'🐔',cow:'🐄',dog:'🐕',donkey:'🫏',duck:'🦆',goat:'🐐',horse:'🐎',sheep:'🐑',spider:'🕷️',bee:'🐝'};
@@ -119,7 +119,7 @@
     if(correct && run.tries===2)run.recovered++;run.phase=correct||run.tries===2?'done':'retry';question();}
   function next(){if(!run||run.phase!=='done')return;run.phase='locked';if(run.index+1===run.questions.length){state.sessions.push({id:run.id,time:Date.now(),total:run.questions.length,correct:run.firstCorrect,review:run.reviewing});save();summary();}else{run.index++;run.tries=0;run.phase='answer';run.selected=null;run.listeningText=false;question();}}
   function summary(){const r=run;run=null;draw(`<section class="panel empty"><div class="icon">🌻</div><h1>这次练习完成啦！</h1><p>认真思考的你，又向前走了一小步。</p><div class="stats"><div class="stat"><strong>${r.questions.length}</strong>完成题数</div><div class="stat"><strong>${r.firstCorrect}</strong>首次答对</div><div class="stat"><strong>${r.recovered}</strong>再试答对</div></div><p>不会的题可以慢慢练，学习不必着急。</p><div class="row"><button class="primary" data-action="home">回到小乐园</button><button class="secondary" data-action="review">看看错题</button></div></section>`);}
-  function records(message=''){draw(`${back()}<h1>学习记录</h1><p>给家长的小窗口：看看孩子的进步，也找到需要陪伴的地方。</p><div class="stats"><div class="stat"><strong>${state.sessions.length}</strong>完整练习</div><div class="stat"><strong>${state.attempts.length}</strong>已答题数</div><div class="stat"><strong>${state.wrong.length}</strong>待复习错题</div></div><section class="panel">${topics.map(t=>{const a=state.attempts.filter(a=>a.topic===t.id);const times=new Set(a.map(a=>a.session)).size;return `<div class="record"><strong>${t.icon} ${t.name}</strong><p>练习 ${times} 次 · 首次作答正确率 ${a.length?Math.round(a.filter(a=>a.correct).length/a.length*100)+'%':'暂无'}</p><small class="muted">${a.length?`${a.length} 题中首次答对 ${a.filter(a=>a.correct).length} 题`:'还没有练习记录'}</small></div>`;}).join('')}</section><p class="muted">练习次数按已作答的练习统计，含错题复习和未完成练习。正确率只计每题首次作答，重试不覆盖原结果。记录仅在当前浏览器保存，暂不支持跨设备同步。</p><section class="panel"><h2>备份与恢复</h2><p>把练习统计和错题保存成文件，换浏览器或设备时可以手动恢复。</p><div class="row backup-actions"><button class="primary" data-action="export">导出备份</button><button class="secondary" data-action="import">导入恢复</button></div><input id="backup-file" type="file" accept=".json,application/json" aria-label="选择学习记录备份" hidden><p class="muted">导入会合并现有记录，相同记录只计一次。不会清空原记录，也不会自动同步。</p><p id="backup-status" role="${message.includes('失败')?'alert':'status'}" aria-live="polite">${escape(message)}</p></section><button class="danger" data-action="clear">清空学习记录</button>`);}
+  function records(message=''){draw(`${back()}<h1>学习记录</h1><p>给家长的小窗口：看看孩子的进步，也找到需要陪伴的地方。</p><div class="stats"><div class="stat"><strong>${state.sessions.length}</strong>完整练习</div><div class="stat"><strong>${state.attempts.length}</strong>已答题数</div><div class="stat"><strong>${state.wrong.length}</strong>待复习错题</div></div><section class="panel">${topics.map(t=>{const a=state.attempts.filter(a=>a.topic===t.id);const times=new Set(a.map(a=>a.session)).size;return `<div class="record"><strong>${t.icon} ${t.name}</strong><p>练习 ${times} 次 · 首次作答正确率 ${a.length?Math.round(a.filter(a=>a.correct).length/a.length*100)+'%':'暂无'}</p><small class="muted">${a.length?`${a.length} 题中首次答对 ${a.filter(a=>a.correct).length} 题`:'还没有练习记录'}</small></div>`;}).join('')}</section><p class="muted">练习次数按已作答的练习统计，含错题复习和未完成练习。正确率只计每题首次作答，重试不覆盖原结果。记录仅在当前浏览器保存，暂不支持跨设备同步。</p><section class="panel"><h2>备份与恢复</h2><p>把练习统计和错题保存成文件，换浏览器或设备时可以手动恢复。</p><div class="row backup-actions"><button class="primary" data-action="export">导出备份</button><button class="secondary" data-action="import">导入恢复</button></div><input id="backup-file" type="file" accept=".json,application/json" aria-label="选择学习记录备份" hidden><p class="muted">导入会合并现有记录，相同记录只计一次。不会清空原记录，也不会自动同步。</p><details class="backup-text-options"><summary>无法下载？使用备份文字</summary><p class="muted">旧版 iPhone 可把备份文字复制到备忘录保存，再粘贴到这里恢复。文字包含学习记录，请妥善保管。</p><div class="row backup-actions"><button class="secondary" data-action="backup-text">生成备份文字</button><button class="secondary" data-action="copy-backup">复制备份文字</button></div><label for="backup-text">要保存的备份文字</label><textarea id="backup-text" readonly rows="6" spellcheck="false" aria-label="要保存的备份文字"></textarea><label for="restore-text">粘贴要恢复的备份文字</label><textarea id="restore-text" rows="6" spellcheck="false" aria-label="粘贴要恢复的备份文字"></textarea><div class="row backup-actions"><button class="secondary" data-action="restore-text">恢复这份备份</button></div></details><p id="backup-status" role="${message.includes('失败')?'alert':'status'}" aria-live="polite">${escape(message)}</p></section><button class="danger" data-action="clear">清空学习记录</button>`);}
   function englishPool(topic) {
     return bank(topic).filter(q => (includeExtra || !q.extended) && (englishMode==='mixed' || q.direction===englishMode));
   }
@@ -172,7 +172,7 @@
     const card=study.cards[study.index], group=course(study.group);
     const lines=card.lines.map(line=>`<div class="sentence-line"><div lang="en">${escape(line.english)}</div><small>${escape(line.chinese)}</small></div>`).join('');
     const phonics=['unit1-phonics','unit2-phonics','unit3-phonics'].includes(study.topic), audio=GardenSpeechText.lesson(card,phonics), recordedOnly=group.id==='unit3';
-    const glossary=card.glossary?.length?`<details class="goal-glossary"><summary>看看词语小帮助</summary><p>${card.glossary.map(word=>`${escape(word.english)}：${escape(word.chinese)}`).join('；')}</p></details>`:'';
+    const glossary=(card.glossary && card.glossary.length)?`<details class="goal-glossary"><summary>看看词语小帮助</summary><p>${card.glossary.map(word=>`${escape(word.english)}：${escape(word.chinese)}`).join('；')}</p></details>`:'';
     draw(`<button class="back" data-action="${group.backAction}">← 返回 ${escape(group.shortLabel)} 学习目标</button><div class="row"><strong>${escape(topicName(study.topic))}</strong><span class="muted">第 ${study.index+1} / ${study.cards.length} 张</span></div><section class="panel goal-card"><h1 class="goal-title">${escape(card.title)}</h1>${visual(card.visual)}<div class="sentence-example">${lines}</div>${glossary}${card.note?`<p class="phonics-note">${escape(card.note)}</p>`:''}<button class="secondary" data-action="speak" data-text="${escape(audio)}" ${audioButtonAttrs(audio,recordedOnly)}>🔊 ${phonics?'听示例词':'听示范'}</button><p class="speech-status muted" role="status" aria-live="polite">${audioPreparation(audio,recordedOnly) || '听一听，然后自己试着说。'}</p><div class="speaking-practice"><h2>我来说一说</h2><p>${escape(card.sayPrompt)}</p><button class="secondary" data-action="show-model">看看说法</button><div class="say-model" hidden><p lang="en">${escape(card.sayModel)}</p><button class="secondary" data-action="speak" data-text="${escape(card.sayModel)}" ${audioButtonAttrs(card.sayModel,recordedOnly)}>🔊 听说法</button>${audioPreparation(card.sayModel,recordedOnly)?`<p class="muted">${audioPreparation(card.sayModel,recordedOnly)}</p>`:''}</div><button class="primary" data-action="say-done">我试着说了 🌱</button><p class="practice-status muted" role="status" aria-live="polite">自己练说，不计答题成绩。</p></div><div class="row vocab-nav"><button class="secondary" data-action="goal-prev" ${study.index===0?'disabled':''}>← 上一张</button><button class="secondary" data-action="goal-next" ${study.index+1===study.cards.length?'disabled':''}>下一张 →</button></div></section><button class="primary" data-action="start" data-id="${study.topic}">练一练这个目标</button>`);
   }
   function farmEditor() {
@@ -227,6 +227,7 @@
     return `This is our classroom poster. ${posterDraft.items.map(item=>posterScene(item).sentence).join(' ')} Our classroom rule: ${rule.english}`;
   }
   function downloadPoster() {
+    if(legacyIOSDownload()){app.querySelector('#poster-status').textContent='旧版 iPhone 无法直接下载海报文件。请使用“打印海报”，或截图保存作品。';return;}
     const rule=GardenUnit1.poster.rules.find(r=>r.key===posterDraft.rule);
     const cells=posterDraft.items.map((item,index)=>{
       const scene=posterScene(item), x=30+(index%2)*390, y=110+Math.floor(index/2)*310;
@@ -275,6 +276,7 @@
     return bookletPages().map(page=>`${page.title}. ${page.lines.join(' ')}`).join(' ');
   }
   function downloadBooklet() {
+    if(legacyIOSDownload()){app.querySelector('#booklet-status').textContent='旧版 iPhone 无法直接下载小手册文件。请使用“打印小手册”，或逐页截图保存作品。';return;}
     const cells=bookletPages().map((page,index)=>{
       const x=20+(index%2)*420,y=20+Math.floor(index/2)*470;
       const drawing=page.drawing.replace('<svg ',`<svg x="${x+80}" y="${y+62}" width="240" height="240" `);
@@ -287,7 +289,7 @@
     app.querySelector('#booklet-status').textContent='四页小手册图片已生成，请在下载列表中查看。用 Edge 或 Chrome 打开 SVG 文件即可查看或打印。也可点击“打印小手册”，逐页打印或另存为 PDF。';
   }
   function englishVoices() {
-    try{return window.speechSynthesis?.getVoices().filter(v=>v.lang.toLowerCase().startsWith('en')) || [];}catch{return [];}
+    try{return (window.speechSynthesis && window.speechSynthesis.getVoices().filter(v=>v.lang.toLowerCase().startsWith('en'))) || [];}catch{return [];}
   }
   function speechAvailable() {
     return Boolean(window.speechSynthesis && typeof window.SpeechSynthesisUtterance==='function' && englishVoices().length);
@@ -295,8 +297,8 @@
   function stopSpeech() {
     speechToken++;
     clearTimeout(speechStartTimer);clearTimeout(speechEndTimer);
-    try { window.GardenAudio?.stop(); } catch { /* 文字练习始终可用。 */ }
-    try { window.speechSynthesis?.cancel(); } catch { /* 文字练习始终可用。 */ }
+    try { if(window.GardenAudio)window.GardenAudio.stop(); } catch { /* 文字练习始终可用。 */ }
+    try { if(window.speechSynthesis)window.speechSynthesis.cancel(); } catch { /* 文字练习始终可用。 */ }
   }
   function speak(text,onFailure,recordedOnly=false) {
     text=GardenSpeechText.text(text);
@@ -304,15 +306,15 @@
     stopSpeech();
     const token=speechToken;
     let complete=false;
-    const current=()=>!complete && token===speechToken && status?.isConnected;
+    const current=()=>!complete && token===speechToken && status && status.isConnected;
     const show=message=>{if(current())status.textContent=message;};
     const fail=()=>{
       if(!current())return;
       clearTimeout(speechStartTimer);clearTimeout(speechEndTimer);
       show('音频暂时无法播放。请检查媒体音量和网络，再点一次；也可以看文字继续学习。');
       complete=true;
-      try{window.speechSynthesis?.cancel();}catch{/* Continue with text. */}
-      onFailure?.();
+      try{if(window.speechSynthesis)window.speechSynthesis.cancel();}catch{/* Continue with text. */}
+      if(typeof onFailure==='function')onFailure();
     };
     const native=()=>{
       if(!current())return;
@@ -342,12 +344,12 @@
     };
     // Prefer the shipped recordings: tablets can play MP3 even when their browser
     // has no working English speechSynthesis implementation.
-    if(window.GardenAudio?.has(text))window.GardenAudio.play(text,{
+    if((window.GardenAudio && window.GardenAudio.has(text)))window.GardenAudio.play(text,{
       onStatus:show,
       onEnd:()=>{if(current()){show('读完啦，你也试着读一遍。');complete=true;}},
       onFailure:recordedOnly?fail:native
     });
-    else if(recordedOnly){show('这段新朗读正在准备，先看文字练习。');complete=true;onFailure?.();}
+    else if(recordedOnly){show('这段新朗读正在准备，先看文字练习。');complete=true;if(typeof onFailure==='function')onFailure();}
     else native();
   }
   function currentForImport() {
@@ -355,12 +357,41 @@
     const saved = localStorage.getItem(key);
     return saved === null ? state : GardenBackup.merge(state, JSON.parse(saved)).data;
   }
+  function backupPayload() {
+    const payload=JSON.stringify(GardenBackup.createBackup(currentForImport()),null,2);
+    if(new Blob([payload]).size>GardenBackup.MAX_FILE_BYTES)throw new Error('记录超过 5 MB，暂时无法生成可恢复的备份。');
+    return payload;
+  }
+  function backupMessage(message) {
+    const status=app.querySelector('#backup-status');
+    if(status){status.textContent=message;status.setAttribute('role',message.includes('失败')?'alert':'status');}
+  }
+  function showBackupText(payload) {
+    const field=app.querySelector('#backup-text'), details=app.querySelector('.backup-text-options');
+    if(!field || !details)return;
+    field.value=payload;details.open=true;
+    backupMessage('备份文字已生成。请复制全部文字到备忘录保存；恢复时粘贴到下面的框中。');
+  }
+  function legacyIOSDownload() {
+    // iOS 12 exposes an anchor's download property but cannot download files.
+    const ua=navigator.userAgent, version=ua.match(/OS (\d+)[_\d]* like Mac OS X/);
+    return /iPhone|iPad|iPod/.test(ua) && version && Number(version[1])<13;
+  }
+  function copyBackup() {
+    try{
+      const field=app.querySelector('#backup-text');
+      if(!field.value)showBackupText(backupPayload());
+      field.focus();field.select();field.setSelectionRange(0,field.value.length);
+      let copied=false;
+      try{copied=typeof document.execCommand==='function' && document.execCommand('copy');}catch{/* Manual selection remains available. */}
+      backupMessage(copied?'备份文字已复制。请粘贴到备忘录保存。':'未能自动复制，已选中全部备份文字。请长按文字选择“复制”，再粘贴到备忘录保存。');
+    }catch(error){backupMessage(`导出失败：${error.message}`);}
+  }
   function exportBackup() {
     try {
-      const current = currentForImport();
-      const payload = JSON.stringify(GardenBackup.createBackup(current), null, 2);
+      const payload = backupPayload();
+      if(legacyIOSDownload()){showBackupText(payload);return;}
       const blob = new Blob([payload], {type:'application/json;charset=utf-8'});
-      if (blob.size > GardenBackup.MAX_FILE_BYTES) throw new Error('记录超过 5 MB，暂时无法生成可恢复的备份。');
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -372,25 +403,47 @@
       records('备份文件已生成，请在浏览器下载列表中查看并妥善保存。');
     } catch (error) { records(`导出失败：${error.message}`); }
   }
+  function readBackupFile(file) {
+    return new Promise((resolve,reject)=>{
+      const reader=new FileReader();
+      reader.onload=()=>resolve(typeof reader.result==='string'?reader.result:'');
+      reader.onerror=()=>reject(new Error('备份文件无法读取，请重新选择。'));
+      reader.onabort=()=>reject(new Error('备份文件读取已取消。'));
+      reader.readAsText(file,'UTF-8');
+    });
+  }
+  function importPreview(source) {
+    if(typeof source!=='string' || !source.trim())throw new Error('请先选择备份文件或粘贴完整的备份文字。');
+    if(source.length>GardenBackup.MAX_FILE_BYTES || new Blob([source]).size>GardenBackup.MAX_FILE_BYTES)throw new Error('备份超过 5 MB，请选择正确的备份。');
+    const imported=GardenBackup.parseBackup(source);
+    const preview=GardenBackup.merge(currentForImport(),imported);
+    const body=`备份包含 ${imported.attempts.length} 条作答、${imported.sessions.length} 次完整练习。合并后新增 ${preview.addedAttempts} 条作答、${preview.addedSessions} 次完整练习，待复习错题共 ${preview.data.wrong.length} 道。现有记录会保留。`;
+    confirmDialog('确认导入学习记录？',body,'确认导入',()=>{
+      try{
+        const result=GardenBackup.merge(currentForImport(),imported);
+        if(!save(result.data))throw new Error('浏览器未能保存备份，原记录未修改。请检查存储空间或浏览器设置后重试。');
+        records(`导入成功：新增 ${result.addedAttempts} 条作答、${result.addedSessions} 次完整练习。重复记录不重复计数，原记录已保留。`);
+      }catch(error){records(`导入失败：${error.message}`);}
+    });
+  }
+  function restoreBackupText() {
+    if(importBusy || dialogCleanup)return;
+    const field=app.querySelector('#restore-text');
+    if(!field)return;
+    try{importPreview(field.value);}
+    catch(error){backupMessage(`导入失败：${error.message} 现有记录未修改。`);}
+  }
   async function importBackup(input) {
-    const file = input.files[0];
+    const file = input.files && input.files[0];
     input.value = ''; // 同一文件可以再次选择。
-    if (!file || importBusy) return;
+    if (!file || importBusy || dialogCleanup) return;
     importBusy = true;
     document.querySelectorAll('.backup-actions button').forEach(button => button.disabled=true);
     try {
       if (file.size > GardenBackup.MAX_FILE_BYTES) throw new Error('备份文件超过 5 MB，请选择正确的备份文件。');
-      const imported = GardenBackup.parseBackup(await file.text());
+      const source=await readBackupFile(file);
       if (!input.isConnected) return;
-      const preview = GardenBackup.merge(currentForImport(), imported);
-      const body = `备份包含 ${imported.attempts.length} 条作答、${imported.sessions.length} 次完整练习。合并后新增 ${preview.addedAttempts} 条作答、${preview.addedSessions} 次完整练习，待复习错题共 ${preview.data.wrong.length} 道。现有记录会保留。`;
-      confirmDialog('确认导入学习记录？', body, '确认导入', () => {
-        try {
-          const result = GardenBackup.merge(currentForImport(), imported);
-          if (!save(result.data)) throw new Error('浏览器未能保存备份，原记录未修改。请检查存储空间或浏览器设置后重试。');
-          records(`导入成功：新增 ${result.addedAttempts} 条作答、${result.addedSessions} 次完整练习。重复记录不重复计数，原记录已保留。`);
-        } catch (error) { records(`导入失败：${error.message}`); }
-      });
+      importPreview(source);
     } catch (error) {
       if (input.isConnected) records(`导入失败：${error.message} 现有记录未修改。`);
     } finally {
@@ -399,14 +452,44 @@
     }
   }
   function confirmDialog(title,body,confirm,onConfirm) {
-    if (document.querySelector('dialog[open]')) return;
-    const d=document.createElement('dialog');
-    d.innerHTML=`<h2>${escape(title)}</h2><p>${escape(body)}</p><div class="row"><button data-cancel>取消</button><button class="danger" data-confirm>${escape(confirm)}</button></div>`;
-    document.body.append(d);
-    d.querySelector('[data-cancel]').onclick=()=>d.close();
-    d.querySelector('[data-confirm]').onclick=()=>{d.querySelector('[data-confirm]').disabled=true;d.close();onConfirm();};
-    d.addEventListener('close',()=>d.remove());
-    d.showModal();
+    if(dialogCleanup || document.querySelector('dialog[open]'))return;
+    const probe=document.createElement('dialog');
+    const native=typeof probe.showModal==='function' && typeof probe.close==='function';
+    const d=native?probe:document.createElement('div');
+    const holder=native?d:document.createElement('div');
+    const previous=document.activeElement, previousOverflow=document.body.style.overflow;
+    let closed=false;
+    if(!native){holder.className='legacy-dialog-backdrop';d.className='legacy-dialog';holder.appendChild(d);document.body.style.overflow='hidden';}
+    d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');d.setAttribute('aria-labelledby','garden-dialog-title');
+    d.innerHTML=`<h2 id="garden-dialog-title">${escape(title)}</h2><p>${escape(body)}</p><div class="row"><button data-cancel>取消</button><button class="danger" data-confirm>${escape(confirm)}</button></div>`;
+    const cancel=d.querySelector('[data-cancel]'), accept=d.querySelector('[data-confirm]');
+    const cleanup=()=>{
+      if(closed)return;
+      closed=true;dialogCleanup=null;
+      document.removeEventListener('keydown',keyboard,true);
+      document.removeEventListener('focusin',keepFocus,true);
+      if(native && d.open)d.close();
+      holder.remove();
+      if(!native)document.body.style.overflow=previousOverflow;
+      if(previous && previous.isConnected && typeof previous.focus==='function')previous.focus();
+    };
+    const keyboard=event=>{
+      if(event.key==='Escape'){event.preventDefault();cleanup();}
+      else if(event.key==='Tab'){
+        const first=cancel, last=accept;
+        if(event.shiftKey && document.activeElement===first){event.preventDefault();last.focus();}
+        else if(!event.shiftKey && document.activeElement===last){event.preventDefault();first.focus();}
+      }
+    };
+    const keepFocus=event=>{if(!closed && !d.contains(event.target))cancel.focus();};
+    dialogCleanup=cleanup;
+    cancel.onclick=cleanup;
+    accept.onclick=()=>{if(closed || accept.disabled)return;accept.disabled=true;cleanup();onConfirm();};
+    document.body.appendChild(holder);
+    document.addEventListener('keydown',keyboard,true);
+    if(native){d.addEventListener('close',cleanup);d.showModal();}
+    else document.addEventListener('focusin',keepFocus,true);
+    cancel.focus();
   }
   app.addEventListener('change', e => {
     if (farmDraft && e.target.closest('.farm-controls')) {
@@ -455,7 +538,7 @@
     if (e.target.id === 'backup-file') importBackup(e.target);
     if (e.target.id === 'include-extra') {includeExtra=e.target.checked;englishUnits();}
   });
-  app.addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(!b||b.disabled)return;const a=b.dataset.action;
+  app.addEventListener('click',e=>{if(dialogCleanup)return;const b=e.target.closest('button[data-action]');if(!b||b.disabled)return;const a=b.dataset.action;
     if(a==='hello-goals')helloGoals();
     if(a==='unit1-goals')unit1Goals();
     if(a==='unit2-goals')goalOverview('unit2');
@@ -467,23 +550,23 @@
     if(a==='review02-goals')goalOverview('review02');
     if(a==='booklet')bookletEditor();
     if(a==='download-booklet')downloadBooklet();
-    if(a==='print-booklet')window.print();
+    if(a==='print-booklet'){document.body.classList.add('print-booklet');window.print();}
     if(a==='read-booklet')speak(bookletSpeech());
     if(a==='poster')posterEditor();
     if(a==='download-poster')downloadPoster();
-    if(a==='print-poster')window.print();
+    if(a==='print-poster'){document.body.classList.add('print-poster');window.print();}
     if(a==='read-passage')speak(b.dataset.text,null,b.dataset.recordedOnly==='true');
     if(a==='read-poster')speak(posterSpeech());
     if(a==='goal-learn')learnGoal(b.dataset.id);
-    if(a==='goal-next'&&study?.cards&&study.index+1<study.cards.length){study.index++;goalCard();}
-    if(a==='goal-prev'&&study?.cards&&study.index>0){study.index--;goalCard();}
+    if(a==='goal-next'&&study && study.cards&&study.index+1<study.cards.length){study.index++;goalCard();}
+    if(a==='goal-prev'&&study && study.cards&&study.index>0){study.index--;goalCard();}
     if(a==='show-model'){app.querySelector('.say-model').hidden=false;b.disabled=true;}
     if(a==='say-done'){app.querySelector('.practice-status').textContent='愿意开口就是进步！慢慢说，多试几次。';b.disabled=true;}
-    if(a==='listen'&&run?.questions[run.index].kind==='listening')speak(run.questions[run.index].speech,showListeningText,b.dataset.recordedOnly==='true');
+    if(a==='listen'&&run && run.questions[run.index].kind==='listening')speak(run.questions[run.index].speech,showListeningText,b.dataset.recordedOnly==='true');
     if(a==='show-listening-text')showListeningText();
-    if(a==='learn')learnWords(b.dataset.id);if(a==='study-next'&&study&&study.index+1<study.words.length){study.index++;wordCard();}if(a==='study-prev'&&study&&study.index>0){study.index--;wordCard();}if(a==='english-mode'){englishMode=b.dataset.mode;englishUnits();}if(a==='speak')speak(b.dataset.text,null,b.dataset.recordedOnly==='true');if(a==='home')home();if(a==='subject')subject(b.dataset.id);if(a==='count'){count=Number(b.dataset.count);subject(b.dataset.id);}if(a==='start')start(b.dataset.id);if(a==='review')review();if(a==='review-count'){count=Number(b.dataset.count);review();}if(a==='start-review')start(null,true);if(a==='records')records();if(a==='export')exportBackup();if(a==='import'&&!importBusy)document.querySelector('#backup-file').click();if(a==='answer')answer(b.dataset.answer);if(a==='retry'&&run?.phase==='retry'){run.phase='answer';run.selected=null;question();}if(a==='next')next();if(a==='leave')confirmDialog('结束这次练习？','已经作答的题目记录会保留。','结束练习',home);if(a==='clear')confirmDialog('确定清空所有学习记录？','练习统计和错题都会删除，清空后无法恢复。','确认清空',()=>{state={attempts:[],sessions:[],wrong:[]};save();records();});
+    if(a==='learn')learnWords(b.dataset.id);if(a==='study-next'&&study&&study.index+1<study.words.length){study.index++;wordCard();}if(a==='study-prev'&&study&&study.index>0){study.index--;wordCard();}if(a==='english-mode'){englishMode=b.dataset.mode;englishUnits();}if(a==='speak')speak(b.dataset.text,null,b.dataset.recordedOnly==='true');if(a==='home')home();if(a==='subject')subject(b.dataset.id);if(a==='count'){count=Number(b.dataset.count);subject(b.dataset.id);}if(a==='start')start(b.dataset.id);if(a==='review')review();if(a==='review-count'){count=Number(b.dataset.count);review();}if(a==='start-review')start(null,true);if(a==='records')records();if(a==='export')exportBackup();if(a==='backup-text'&&!importBusy){try{showBackupText(backupPayload());}catch(error){backupMessage(`导出失败：${error.message}`);}}if(a==='copy-backup'&&!importBusy)copyBackup();if(a==='restore-text')restoreBackupText();if(a==='import'&&!importBusy)document.querySelector('#backup-file').click();if(a==='answer')answer(b.dataset.answer);if(a==='retry'&&run && run.phase==='retry'){run.phase='answer';run.selected=null;question();}if(a==='next')next();if(a==='leave')confirmDialog('结束这次练习？','已经作答的题目记录会保留。','结束练习',home);if(a==='clear')confirmDialog('确定清空所有学习记录？','练习统计和错题都会删除，清空后无法恢复。','确认清空',()=>{state={attempts:[],sessions:[],wrong:[]};save();records();});
   });
-  document.querySelector('#home-link').addEventListener('click',e=>{e.preventDefault();if(run)confirmDialog('结束这次练习？','已经作答的题目记录会保留。','回到首页',home);else home();});
+  document.querySelector('#home-link').addEventListener('click',e=>{e.preventDefault();if(dialogCleanup)return;if(run)confirmDialog('结束这次练习？','已经作答的题目记录会保留。','回到首页',home);else home();});
   window.addEventListener('pagehide',stopSpeech);
   document.addEventListener('visibilitychange',()=>{if(document.hidden)stopSpeech();});
   home();
