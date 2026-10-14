@@ -6,7 +6,7 @@
   try { const saved=JSON.parse(localStorage.getItem(key)); if(saved && Array.isArray(saved.attempts) && Array.isArray(saved.sessions) && Array.isArray(saved.wrong)) state=saved; }
   catch { storageWarning='浏览器记录暂时无法读取。本次仍可练习，请确认浏览器允许本地存储。'; }
   const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const topicName=id=>topics.find(t=>t.id===id)?.name || id;
+  const topicName=id=>(topics.find(t=>t.id===id) || {}).name || id;
   const resolve=id=>{const topic=topics.find(t=>id.startsWith(t.id+'-'));return topic ? bank(topic.id).find(q=>q.id===id) : null;};
   function save(nextState=state){try{localStorage.setItem(key,JSON.stringify(nextState));state=nextState;storageWarning='';return true;}catch{storageWarning='记录未能保存，可能是浏览器存储受限或已满。离开页面后本次记录可能丢失。';return false;}}
   function draw(html){stopSpeech();app.innerHTML=html+(storageWarning?`<p class="notice" role="alert">${escape(storageWarning)}</p>`:'');}
@@ -17,13 +17,13 @@
   function start(topic,reviewing=false){study=null;const pool=reviewing?state.wrong.map(resolve).filter(Boolean):topic.startsWith('english')?englishPool(topic):bank(topic);run={id:`${Date.now()}-${Math.random()}`,questions:shuffle(pool).slice(0,count).map(q=>({...q,choices:shuffle(q.choices)})),index:0,firstCorrect:0,recovered:0,reviewing,tries:0,phase:'answer',selected:null};if(!run.questions.length){review();return;}question();}
   function question() {
     const q=run.questions[run.index], listening=q.kind==='listening';
-    const englishQuestion=topics.find(t=>t.id===q.topic)?.subject==='english';
+    const englishQuestion=(topics.find(t=>t.id===q.topic) || {}).subject==='english';
     const audio=listening
       ? `<div class="audio-tools"><button class="primary" data-action="listen">🔊 听题目</button><button class="secondary" data-action="show-listening-text">显示文字提示</button><p class="speech-status muted" role="status" aria-live="polite"></p><p class="listening-text" ${run.listeningText?'':'hidden'}>${escape(q.fallbackPrompt)}</p></div>`
       : q.speech || (run.phase==='done' && q.answerSpeech)
         ? `<div class="audio-tools"><button class="secondary" data-action="speak" data-text="${escape(q.speech || q.answerSpeech)}">🔊 听一听</button><p class="speech-status muted" role="status" aria-live="polite"></p></div>` : '';
     draw(`<button class="back" data-action="leave">← 结束这次练习</button><div class="row"><strong>${run.reviewing?'错题复习':topicName(q.topic)}</strong><span class="muted">第 ${run.index+1} / ${run.questions.length} 题</span></div><div class="progress" aria-label="练习进度"><div style="width:${(run.index/run.questions.length)*100}%"></div></div><section class="panel"><div class="question" data-question-id="${escape(q.id)}">${escape(q.prompt)}</div>${q.visual?'<div class="question-visual">'+visual(q.visual)+'</div>':''}${reading(q)}${listening?audio:''}<div class="choices ${englishQuestion?'english-choices':''}">${q.choices.map(c=>`<button data-action="answer" data-answer="${escape(c)}" ${run.phase!=='answer'?'disabled':''} class="${run.selected===c?'selected':''} ${c.length>2?'long-answer':''}">${escape(c)}</button>`).join('')}</div>${listening?'':audio}<div id="feedback" aria-live="polite">${feedback(q)}</div></section><p class="muted">不着急，认真想一想。</p>`);
-    if (listening && !window.GardenAudio?.has(q.speech) && !speechAvailable()) {
+    if (listening && !(window.GardenAudio && window.GardenAudio.has(q.speech)) && !speechAvailable()) {
       showListeningText();
       app.querySelector('.speech-status').textContent='当前没有可用音频，已显示文字提示，可以继续练习。';
     }
@@ -41,8 +41,8 @@
     return '';
   }
   function reading(q) {
-    if (!q.passage?.length) return '';
-    return `<section class="reading-passage"><strong>读一读 · 原创小故事</strong>${q.passage.map(line=>`<p lang="en">${escape(line)}</p>`).join('')}<button class="secondary" data-action="read-passage" data-text="${escape(q.passage.join(' '))}">🔊 听故事</button><p class="speech-status muted" role="status" aria-live="polite"></p>${q.glossary?.length?`<details><summary>看看词语帮助</summary><p>${q.glossary.map(word=>`${escape(word.english)}：${escape(word.chinese)}`).join('；')}</p></details>`:''}</section>`;
+    if (!(q.passage && q.passage.length)) return '';
+    return `<section class="reading-passage"><strong>读一读 · 原创小故事</strong>${q.passage.map(line=>`<p lang="en">${escape(line)}</p>`).join('')}<button class="secondary" data-action="read-passage" data-text="${escape(q.passage.join(' '))}">🔊 听故事</button><p class="speech-status muted" role="status" aria-live="polite"></p>${(q.glossary && q.glossary.length)?`<details><summary>看看词语帮助</summary><p>${q.glossary.map(word=>`${escape(word.english)}：${escape(word.chinese)}`).join('；')}</p></details>`:''}</section>`;
   }
   function personSvg(item) {
     const hair={black:'#34383b',brown:'#805438',blond:'#e5bd58'}[item.hair] || '#805438';
@@ -247,7 +247,7 @@
     app.querySelector('#booklet-status').textContent='四页小手册图片已生成，请在下载列表中查看。用 Edge 或 Chrome 打开 SVG 文件即可查看或打印。也可点击“打印小手册”，逐页打印或另存为 PDF。';
   }
   function englishVoices() {
-    try{return window.speechSynthesis?.getVoices().filter(v=>v.lang.toLowerCase().startsWith('en')) || [];}catch{return [];}
+    try{return window.speechSynthesis && window.speechSynthesis.getVoices().filter(v=>v.lang.toLowerCase().startsWith('en')) || [];}catch{return [];}
   }
   function speechAvailable() {
     return Boolean(window.speechSynthesis && typeof window.SpeechSynthesisUtterance==='function' && englishVoices().length);
@@ -255,8 +255,8 @@
   function stopSpeech() {
     speechToken++;
     clearTimeout(speechStartTimer);clearTimeout(speechEndTimer);
-    try { window.GardenAudio?.stop(); } catch { /* 文字练习始终可用。 */ }
-    try { window.speechSynthesis?.cancel(); } catch { /* 文字练习始终可用。 */ }
+    try { if(window.GardenAudio)window.GardenAudio.stop(); } catch { /* 文字练习始终可用。 */ }
+    try { if(window.speechSynthesis)window.speechSynthesis.cancel(); } catch { /* 文字练习始终可用。 */ }
   }
   function speak(text,onFailure) {
     text=GardenSpeechText.text(text);
@@ -264,15 +264,15 @@
     stopSpeech();
     const token=speechToken;
     let complete=false;
-    const current=()=>!complete && token===speechToken && status?.isConnected;
+    const current=()=>!complete && token===speechToken && (status && status.isConnected);
     const show=message=>{if(current())status.textContent=message;};
     const fail=()=>{
       if(!current())return;
       clearTimeout(speechStartTimer);clearTimeout(speechEndTimer);
       show('音频暂时无法播放。请检查媒体音量和网络，再点一次；也可以看文字继续学习。');
       complete=true;
-      try{window.speechSynthesis?.cancel();}catch{/* Continue with text. */}
-      onFailure?.();
+      try{if(window.speechSynthesis)window.speechSynthesis.cancel();}catch{/* Continue with text. */}
+      if(typeof onFailure==='function')onFailure();
     };
     const native=()=>{
       if(!current())return;
@@ -301,7 +301,7 @@
     };
     // Prefer the shipped recordings: tablets can play MP3 even when their browser
     // has no working English speechSynthesis implementation.
-    if(window.GardenAudio?.has(text))window.GardenAudio.play(text,{
+    if((window.GardenAudio && window.GardenAudio.has(text)))window.GardenAudio.play(text,{
       onStatus:show,
       onEnd:()=>{if(current()){show('读完啦，你也试着读一遍。');complete=true;}},
       onFailure:native
@@ -338,7 +338,7 @@
     document.querySelectorAll('.backup-actions button').forEach(button => button.disabled=true);
     try {
       if (file.size > GardenBackup.MAX_FILE_BYTES) throw new Error('备份文件超过 5 MB，请选择正确的备份文件。');
-      const imported = GardenBackup.parseBackup(await file.text());
+      const imported = GardenBackup.parseBackup(await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(new Error('无法读取备份文件，请重新选择。'));reader.readAsText(file);}));
       if (!input.isConnected) return;
       const preview = GardenBackup.merge(currentForImport(), imported);
       const body = `备份包含 ${imported.attempts.length} 条作答、${imported.sessions.length} 次完整练习。合并后新增 ${preview.addedAttempts} 条作答、${preview.addedSessions} 次完整练习，待复习错题共 ${preview.data.wrong.length} 道。现有记录会保留。`;
@@ -357,6 +357,7 @@
     }
   }
   function confirmDialog(title,body,confirm,onConfirm) {
+    if(typeof HTMLDialogElement==='undefined' || typeof HTMLDialogElement.prototype.showModal!=='function'){if(window.confirm(title+'\n'+body))onConfirm();return;}
     if (document.querySelector('dialog[open]')) return;
     const d=document.createElement('dialog');
     d.innerHTML=`<h2>${escape(title)}</h2><p>${escape(body)}</p><div class="row"><button data-cancel>取消</button><button class="danger" data-confirm>${escape(confirm)}</button></div>`;
@@ -409,13 +410,13 @@
     if(a==='read-passage')speak(b.dataset.text);
     if(a==='read-poster')speak(posterSpeech());
     if(a==='goal-learn')learnGoal(b.dataset.id);
-    if(a==='goal-next'&&study?.cards&&study.index+1<study.cards.length){study.index++;goalCard();}
-    if(a==='goal-prev'&&study?.cards&&study.index>0){study.index--;goalCard();}
+    if(a==='goal-next'&&study && study.cards&&study.index+1<study.cards.length){study.index++;goalCard();}
+    if(a==='goal-prev'&&study && study.cards&&study.index>0){study.index--;goalCard();}
     if(a==='show-model'){app.querySelector('.say-model').hidden=false;b.disabled=true;}
     if(a==='say-done'){app.querySelector('.practice-status').textContent='愿意开口就是进步！慢慢说，多试几次。';b.disabled=true;}
-    if(a==='listen'&&run?.questions[run.index].kind==='listening')speak(run.questions[run.index].speech,showListeningText);
+    if(a==='listen'&&(run && run.questions[run.index].kind)==='listening')speak(run.questions[run.index].speech,showListeningText);
     if(a==='show-listening-text')showListeningText();
-    if(a==='learn')learnWords(b.dataset.id);if(a==='study-next'&&study&&study.index+1<study.words.length){study.index++;wordCard();}if(a==='study-prev'&&study&&study.index>0){study.index--;wordCard();}if(a==='english-mode'){englishMode=b.dataset.mode;englishUnits();}if(a==='speak')speak(b.dataset.text);if(a==='home')home();if(a==='subject')subject(b.dataset.id);if(a==='count'){count=Number(b.dataset.count);subject(b.dataset.id);}if(a==='start')start(b.dataset.id);if(a==='review')review();if(a==='review-count'){count=Number(b.dataset.count);review();}if(a==='start-review')start(null,true);if(a==='records')records();if(a==='export')exportBackup();if(a==='import'&&!importBusy)document.querySelector('#backup-file').click();if(a==='answer')answer(b.dataset.answer);if(a==='retry'&&run?.phase==='retry'){run.phase='answer';run.selected=null;question();}if(a==='next')next();if(a==='leave')confirmDialog('结束这次练习？','已经作答的题目记录会保留。','结束练习',home);if(a==='clear')confirmDialog('确定清空所有学习记录？','练习统计和错题都会删除，清空后无法恢复。','确认清空',()=>{state={attempts:[],sessions:[],wrong:[]};save();records();});
+    if(a==='learn')learnWords(b.dataset.id);if(a==='study-next'&&study&&study.index+1<study.words.length){study.index++;wordCard();}if(a==='study-prev'&&study&&study.index>0){study.index--;wordCard();}if(a==='english-mode'){englishMode=b.dataset.mode;englishUnits();}if(a==='speak')speak(b.dataset.text);if(a==='home')home();if(a==='subject')subject(b.dataset.id);if(a==='count'){count=Number(b.dataset.count);subject(b.dataset.id);}if(a==='start')start(b.dataset.id);if(a==='review')review();if(a==='review-count'){count=Number(b.dataset.count);review();}if(a==='start-review')start(null,true);if(a==='records')records();if(a==='export')exportBackup();if(a==='import'&&!importBusy)document.querySelector('#backup-file').click();if(a==='answer')answer(b.dataset.answer);if(a==='retry'&&(run && run.phase)==='retry'){run.phase='answer';run.selected=null;question();}if(a==='next')next();if(a==='leave')confirmDialog('结束这次练习？','已经作答的题目记录会保留。','结束练习',home);if(a==='clear')confirmDialog('确定清空所有学习记录？','练习统计和错题都会删除，清空后无法恢复。','确认清空',()=>{state={attempts:[],sessions:[],wrong:[]};save();records();});
   });
   document.querySelector('#home-link').addEventListener('click',e=>{e.preventDefault();if(run)confirmDialog('结束这次练习？','已经作答的题目记录会保留。','回到首页',home);else home();});
   window.addEventListener('pagehide',stopSpeech);

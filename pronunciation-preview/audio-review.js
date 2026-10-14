@@ -3,8 +3,8 @@
   'use strict';
   const manifest=root.GardenAudioManifest;
   const player=root.GardenAudio;
-  const normalize=root.GardenSpeechText?.canonical;
-  const clips=manifest?.clips || {};
+  const normalize=root.GardenSpeechText && root.GardenSpeechText.canonical;
+  const clips=manifest && manifest.clips || {};
   const keys=Object.keys(clips).filter(key=>/^assets\/audio\/[a-f0-9]{20}\.mp3$/.test(clips[key])).sort();
   const elements={
     version:document.getElementById('audio-version'),
@@ -34,7 +34,7 @@
   }
   function stop(message='已停止播放。'){
     generation++;
-    player?.stop();
+    if(player && typeof player.stop==='function')player.stop();
     active='';
     syncButtons();
     status(message);
@@ -42,10 +42,10 @@
   function play(key){
     if(active===key)return;
     const token=++generation;
-    player?.stop();
+    if(player && typeof player.stop==='function')player.stop();
     active='';
     elements.current.textContent=key;
-    if(!player?.has(key)){
+    if(!(player && typeof player.has==='function' && player.has(key))){
       syncButtons();
       status('这段录音暂时无法读取，请刷新页面重试。此页不会改用设备的系统发音。',true);
       return;
@@ -87,12 +87,13 @@
   function search(){
     const query=normalize?normalize(elements.search.value):elements.search.value.trim().toLowerCase();
     const found=keys.filter(key=>key.includes(query));
-    elements.list.replaceChildren(...found.map(button));
+    elements.list.textContent='';
+    found.forEach(key=>elements.list.appendChild(button(key)));
     elements.count.textContent=query?`找到 ${found.length} 段，共 ${keys.length} 段。`:`共 ${keys.length} 段，点一个按钮试听。`;
     elements.empty.hidden=found.length>0;
   }
 
-  if(manifest?.version>=2){
+  if(manifest && manifest.version>=2){
     elements.version.textContent=`新版音频试听 · 待听辨确认 · 英式英语 · 共 ${keys.length} 段录音`;
   }else{
     elements.version.textContent=`当前清单为旧版 · 共 ${keys.length} 段录音。修正版发布后，请刷新本页。`;
@@ -107,7 +108,7 @@
   search();
   elements.search.addEventListener('input',search);
   document.addEventListener('click',event=>{
-    const clicked=event.target.closest?.('button[data-clip]');
+    const clicked=event.target && typeof event.target.closest==='function' && event.target.closest('button[data-clip]');
     if(clicked && !clicked.disabled)play(clicked.dataset.clip);
   });
   elements.stop.addEventListener('click',()=>stop());

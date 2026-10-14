@@ -22,6 +22,9 @@ const root = path.resolve(__dirname, '..');
 const KEY = 'learning-garden-v1';
 const AUDIO_CACHE = 'azure-jenny-unit3-v1-20261013';
 const APP_CACHE = 'unit3-farm-audio-v2-20261013';
+const COMPAT_CACHE = 'ios12-webapp-v1-20261014';
+const cacheVersion = source => ['app.js','style.css','audio-player.js','speech-text.js'].includes(source)
+  ? COMPAT_CACHE : ['data/questions.js','data/english-unit3.js'].includes(source) ? APP_CACHE : AUDIO_CACHE;
 const exact = value => new RegExp(`^${value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
 const wall = questions.bank('english1').find(q => q.id === 'english1-wall-meaning');
 const listen = questions.bank('hello-numbers').find(q => q.kind === 'listening');
@@ -344,7 +347,7 @@ function initialize(options) {
       'data/questions.js', 'data/english-unit3.js', 'style.css']) {
       const sourceRequests = requests.filter(request => new URL(request.url).pathname === '/' + source);
       assert(sourceRequests.length > 0, '真实页面确实加载新版脚本 ' + source);
-      const version = ['app.js', 'data/questions.js', 'data/english-unit3.js', 'style.css'].includes(source) ? APP_CACHE : AUDIO_CACHE;
+      const version = cacheVersion(source);
       assert(sourceRequests.every(request => new URL(request.url).searchParams.get('v') === version),
         source + ' 带新版缓存参数，避免平板继续使用旧逻辑');
     }
@@ -548,7 +551,7 @@ function initialize(options) {
     const upgradeRequests = server.servedRequests.slice(beforeUpgrade);
     assert(upgradeRequests.includes('/data/audio-manifest.js?v=' + AUDIO_CACHE), '新缓存参数请求当前 501 段清单');
     for (const source of ['app.js', 'data/questions.js', 'data/english-unit3.js', 'style.css']) {
-      assert(upgradeRequests.includes('/' + source + '?v=' + APP_CACHE), source + ' 使用新版缓存参数');
+      assert(upgradeRequests.includes('/' + source + '?v=' + cacheVersion(source)), source + ' 使用新版缓存参数');
     }
     assert(upgradeRequests.includes('/' + manifest.clips[speechText.canonical(newlyRecorded.speech)]),
       '刷新后实际下载并播放新增 Unit 3 MP3');

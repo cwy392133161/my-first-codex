@@ -227,7 +227,8 @@ function initialize({recordKey,originalRecords}){
     assert.deepEqual(errors,[]);
     for(const source of ['speech-text.js','data/audio-manifest.js','audio-player.js','audio-review.js']){
       const loaded=requests.filter(request=>new URL(request.url).pathname==='/'+source);
-      assert(loaded.length>0&&loaded.every(request=>new URL(request.url).searchParams.get('v')===audioCache),source+' 使用新版缓存参数');
+      const version=source==='data/audio-manifest.js'?audioCache:'ios12-webapp-v1-20261014';
+      assert(loaded.length>0&&loaded.every(request=>new URL(request.url).searchParams.get('v')===version),source+' 使用新版缓存参数');
     }
     assert(requests.every(request=>request.method==='GET'&&new URL(request.url).origin===origin),'只读取同源文件，不调用外部接口');
     pass('音频 404 和空清单明确提示，不偷偷换成系统语音；所有场景无脚本异常和外部请求');

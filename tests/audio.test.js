@@ -292,13 +292,14 @@ for (const required of ['data/english.js', 'data/english-hello.js', 'data/englis
   assert.equal(paths.filter(filename => filename === required).length, 1, `${required} 加载一次`);
 }
 for (const changed of ['speech-text.js', 'data/audio-manifest.js', 'audio-player.js']) {
-  assert.equal(sources.find(source => source.split(/[?#]/)[0] === changed), changed + '?v=azure-jenny-unit3-v1-20261013',
+  const version=changed==='data/audio-manifest.js'?'azure-jenny-unit3-v1-20261013':'ios12-webapp-v1-20261014';
+  assert.equal(sources.find(source => source.split(/[?#]/)[0] === changed), changed + '?v='+version,
     `${changed} 有缓存版本，避免平板沿用旧脚本`);
 }
 assert(sources.includes('data/english-unit3.js?v=unit3-farm-audio-v2-20261013'), '新增课程内容有独立缓存版本');
-assert(sources.includes('app.js?v=unit3-farm-audio-v2-20261013'), '新增课程脚本有自己的缓存版本');
+assert(sources.includes('app.js?v=ios12-webapp-v1-20261014'), '兼容修复脚本有自己的缓存版本');
 assert(sources.includes('data/questions.js?v=unit3-farm-audio-v2-20261013'), '题库新依赖和新编号不能继续命中旧版缓存');
-assert(html.includes('style.css?v=unit3-farm-audio-v2-20261013'), '新增课程样式有缓存版本');
+assert(html.includes('style.css?v=ios12-webapp-v1-20261014'), '兼容修复样式有缓存版本');
 assert(paths.indexOf('speech-text.js') < paths.indexOf('data/audio-manifest.js'));
 assert(paths.indexOf('data/audio-manifest.js') < paths.indexOf('audio-player.js'));
 assert(paths.indexOf('audio-player.js') < paths.indexOf('app.js'));
@@ -324,7 +325,8 @@ for (const required of ['Azure Speech', 'en-US-JennyNeural', '美式英语', '�
 assert(!notice.includes('发音修正版使用 Kokoro'), '当前来源说明不再把 Azure 成品归属到旧声线');
 const reviewHTML = fs.readFileSync(path.join(repository, 'audio-review.html'), 'utf8');
 for (const source of ['speech-text.js', 'data/audio-manifest.js', 'audio-player.js', 'audio-review.js']) {
-  assert(reviewHTML.includes(`src="${source}?v=azure-jenny-unit3-v1-20261013"`), '试听页使用新版脚本缓存地址');
+  const version=source==='data/audio-manifest.js'?'azure-jenny-unit3-v1-20261013':'ios12-webapp-v1-20261014';
+  assert(reviewHTML.includes(`src="${source}?v=${version}"`), '试听页使用新版脚本缓存地址');
 }
 
 console.log(`音频静态检查通过：${entries.length} 段，${staticCount} 个固定朗读入口，${posterCount} 种海报、${bookletCount} 种小手册，${(totalBytes / 1024 / 1024).toFixed(2)} MiB。`);
