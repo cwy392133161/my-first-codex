@@ -1,24 +1,17 @@
 # 英语示范音频来源说明
 
-本目录的 MP3 是为“学习小乐园”的单词、原创示例句、原创阅读和作品介绍离线合成的英语示范音频，不是教材原声录音。
+当前 MP3 由 **Azure Speech** 通过 HTTPS REST 接口在开发环境预先合成，使用 **`en-US-JennyNeural`**、美式英语（`en-US`）、默认风格、正常语速。成品输出格式为 `audio-24khz-96kbitrate-mono-mp3`：24 kHz、单声道、96 kbps MP3。
 
-生成时使用 Kokoro v1.0 模型，通过 kokoro-onnx 运行，选择英国英语声线 `bf_emma` 和语言 `en-gb`。模型和声音参数仅用于开发环境生成文件，没有随网页交付。网页通过普通浏览器音频功能播放本站 MP3，运行时不调用模型、外部语音接口或外部 AI 接口，也不发送孩子的学习记录、姓名或家庭资料。
+这些录音用于“学习小乐园”的单词、原创示例句、原创阅读和作品介绍，不是教材原声。本开发分支501段音频复用覆盖2,029个朗读入口，包含原398段和Unit 3新增103段，数量不是题库题数。`close`（关闭）、`read`／`reads`（现在时）、`minute`／`minutes`（分钟）在实际 SSML 中明确指定对应 IPA 读音；单词和例句、foot 和 feet 分段示范。Unit 3 包括 has／hasn’t got 问答、c／k／ck完整示例词、动物宝宝短文及农场介绍；原398段MP3地址、文件字节及SSML指纹保留，增量生成避免重复请求。
 
-## 模型与工具归属
+网站通过浏览器播放项目内 MP3，运行时不调用 Azure 或其他外部语音接口，不读取生成密钥，也不发送孩子的学习记录、姓名或家庭资料。密钥仅用于开发环境的 HTTPS 请求，没有随网页交付。
 
-- **Kokoro / Kokoro-82M，hexgrad**：官方项目介绍说明模型权重采用 Apache License 2.0。本目录保留官方 Kokoro 仓库提供的许可证全文：[LICENSE-Kokoro](LICENSE-Kokoro)。
-  - 官方代码及模型介绍：<https://github.com/hexgrad/kokoro>
-  - 已核对的介绍原文：<https://raw.githubusercontent.com/hexgrad/kokoro/main/README.md>
-  - 许可证原文：<https://raw.githubusercontent.com/hexgrad/kokoro/main/LICENSE>
-  - 官方模型页面：<https://huggingface.co/hexgrad/Kokoro-82M>
-- **kokoro-onnx，thewh1teagle**：官方 README 将工具标为 MIT，将 Kokoro 模型标为 Apache 2.0。本目录保留该工具的 MIT 许可证全文与原版权声明：[LICENSE-kokoro-onnx](LICENSE-kokoro-onnx)。
-  - 官方项目：<https://github.com/thewh1teagle/kokoro-onnx>
-  - 已核对的介绍原文：<https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/README.md>
-  - 许可证原文：<https://raw.githubusercontent.com/thewh1teagle/kokoro-onnx/main/LICENSE>
-  - 使用的模型及声音参数发布版本：<https://github.com/thewh1teagle/kokoro-onnx/releases/tag/model-files-v1.1>
+`data/audio-audit.json` 记录实际朗读文本、来源、生成配置、每段 SSML 指纹，以及完整解码接受文件的 SHA-256、大小和时长。音频清单版本为 3，配置标记为 `azure-jenny-v1-<12位指纹>`；每段文件名取实际 SSML、输出格式和生成规则指纹的前20位。文本、标点或读音规则改变会使用新文件地址；新增题目不使无关录音重新生成。
 
-## 许可资料范围
+文件 SHA-256、完整解码、非静音和浏览器播放检查用于验证文件与软件流程，**不代表所有录音已由老师逐条完成人工发音审核，也不能证明发音、重音和语调始终准确自然**。当前工作分支的候选版尚未发布到正式网站。可打开 `audio-review.html` 试听相同 MP3；本次检查结果见 [UNIT3_AUDIO_CHECKS.md](../../UNIT3_AUDIO_CHECKS.md)；此前398段检查记录见 [PRONUNCIATION_REVIEW.md](../../PRONUNCIATION_REVIEW.md)。本项目未完成华为实体平板验收。
 
-上面记录的是已核实的官方项目级许可声明。可获取的官方仓库资料没有列出 `bf_emma` 的独立许可；本环境无法访问官方 Hugging Face 声线说明页面 <https://huggingface.co/hexgrad/Kokoro-82M/blob/main/VOICES.md>，因此没有对该声线训练数据来源、现实人物身份或其他未列出的授权作额外断言，也没有将 Apache 或 MIT 许可解释为第三方对本项目的认可。
+## 服务参考与历史文件
 
-许可证全文按上游原样保存。音频文本及生成过程由本项目组织；合成语音供练习听读参考。
+- Azure Speech 服务及声音由 Microsoft 提供：[文字转语音](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/text-to-speech)、[语言与声音](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=tts)、[REST 输出格式](https://learn.microsoft.com/en-us/azure/ai-services/speech-service/rest-text-to-speech)。使用受该资源适用的 Microsoft 服务条款约束；本项目没有将旧开源模型许可证套用到 Azure 服务或声线。
+- 项目文本和生成流程由本项目组织，合成语音供练习听读参考，不表示 Microsoft 对本项目的认可。
+- `LICENSE-Kokoro`、`LICENSE-kokoro-onnx`、`LICENSE-Misaki` 保留了历史离线音频工具的上游许可。当前 Azure Jenny 音频不使用 Kokoro、Misaki、spaCy 或 eSpeak 模型生成，以上文件用于历史追溯。

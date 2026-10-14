@@ -1,17 +1,30 @@
 'use strict';
 
 // Run with: node tests/audio.browser.test.js
-// Real MP3 decoding/playback covers Huawei-style browsers without speechSynthesis.
+// Real MP3 decoding/playback covers browsers without speechSynthesis.
+// Browser playback and file correspondence do not confirm human pronunciation.
 const assert = require('node:assert/strict');
 const { chromium } = require('playwright');
 const http = require('node:http');
 const fs = require('node:fs/promises');
 const path = require('node:path');
+const crypto = require('node:crypto');
+const vm = require('node:vm');
+const { execFile } = require('node:child_process');
+const audit = require('../data/audio-audit.json');
 const questions = require('../data/questions.js');
 const unit2 = require('../data/english-unit2.js');
+const unit3 = require('../data/english-unit3.js');
+const manifest = require('../data/audio-manifest.js');
+const speechText = require('../speech-text.js');
 
 const root = path.resolve(__dirname, '..');
 const KEY = 'learning-garden-v1';
+const AUDIO_CACHE = 'azure-jenny-unit3-v1-20261013';
+const APP_CACHE = 'unit3-farm-audio-v2-20261013';
+const COMPAT_CACHE = 'ios12-webapp-v1-20261014';
+const cacheVersion = source => ['app.js','style.css','audio-player.js','speech-text.js'].includes(source)
+  ? COMPAT_CACHE : ['data/questions.js','data/english-unit3.js'].includes(source) ? APP_CACHE : AUDIO_CACHE;
 const exact = value => new RegExp(`^${value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
 const wall = questions.bank('english1').find(q => q.id === 'english1-wall-meaning');
 const listen = questions.bank('hello-numbers').find(q => q.kind === 'listening');
@@ -27,15 +40,51 @@ async function serverStart() {
       const url = new URL(request.url, 'http://localhost');
       const file = path.resolve(root, url.pathname === '/' ? 'index.html' : `.${decodeURIComponent(url.pathname)}`);
       if (!file.startsWith(`${root}${path.sep}`)) { response.writeHead(403).end(); return; }
-      const body = await fs.readFile(file);
+      const relative = url.pathname === '/' ? '/index.html' : url.pathname;
+      const body = server.legacyFiles?.get(relative) || await fs.readFile(file);
       const type = file.endsWith('.mp3') ? 'audio/mpeg'
         : file.endsWith('.js') ? 'text/javascript; charset=utf-8'
         : file.endsWith('.css') ? 'text/css; charset=utf-8' : 'text/html; charset=utf-8';
-      response.writeHead(200, { 'Content-Type': type, 'Content-Length': body.length }).end(body);
+      server.servedRequests.push(request.url);
+      response.writeHead(200, {
+        'Content-Type': type, 'Content-Length': body.length,
+        'Cache-Control': /\.(?:js|mp3)$/.test(file) ? 'public, max-age=31536000' : 'no-cache'
+      }).end(body);
     } catch { response.writeHead(404).end(); }
   });
+  server.servedRequests = [];
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   return server;
+}
+
+async function legacyAudioFiles() {
+  // Retain the real previous resources in browser HTTP cache before switching
+  // the same origin to the candidate. Playwright routing would disable cache.
+  const read = filename => new Promise((resolve, reject) => {
+    execFile('git', ['show', `15992d8:${filename}`],
+      { cwd: root, encoding: 'buffer', maxBuffer: 1024 * 1024 }, (error, body) => {
+        if (error) { reject(new Error(`无法读取交接提交中的缓存升级检查文件：${filename}`)); return; }
+        resolve(body);
+      });
+  });
+  const index = await read('index.html');
+  const manifestSource = await read('data/audio-manifest.js');
+  const sandbox = { module: { exports: {} } };
+  vm.runInNewContext(manifestSource.toString('utf8'), sandbox);
+  const previous = sandbox.module.exports;
+  assert.equal(previous.version, 3, '增量升级从真实 Azure Jenny v3 清单开始');
+  assert.equal(Object.keys(previous.clips).length, 398, '升级检查加载真实原有 398 段清单');
+  // Serve a coherent historical page, including its bank and app. Combining
+  // the old HTML with new scripts is not a real snapshot.
+  const historical = new Map([['/index.html', index], ['/data/audio-manifest.js', manifestSource],
+    ['/' + previous.clips.hello, await read(previous.clips.hello)]]);
+  const assets = [...index.toString('utf8').matchAll(/(?:src|href)="([^"#]+\.(?:js|css)(?:\?[^" ]*)?)"/g)]
+    .map(match => match[1].split('?')[0]);
+  for (const filename of new Set(assets)) historical.set('/' + filename, await read(filename));
+  return {
+    previous,
+    files: historical
+  };
 }
 
 function initialize(options) {
@@ -90,24 +139,43 @@ function initialize(options) {
   HTMLMediaElement.prototype.play = function (...args) {
     if (!observed.has(this)) {
       observed.add(this);
-      const sample = { node: this, events: [], maximumTime: 0, duration: 0, playingCount: 0 };
+      const sample = { node: this, events: [], maximumTime: 0, duration: 0, playingCount: 0, currentCall: null };
       window.audioMedia.push(sample);
       for (const name of ['loadedmetadata', 'canplay', 'playing', 'ended', 'pause', 'error']) {
         this.addEventListener(name, () => {
           sample.events.push(name);
-          if (name === 'loadedmetadata') sample.duration = this.duration;
+          if (sample.currentCall && sample.currentCall.src === this.currentSrc) {
+            sample.currentCall.events.push(name);
+            if (Number.isFinite(this.duration)) sample.currentCall.duration = this.duration;
+            if (Number.isFinite(this.currentTime)) {
+              sample.currentCall.maximumTime = Math.max(sample.currentCall.maximumTime, this.currentTime);
+            }
+          }
+          if (name === 'loadedmetadata' && Number.isFinite(this.duration)) sample.duration = this.duration;
           if (name === 'playing') {
             sample.playingCount++;
             const active = window.audioMedia.filter(item => !item.node.paused && !item.node.ended).length;
             window.audioMaxActive = Math.max(window.audioMaxActive, active);
           }
-        });
+        // Capture before audio-player's onended switches src/currentCall to the
+        // next clip, or removes src after the last clip.
+        }, true);
       }
-      this.addEventListener('timeupdate', () => { sample.maximumTime = Math.max(sample.maximumTime, this.currentTime); });
+      this.addEventListener('timeupdate', () => {
+        if (Number.isFinite(this.currentTime)) {
+          sample.maximumTime = Math.max(sample.maximumTime, this.currentTime);
+          if (sample.currentCall && sample.currentCall.src === this.currentSrc) {
+            sample.currentCall.maximumTime = Math.max(sample.currentCall.maximumTime, this.currentTime);
+          }
+        }
+      }, true);
     }
     const mediaIndex = window.audioMedia.findIndex(sample => sample.node === this);
-    window.audioPlayCalls.push({ src: this.src, time: performance.now(), mediaIndex,
-      playingCountBefore: window.audioMedia[mediaIndex].playingCount });
+    const call = { src: this.src, time: performance.now(), mediaIndex,
+      playingCountBefore: window.audioMedia[mediaIndex].playingCount,
+      events: [], duration: 0, maximumTime: 0, playbackRate: this.playbackRate };
+    window.audioPlayCalls.push(call);
+    window.audioMedia[mediaIndex].currentCall = call;
     return realPlay.apply(this, args);
   };
   HTMLMediaElement.prototype.pause = function (...args) {
@@ -117,6 +185,7 @@ function initialize(options) {
 }
 
 (async () => {
+  assert.equal(Object.keys(manifest.clips).length, 501, '交付版必须包含全部 501 段录音');
   const server = await serverStart();
   const origin = `http://127.0.0.1:${server.address().port}`;
   let browser;
@@ -159,7 +228,8 @@ function initialize(options) {
         await units(page);
         await page.locator(`.english-unit[data-topic="${question.topic}"] button[data-action="start"]`).click();
       } else {
-        await goals(page, question.topic.startsWith('hello-') ? 'hello' : question.topic.startsWith('unit1-') ? 'unit1' : 'unit2');
+        await goals(page, question.topic.startsWith('hello-') ? 'hello' : question.topic.startsWith('unit1-') ? 'unit1'
+          : question.topic.startsWith('unit3-') ? 'unit3' : 'unit2');
         await page.locator(`.goal-unit[data-topic="${question.topic}"] button[data-action="start"]`).click();
       }
       assert.equal(await page.locator('.question').getAttribute('data-question-id'), question.id);
@@ -178,7 +248,7 @@ function initialize(options) {
     async function complete(page, prior, timeout = 45000) {
       await page.waitForFunction(prior => {
         const calls = window.audioPlayCalls;
-        return calls.length > prior && window.audioMedia.some(sample => sample.events.includes('ended'))
+        return calls.length > prior && calls.slice(prior).every(call => call.events.includes('ended'))
           && window.audioMedia.every(sample => sample.node.paused || sample.node.ended)
           && /读完|听完|播放完/.test(document.querySelector('.speech-status')?.textContent || '');
       }, prior, { timeout });
@@ -189,6 +259,22 @@ function initialize(options) {
       await begun(page, prior);
       await complete(page, prior, timeout);
       return (await page.evaluate(() => window.audioPlayCalls)).slice(prior);
+    }
+    async function playMappedToEnd(page, action, text, timeout) {
+      const expected = speechText.sentences(text).map(part => manifest.clips[speechText.canonical(part)]);
+      assert(expected.length > 0 && expected.every(Boolean), '每个完整句子或示例词都有真实清单映射');
+      assert.equal(await page.locator(`button[data-action="${action}"]`).first().isDisabled(), false,
+        '已有录音的 Unit 3 播放按钮启用');
+      const calls = await playToEnd(page, action, timeout);
+      assert.deepEqual(calls.map(call => new URL(call.src).pathname), expected.map(file => '/' + file),
+        '实际浏览器请求与英文句子按顺序一一对应');
+      for (const call of calls) {
+        assert(Number.isFinite(call.duration) && call.duration > 0 && call.maximumTime > 0
+          && ['loadedmetadata', 'canplay', 'playing', 'ended'].every(event => call.events.includes(event)),
+        '每个 MP3 均真实解码、产生播放进度并完整结束');
+        assert.equal(call.playbackRate, 1, '浏览器以正常一倍速度播放');
+      }
+      return calls;
     }
     const status = page => page.locator('.speech-status').first().innerText();
     async function lifecycle() {
@@ -238,7 +324,34 @@ function initialize(options) {
     assert(!(await status(page)).includes('不支持'));
     assert.deepEqual(await saved(page), afterAnswer, '听读不重复记录 wall 的首次作答');
     assert.equal(await page.evaluate(() => window.audioNativeCalls.length), 0);
-    pass('截图中的 wall 在无系统语音的浏览器中真实播放 MP3，首次作答记录不变');
+    await goals(page, 'hello');
+    await page.locator('.goal-unit[data-topic="hello-greetings"] button[data-action="goal-learn"]').click();
+    assert.equal(await page.evaluate(() => GardenAudioManifest.version), 3);
+    assert.match(manifest.voice.profile, /^azure-jenny-v1-[a-f0-9]{12}$/);
+    assert.equal(await page.evaluate(() => GardenAudioManifest.voice.profile), manifest.voice.profile);
+    for (const [index, greeting] of ['hello', 'hi'].entries()) {
+      if (index) await click(page, 'goal-next');
+      assert.equal((await page.locator('button[data-action="speak"]').first().getAttribute('data-text'))
+        .trim().replace(/[.!?]+$/, '').toLowerCase(), greeting, '问候卡保持 Hello 和 Hi 两个独立示范');
+      const greetingClips = await playToEnd(page, 'speak');
+      const corrected = audit.clips.find(clip => clip.key === greeting).digest.slice(0, 20);
+      const old = crypto.createHash('sha256').update(greeting).digest('hex').slice(0, 20);
+      assert.equal(manifest.clips[greeting], `assets/audio/${corrected}.mp3`);
+      assert.equal(greetingClips.length, 1, '每个问候只播放相应的新版片段');
+      assert.equal(new URL(greetingClips[0].src).pathname, '/assets/audio/' + corrected + '.mp3');
+      assert(!greetingClips[0].src.includes(old), '请求新地址，不重复播放旧缓存中的 Hello / Hi');
+    }
+    assert.deepEqual(await saved(page), afterAnswer, 'Hello / Hi 的听读不修改旧记录或英语首次作答');
+    assert.equal(await page.evaluate(() => window.audioNativeCalls.length), 0, '新版问候不依赖系统语音 API');
+    for (const source of ['speech-text.js', 'data/audio-manifest.js', 'audio-player.js', 'app.js',
+      'data/questions.js', 'data/english-unit3.js', 'style.css']) {
+      const sourceRequests = requests.filter(request => new URL(request.url).pathname === '/' + source);
+      assert(sourceRequests.length > 0, '真实页面确实加载新版脚本 ' + source);
+      const version = cacheVersion(source);
+      assert(sourceRequests.every(request => new URL(request.url).searchParams.get('v') === version),
+        source + ' 带新版缓存参数，避免平板继续使用旧逻辑');
+    }
+    pass('wall、Hello / Hi 真实播放新版 MP3，使用更新后的缓存地址，无系统语音且记录不变');
 
     // 2: Word learning and a listening question use audio without revealing its answer.
     await units(page);
@@ -378,13 +491,183 @@ function initialize(options) {
       }
       assert.deepEqual(await saved(unavailable), oldRecords);
     }
+    pass('录音失败后原生兜底可用；原生抛错、报错、超时与旧回调安全降级；仅同源文件读取');
+
+    // 9: Refresh the same origin with prior 398-clip Azure resources cached. Existing
+    // Chinese/English first answers, mistakes and unrelated settings survive.
+    const legacy = await legacyAudioFiles();
+    server.legacyFiles = legacy.files;
+    const upgrading = await fresh();
+    await upgrading.evaluate(({ key, records }) => {
+      localStorage.setItem(key, JSON.stringify(records));
+      localStorage.setItem('audio-upgrade-setting', 'keep-me');
+    }, { key: KEY, records: afterListening });
+    await upgrading.reload();
+    assert.equal(await upgrading.evaluate(() => GardenAudioManifest.version), 3);
+    assert.equal(await upgrading.evaluate(() => Object.keys(GardenAudioManifest.clips).length), 398);
+    const newlyRecorded = questions.bank('unit3-hasgot').find(q => q.id === 'unit3-hasgot-listen-no-tail');
+    await start(upgrading, newlyRecorded);
+    assert.equal(await upgrading.locator('button[data-action="listen"]').isDisabled(), true,
+      '真实旧版清单缺少新增 Unit 3 录音时明确禁用');
+    assert.equal(await upgrading.locator('.listening-text').isVisible(), true);
+    assert((await status(upgrading)).includes('准备'));
+    await goals(upgrading, 'hello');
+    await upgrading.locator('.goal-unit[data-topic="hello-greetings"] button[data-action="goal-learn"]').click();
+    const oldPlayback = await playToEnd(upgrading, 'speak');
+    assert.equal(oldPlayback.length, 1);
+    assert.equal(new URL(oldPlayback[0].src).pathname, '/' + legacy.previous.clips.hello);
+    assert(server.servedRequests.includes('/data/audio-manifest.js?v=azure-jenny-v3-20261012'), '真实原 398 段清单曾下载并可进入 HTTP 缓存');
+    assert(server.servedRequests.includes('/' + legacy.previous.clips.hello), '真实旧 Hello 曾下载并播放');
+    const oldHelloRequests = () => server.servedRequests.filter(url => url === '/' + legacy.previous.clips.hello).length;
+    const cachedHelloRequests = oldHelloRequests();
+    await playToEnd(upgrading, 'speak');
+    assert.equal(oldHelloRequests(), cachedHelloRequests, '再次播放旧 Hello 命中浏览器缓存，没有向服务端重复下载');
+    assert.deepEqual(await saved(upgrading), afterListening);
+    const beforeUpgrade = server.servedRequests.length;
+    server.legacyFiles = null;
+    await upgrading.reload();
+    assert.equal(await upgrading.evaluate(() => GardenAudioManifest.version), 3, '增量升级继续使用 Azure v3 音频格式');
+    assert.equal(await upgrading.evaluate(() => Object.keys(GardenAudioManifest.clips).length), 501,
+      '同源刷新加载完整 501 段清单，没有沿用已缓存的 398 段清单');
+    assert.equal(await upgrading.evaluate(() => GardenAudioManifest.voice.name), 'en-US-JennyNeural');
+    assert(await upgrading.evaluate(() => GardenQuestions.topics.some(topic=>topic.id==='unit3-hasgot')),
+      '同源升级获取包含 Unit 3 的题库，而不是旧缓存');
+    assert.deepEqual(await saved(upgrading), afterListening, '刷新升级原样保留中文、英语首次记录与错题');
+    assert.equal(await upgrading.evaluate(() => localStorage.getItem('audio-upgrade-setting')), 'keep-me');
+    await goals(upgrading, 'hello');
+    await upgrading.locator('.goal-unit[data-topic="hello-greetings"] button[data-action="goal-learn"]').click();
+    const newPlayback = await playToEnd(upgrading, 'speak');
+    assert.equal(newPlayback.length, 1);
+    assert.equal(new URL(newPlayback[0].src).pathname, '/' + manifest.clips.hello);
+    assert.equal(manifest.clips.hello, legacy.previous.clips.hello, '原 398 段录音的 Hello 地址继续复用');
+    assert.equal(oldHelloRequests(), cachedHelloRequests, '升级后播放复用同一 Hello HTTP 缓存，不重复下载');
+    const oldHelloBytes = legacy.files.get('/' + legacy.previous.clips.hello);
+    assert.deepEqual(await fs.readFile(path.join(root, manifest.clips.hello)), oldHelloBytes,
+      '原有 Hello 的实际 MP3 字节保持不变');
+    await start(upgrading, newlyRecorded);
+    assert.equal(await upgrading.locator('.listening-text').isVisible(), false, '新录音可用后不再显示准备中文字兜底');
+    await playMappedToEnd(upgrading, 'listen', newlyRecorded.speech);
+    assert.equal(await upgrading.locator('.listening-text').isVisible(), false);
+    const upgradeRequests = server.servedRequests.slice(beforeUpgrade);
+    assert(upgradeRequests.includes('/data/audio-manifest.js?v=' + AUDIO_CACHE), '新缓存参数请求当前 501 段清单');
+    for (const source of ['app.js', 'data/questions.js', 'data/english-unit3.js', 'style.css']) {
+      assert(upgradeRequests.includes('/' + source + '?v=' + cacheVersion(source)), source + ' 使用新版缓存参数');
+    }
+    assert(upgradeRequests.includes('/' + manifest.clips[speechText.canonical(newlyRecorded.speech)]),
+      '刷新后实际下载并播放新增 Unit 3 MP3');
+    assert.deepEqual(await saved(upgrading), afterListening, '新声音播放不改首次作答或错题，也没有清空数据');
+    pass('同源原 398 段与 MP3 已缓存时，刷新切换 501 段并启用新 Unit 3 录音，Hello 缓存与学习记录和错题保留');
+
+    // 10: New Unit 3 listening prompts and answer models are real Jenny MP3s.
+    const farmPage = await fresh('ok');
+    for (const id of ['ears', 'no-tail', 'yes', 'no']) {
+      const q = questions.bank('unit3-hasgot').find(item => item.id === 'unit3-hasgot-listen-' + id);
+      await start(farmPage, q);
+      assert.equal(await farmPage.locator('.listening-text').isVisible(), false, 'Unit 3 听辨不提前揭示英文文字');
+      await playMappedToEnd(farmPage, 'listen', q.speech);
+      assert.equal(await farmPage.locator('.listening-text').isVisible(), false, '真实 MP3 听完也不泄露答案');
+      assert.deepEqual(await saved(farmPage), oldRecords, 'Unit 3 只听题不写学习成绩');
+    }
+    let unit3Records = oldRecords;
+    for (const id of ['complete-has', 'negative', 'ask', 'yes', 'no']) {
+      const q = questions.bank('unit3-hasgot').find(item => item.id === 'unit3-hasgot-language-' + id);
+      await start(farmPage, q);
+      await choice(farmPage, q.answer).click();
+      const answered = await saved(farmPage);
+      assert.equal(answered.attempts.length, unit3Records.attempts.length + 1);
+      assert.equal(answered.attempts.at(-1).question, q.id);
+      assert.equal(answered.attempts.at(-1).correct, true);
+      assert.equal(await farmPage.locator('button[data-action="speak"]').first().getAttribute('data-text'), q.answerSpeech);
+      await playMappedToEnd(farmPage, 'speak', q.answerSpeech);
+      assert.deepEqual(await saved(farmPage), answered, '肯定、否定、疑问和 Yes/No 示范播放不重复记分');
+      unit3Records = answered;
+    }
+    await home(farmPage);
+    await farmPage.reload();
+    assert.deepEqual(await saved(farmPage), unit3Records, '新语法作答和旧错题在刷新后原样保存');
+    assert.equal(await farmPage.evaluate(() => window.audioNativeCalls.length), 0,
+      '即使设备原生声音可用，全部新 Unit 3 播放仍使用 Jenny MP3');
+    pass('Unit 3 has/hasn’t got 听题及疑问、Yes/No 答后示范逐句真实播放，隐藏答案且首次成绩刷新保存');
+
+    // 11: c/k/ck are complete-word audio, never letter names or bracketed spelling.
+    await goals(farmPage, 'unit3');
+    await farmPage.locator('.goal-unit[data-topic="unit3-phonics"] button[data-action="goal-learn"]').click();
+    for (const [index, card] of unit3.lesson('unit3-phonics').slice(0, 3).entries()) {
+      if (index) await click(farmPage, 'goal-next');
+      const button = farmPage.locator('button[data-action="speak"]').first();
+      assert.equal(await button.getAttribute('data-text'), card.sayModel);
+      assert(!/[\[\]]/.test(await button.getAttribute('data-text')), '拼写方括号不进入朗读');
+      assert((await button.innerText()).includes('听示例词'));
+      await playMappedToEnd(farmPage, 'speak', card.sayModel);
+    }
+    assert.deepEqual(await saved(farmPage), unit3Records);
+    pass('Unit 3 c / k / ck 分别播放 cat/cow、donkey、chicken/duck 完整词，与清单准确对应');
+
+    // 12: The original baby story plays every sentence in order.
+    const babyStory = questions.bank('unit3-reading').find(q => q.id === 'unit3-reading-lamb-name');
+    await start(farmPage, babyStory);
+    for (const line of babyStory.passage) assert((await farmPage.locator('.reading-passage').innerText()).includes(line));
+    const babyCalls = await playMappedToEnd(farmPage, 'read-passage', babyStory.passage.join(' '));
+    assert.equal(babyCalls.length, babyStory.passage.length);
+    assert.deepEqual(await saved(farmPage), unit3Records, '完整宝宝故事不改变成绩或错题');
+    pass('Unit 3 绵羊宝宝原创短文四句按原文顺序完整播放，包含出生方式和否定句');
+
+    // 13: Edited farm sentences, plural sheep and the care promise play completely.
+    await farmPage.setViewportSize({ width: 1024, height: 768 });
+    await goals(farmPage, 'unit3');
+    await click(farmPage, 'farm');
+    const farmSelection = {
+      animals: [{ key: 'sheep', count: 2, description: 'small' },
+        { key: 'donkey', count: 1, description: 'big' },
+        { key: 'duck', count: 3, description: 'happy' }], care: 'kind'
+    };
+    // Free the default sheep slot before selecting it in slot 0.
+    for (const index of [1, 0, 2]) {
+      const slot = farmSelection.animals[index];
+      await farmPage.locator(`select[data-farm-animal="${index}"]`).selectOption(slot.key);
+      await farmPage.locator(`select[data-farm-count="${index}"]`).selectOption(String(slot.count));
+      await farmPage.locator(`select[data-farm-description="${index}"]`).selectOption(slot.description);
+    }
+    assert.deepEqual(await saved(farmPage), unit3Records, '编辑农场草稿不写学习记录');
+    await click(farmPage, 'farm-show');
+    const farmText = unit3.farmSentences(farmSelection);
+    assert.deepEqual(await farmPage.locator('#farm-sheet p[lang="en"]').allTextContents(), farmText,
+      '展示内容和编辑的三组动物、单复数、产品句与约定一致');
+    const farmCalls = await playMappedToEnd(farmPage, 'read-farm', farmText.join(' '), 75000);
+    assert.equal(farmCalls.length, farmText.length, '完整农场介绍每句都真实播放到结束');
+    assert(!/\bsheeps\b/.test(farmText.join(' ')));
+    assert.equal(farmText.at(-1), 'We are kind to animals.');
+    assert.equal(await farmPage.evaluate(() => window.audioMaxActive), 1, '完整农场介绍逐句衔接且不叠音');
+    await click(farmPage, 'farm-edit');
+    await farmPage.locator('select[data-farm-count="0"]').selectOption('3');
+    await click(farmPage, 'farm-show');
+    const changedSelection = { animals: farmSelection.animals.map((slot, i) => i ? slot : { ...slot, count: 3 }), care: 'kind' };
+    const changedText = unit3.farmSentences(changedSelection);
+    const changedCalls = await playMappedToEnd(farmPage, 'read-farm', changedText.join(' '), 75000);
+    assert.equal(changedCalls.length, changedText.length);
+    assert.equal(new URL(changedCalls[0].src).pathname, '/' + manifest.clips['our farm has got three sheep'],
+      '修改后播放新的三只绵羊句子，没有沿用旧草稿录音');
+    assert(await farmPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth), '平板农场音频界面不溢出');
+    assert.deepEqual(await saved(farmPage), unit3Records, '两次完整农场介绍和再编辑均保留全部记录与错题');
+    pass('可编辑完整农场介绍真实播放单/复数、sheep、产品句及照顾约定，修改数量后使用对应 MP3');
+
+    // 14: Unit 3 must not silently use a different system voice when media fails.
+    const unit3Failure = await fresh('ok', true);
+    await start(unit3Failure, newlyRecorded);
+    await click(unit3Failure, 'listen');
+    await unit3Failure.locator('.listening-text').waitFor({ state: 'visible', timeout: 15000 });
+    assert((await unit3Failure.locator('.listening-text').innerText()).includes(newlyRecorded.fallbackPrompt));
+    assert.equal(await unit3Failure.evaluate(() => window.audioNativeCalls.length), 0);
+    assert.deepEqual(await saved(unit3Failure), oldRecords);
+    pass('新增 Unit 3 MP3 失败时提供明确文字提示，有系统语音也不替换已指定 Jenny 声线');
+
     assert.deepEqual(pageErrors, [], '所有设备和失败场景均没有未捕获脚本异常');
     assert(requests.every(request => request.method === 'GET' && new URL(request.url).origin === origin),
       '运行时只读取项目本身的文件，不发送文字或资料到外部语音接口');
     assert(requests.some(request => /\/assets\/audio\/[^/]+\.mp3$/.test(request.url)), '确实请求了项目内的录音文件');
-    pass('录音失败后原生兜底可用；原生抛错、报错、超时与旧回调安全降级；仅同源文件读取');
 
     console.log(`通过 ${passed.length} 组真实浏览器音频检查。`);
+    console.log('以上验证实际 MP3 播放与文本对应，不等同于全部发音已人工确认。');
   } finally {
     await Promise.all(contexts.map(context => context.close().catch(() => {})));
     await browser?.close();

@@ -205,7 +205,7 @@ for (const [id, answer] of Object.entries(dialogueAnswers)) {
 
 // Run the same data and backup scripts without CommonJS, fetch or a server.
 const scriptSources = [...read('index.html').matchAll(/<script\b([^>]*)>/g)]
-  .map(match => ({ attributes: match[1], source: match[1].match(/\bsrc=["']([^"']+)["']/)?.[1] }))
+  .map(match => ({ attributes: match[1], source: match[1].match(/\bsrc=["']([^"']+)["']/)?.[1]?.split(/[?#]/)[0] }))
   .filter(script => script.source);
 for (const script of scriptSources) {
   assert(!/^https?:|^\/\//i.test(script.source), '必需脚本保存在项目内');
@@ -213,7 +213,7 @@ for (const script of scriptSources) {
   assert(fs.existsSync(path.join(repository, script.source)), `脚本文件已包含：${script.source}`);
   assert(!/\b(?:fetch|XMLHttpRequest|WebSocket)\s*\(/.test(read(script.source)), '学习内容和备份不依赖网络接口');
 }
-const dependencies = ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js', 'data/questions.js', 'record-backup.js'];
+const dependencies = ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js', 'data/english-unit3.js', 'data/questions.js', 'record-backup.js'];
 const actualOrder = scriptSources.filter(script => dependencies.includes(script.source)).map(script => script.source);
 assert.deepEqual(actualOrder, dependencies, '双击运行时题库与备份依赖加载顺序正确');
 const sandbox = {};

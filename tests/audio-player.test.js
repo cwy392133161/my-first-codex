@@ -8,6 +8,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 const test = require('node:test');
 const source = fs.readFileSync(path.resolve(__dirname, '../audio-player.js'), 'utf8');
+const speechSource = fs.readFileSync(path.resolve(__dirname, '../speech-text.js'), 'utf8');
 const clips = {
   wall: 'assets/audio/aaaaaaaaaaaaaaaaaaaa.mp3',
   blue: 'assets/audio/bbbbbbbbbbbbbbbbbbbb.mp3'
@@ -48,7 +49,9 @@ function browser() {
     clearTimeout(id) { timers.delete(id); }
   };
   sandbox.window = sandbox;
-  new vm.Script(source, { filename: 'audio-player.js' }).runInNewContext(sandbox);
+  const context = vm.createContext(sandbox);
+  new vm.Script(speechSource, { filename: 'speech-text.js' }).runInContext(context);
+  new vm.Script(source, { filename: 'audio-player.js' }).runInContext(context);
   function advance(ms) {
     const target = now + ms;
     for (;;) {

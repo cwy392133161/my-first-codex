@@ -2,11 +2,11 @@
 (function(root){
   'use strict';
   const manifest=typeof module!=='undefined' && module.exports?require('./data/audio-manifest.js'):root.GardenAudioManifest;
+  const speechText=typeof module!=='undefined' && module.exports?require('./speech-text.js'):root.GardenSpeechText;
   let audio=null,ticket=0,loadTimer=null,endTimer=null;
-  const canonical=text=>String(text).replace(/[’‘]/g,"'").replace(/\s+/g,' ').trim().replace(/[.!?]+$/,'').toLowerCase();
   function plan(text){
-    const parts=(String(text).match(/[^.!?]+[.!?]*/g)||[]).map(part=>part.trim()).filter(Boolean);
-    const files=parts.map(part=>manifest?.clips?.[canonical(part)]);
+    const parts=speechText.sentences(speechText.text(text));
+    const files=parts.map(part=>manifest && manifest.clips && manifest.clips[speechText.canonical(part)]);
     return files.length && files.every(file=>/^assets\/audio\/[a-f0-9]{20}\.mp3$/.test(file || ''))?files:[];
   }
   function has(text){return typeof root.Audio==='function' && plan(text).length>0;}
@@ -25,7 +25,7 @@
     const current=()=>token===ticket && !finished;
     const fail=reason=>{
       if(!current())return;
-      finished=true;silence();callbacks.onFailure?.(new Error(reason));
+      finished=true;silence();if(typeof callbacks.onFailure==='function')callbacks.onFailure(new Error(reason));
     };
     if(!has(text)){fail('missing-audio');return false;}
     try{
@@ -34,11 +34,11 @@
         if(!current())return;
         clearTimers();
         audio.src=files[index];
-        callbacks.onStatus?.('正在加载音频……');
+        if(typeof callbacks.onStatus==='function')callbacks.onStatus('正在加载音频……');
         loadTimer=setTimeout(()=>fail('audio-start-timeout'),8000);
         audio.onplaying=()=>{
           if(!current())return;
-          clearTimers();callbacks.onStatus?.('正在播放，可以跟着读一遍。');
+          clearTimers();if(typeof callbacks.onStatus==='function')callbacks.onStatus('正在播放，可以跟着读一遍。');
           const duration=Number.isFinite(audio.duration)?audio.duration:20;
           endTimer=setTimeout(()=>fail('audio-end-timeout'),Math.max(10000,Math.min(90000,duration*2000+5000)));
         };
@@ -52,11 +52,11 @@
           if(!current() || !audio.ended)return;
           clearTimers();index++;
           if(index<files.length){load();return;}
-          finished=true;silence();callbacks.onEnd?.();
+          finished=true;silence();if(typeof callbacks.onEnd==='function')callbacks.onEnd();
         };
         // First play happens synchronously inside the user's click; later clips
         // reuse this unlocked audio element so mobile browsers allow the sequence.
-        try{const result=audio.play();result?.catch(()=>fail('audio-play-blocked'));}
+        try{const result=audio.play();if(result && typeof result.catch==='function')result.catch(()=>fail('audio-play-blocked'));}
         catch{fail('audio-play-blocked');}
       };
       load();return true;
