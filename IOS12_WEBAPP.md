@@ -61,6 +61,8 @@ node tests/audio-review.browser.test.js
 
 ## 发布与核对
 
+本次兼容代码提交为 `42919d04191ad09e0d581d5560f901e57a0a01d4`，已通过合并提交 `cc2516bc9f8b14ae20cd290c8cff037c80ff0909` 推送到 `learning-garden-windows`；开发分支 `ios12-webapp` 同样已保存。已核对远端成功，`main` 和Pages设置未修改。当前 `learning-record-backup` 仍为 `b635fe0`；推送指定分支后，公开Actions列表未出现本次提交的Pages任务，**原网址尚未发布兼容更新**。同步实际来源的范围等待用户选择。
+
 本次用户指定更新 `learning-garden-windows`，不能只保存到`main`。同时，最近成功的真实Pages部署 [38488738173](https://github.com/cwy392133161/my-first-codex/actions/runs/38488738173) 显示：2026-10-14，`learning-record-backup`、提交`b635fe0`、Status Success。**当前实际发布来源与用户给出的分支名称存在差异。** 保持Pages设置不变时，线上更新需要将同一兼容版本同步到实际发布来源；是否同步按用户本次选择执行。
 
 合并并推送后，在GitHub仓库 **Actions → pages build and deployment** 查看对应新提交的build、deploy成功；在iPhone Safari刷新原网址，重新添加主屏幕图标，并按上面的步骤检查。不要改域名、Pages来源或清空学习记录。
