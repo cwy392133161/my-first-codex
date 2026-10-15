@@ -2,7 +2,9 @@
 
 // node tests/audio.test.js
 // node tests/audio.test.js --decode  (also needs FFmpeg; decodes every MP3)
-// Strict full delivery: every current Unit 3 reading must have a real MP3.
+// Strict delivery requires every current reading, including Unit 4, to have a real MP3.
+// --allow-pending audits delivered files and the exact explicit missing registry.
+// This review mode does not certify delivery of newly added recordings.
 // Enumerate real reading sources independently of the audio build helper.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -15,16 +17,23 @@ const hello = require('../data/english-hello.js');
 const unit1 = require('../data/english-unit1.js');
 const unit2 = require('../data/english-unit2.js');
 const unit3 = require('../data/english-unit3.js');
+const unit4 = require('../data/english-unit4.js');
 const questions = require('../data/questions.js');
 const speechText = require('../speech-text.js');
 const manifest = require('../data/audio-manifest.js');
 const audio = require('../audio-player.js');
 const audit = require('../data/audio-audit.json');
 const collect = require('../scripts/audio-texts.js').collect;
-assert(!process.argv.includes('--allow-pending'), '全量交付检查不再支持待生成审查模式。');
-const collected = collect();
-assert.equal(collected.clips.length, 501, '完整当前计划含 Unit 3，共501段');
-assert.equal(collected.texts.length, 2029, '2029个实际朗读入口全部纳入交付检查');
+const allowPending = process.argv.includes('--allow-pending');
+const fullCollected = collect();
+const published = collect({includeUnit4:false});
+assert.equal(published.clips.length, 501, '已发布基线保持 501 段');
+assert.equal(published.texts.length, 2029, '已发布基线保持 2029 个朗读入口');
+const collected = allowPending ? published : fullCollected;
+const pendingRegistry = allowPending ? require('../data/audio-pending.json') : null;
+const pendingKeys = new Set(pendingRegistry ? pendingRegistry.clips.map(clip => clip.key) : []);
+if (!allowPending) assert.equal(audit.clips.length, fullCollected.clips.length,
+  `全量录音尚未完成：当前需要 ${fullCollected.clips.length} 段，已交付 ${audit.clips.length} 段，仍缺 ${fullCollected.clips.length-audit.clips.length} 段。--allow-pending 仅审查已交付文件及待生成计划，不代表新增音频已交付。`);
 
 const repository = path.resolve(__dirname, '..');
 const normalize = text => text.replace(/[\u2018\u2019]/g, "'").replace(/\s+/g, ' ')
@@ -63,10 +72,15 @@ function checkPlan(text, label, remember = false) {
     const key = normalize(piece);
     assert(key, `${label} 不包含空片段`);
     expectedKeys.add(key);
-    assert(Object.hasOwn(manifest.clips, key), `${label} 缺少音频：${piece}`);
+    if (!Object.hasOwn(manifest.clips, key)) {
+      assert(allowPending && pendingKeys.has(key), `${label} 缺少音频且没有准确待生成条目：${piece}`);
+      return null;
+    }
+    assert(!pendingKeys.has(key), `${label} 已交付片段不得冒充待生成`);
     return manifest.clips[key];
   });
-  assert.deepEqual(audio.plan(text), expected, `${label} 的整个朗读按顺序映射到本地音频`);
+  assert.deepEqual(audio.plan(text), expected.includes(null) ? [] : expected,
+    `${label} 全部已准备时按序播放；任一句未生成时不虚报完整朗读`);
   sourceCount++;
   if (remember) staticSources.push({ text, label });
 }
@@ -133,7 +147,36 @@ const prepared = audit.clips.map(clip => ({
 }));
 assert.equal(audit.datasetSha256, hashJSON(prepared), '审核数据完整对应当前数据集和逐段 SSML');
 assert(manifest.clips && typeof manifest.clips === 'object');
-assert(!fs.existsSync(path.join(repository, 'data/audio-pending.json')), '全量音频完成后不能保留待生成清单。');
+if (allowPending) {
+  const fullPrepared = fullCollected.clips.map(clip => {
+    const ssml = expectedSSML(clip.text);
+    const digest = hashJSON({ssml, format:configuration.format, pipeline:1});
+    return {key:clip.key,text:clip.text,ssml,digest,path:`assets/audio/${digest.slice(0,20)}.mp3`,sources:clip.sources};
+  });
+  const missing = fullPrepared.filter(clip => !Object.hasOwn(manifest.clips, clip.key))
+    .map(({ssml,...clip}) => clip);
+  assert.equal(pendingRegistry.version, 1);
+  assert.equal(pendingRegistry.status, 'pending');
+  assert.deepEqual(pendingRegistry.configuration, configuration);
+  assert.equal(pendingRegistry.region, 'eastus');
+  assert.equal(pendingRegistry.datasetSha256, hashJSON(fullPrepared), '待生成计划覆盖当前全部真实输入与 SSML');
+  assert.equal(pendingRegistry.totalClips, fullCollected.clips.length);
+  assert.equal(pendingRegistry.availableClips, audit.clips.length);
+  assert.equal(pendingRegistry.pendingClips, missing.length);
+  assert.equal(pendingRegistry.sourceCount, fullCollected.texts.length);
+  assert.equal(pendingKeys.size, missing.length, '待生成清单不重复计数');
+  assert.deepEqual(pendingRegistry.clips, missing, '待生成清单严格等于全部新计划减去已交付录音');
+  assert(missing.length > 0, '待生成审查模式明确包含尚未交付的录音');
+  assert.match(pendingRegistry.reason, /尚未生成/);
+  const fullInputs = new Map(fullCollected.clips.map(clip => [clip.key,clip]));
+  for (const clip of audit.clips) {
+    const current = fullInputs.get(clip.key);
+    assert.equal(current.text, clip.text, '复用音频不改动旧文本与 SSML');
+    assert.deepEqual(current.sources.slice(0,clip.sources.length), clip.sources, '所有新用途在原来源后追加');
+  }
+} else {
+  assert(!fs.existsSync(path.join(repository, 'data/audio-pending.json')), '全量音频完成后不能保留待生成清单。');
+}
 
 // Word aliases include all optional extension words, not only the home defaults.
 let wordCount = 0;
@@ -155,13 +198,13 @@ for (const topic of questions.topics) {
     if (question.passage?.length) checkPlan(question.passage.join(' '), `故事全文 ${question.id}`, true);
   }
 }
-for (const api of [hello, unit1, unit2, unit3]) {
+for (const api of [hello, unit1, unit2, unit3, unit4]) {
   const topics = api.reviewTopic ? [...api.topics, api.reviewTopic] : api.topics;
   for (const topic of topics) {
     for (const card of api.lesson(topic.id)) {
       checkPlan(card.sayModel, `开口示范 ${card.id}`, true);
       // Phonics buttons use whole-word sayModel rather than reading IPA/letters.
-      if (!['unit1-phonics', 'unit2-phonics', 'unit3-phonics'].includes(topic.id)) {
+      if (!['unit1-phonics', 'unit2-phonics', 'unit3-phonics', 'unit4-phonics'].includes(topic.id)) {
         checkPlan(lessonReading(card), `学习卡英文 ${card.id}`, true);
       }
     }
@@ -241,10 +284,27 @@ checkPlan(unit3.farmSentences({ animals: [
   {key:'sheep',count:2,description:'small'}, {key:'duck',count:1,description:'happy'},
   {key:'donkey',count:3,description:'big'}], care:'kind' }).join(' '), '三组动物完整农场');
 
+// Enumerate the task's actual finite dialogue lines independently of collection.
+// A valid selection requires three distinct foods, including both reply choices.
+let picnicCount = 0;
+for (const food of unit4.picnic.foods) for (const reply of ['yes','no']) {
+  const others = unit4.picnic.foods.filter(item=>item.key!==food.key).slice(0,2);
+  for (const drink of unit4.picnic.drinks) {
+    const selection = {foods:[{key:food.key,reply},...others.map(item=>({key:item.key,reply:'yes'}))],drink:drink.key};
+    const lines = unit4.picnicSentences(selection);
+    assert(lines.length > 0, '野餐生成器的有效选择必须提供真实示范');
+    checkPlan(lines.join(' '), `野餐 ${food.key}/${reply}/${drink.key}`);
+    picnicCount++;
+  }
+}
+assert.equal(picnicCount, unit4.picnic.foods.length * 2 * unit4.picnic.drinks.length);
+
 // Verify the physical delivery, not just the promise of a manifest entry.
 const entries = Object.entries(manifest.clips);
-assert.equal(entries.length, expectedKeys.size, '题库、学习卡和全部作品实际需要的每个片段都已覆盖');
-assert.deepEqual(new Set(entries.map(([key]) => key)), expectedKeys, '所有音频都有实际教学朗读来源');
+const deliveredKeys = new Set([...expectedKeys].filter(key=>!pendingKeys.has(key)));
+assert.equal(entries.length, deliveredKeys.size, '全部已交付录音都有实际朗读用途');
+assert.deepEqual(new Set(entries.map(([key]) => key)), deliveredKeys, '已交付与明确待生成片段共同覆盖真实教学朗读');
+assert.deepEqual(new Set([...expectedKeys].filter(key=>!Object.hasOwn(manifest.clips,key))), pendingKeys, '独立枚举得到的缺少片段与待生成清单完全相同');
 const files = new Set();
 let totalBytes = 0;
 for (const [key, filename] of entries) {
@@ -288,7 +348,7 @@ for (const [index, match] of scripts.entries()) {
   assert(!/^(?:[a-z]+:|\/)/i.test(paths[index]), '必需脚本都采用相对本地路径');
   assert(fs.statSync(path.join(repository, paths[index])).isFile(), `${paths[index]} 随项目交付`);
 }
-for (const required of ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js', 'data/english-unit3.js', 'data/questions.js', 'record-backup.js', 'speech-text.js', 'data/audio-manifest.js', 'audio-player.js', 'app.js']) {
+for (const required of ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js', 'data/english-unit3.js', 'data/english-unit4.js', 'data/questions.js', 'record-backup.js', 'speech-text.js', 'data/audio-manifest.js', 'audio-player.js', 'app.js']) {
   assert.equal(paths.filter(filename => filename === required).length, 1, `${required} 加载一次`);
 }
 for (const changed of ['speech-text.js', 'data/audio-manifest.js', 'audio-player.js']) {
@@ -297,13 +357,14 @@ for (const changed of ['speech-text.js', 'data/audio-manifest.js', 'audio-player
     `${changed} 有缓存版本，避免平板沿用旧脚本`);
 }
 assert(sources.includes('data/english-unit3.js?v=unit3-farm-audio-v2-20261013'), '新增课程内容有独立缓存版本');
-assert(sources.includes('app.js?v=ios12-webapp-v1-20261014'), '兼容修复脚本有自己的缓存版本');
-assert(sources.includes('data/questions.js?v=unit3-farm-audio-v2-20261013'), '题库新依赖和新编号不能继续命中旧版缓存');
-assert(html.includes('style.css?v=ios12-webapp-v1-20261014'), '兼容修复样式有缓存版本');
+assert(sources.includes('app.js?v=unit4-food-v1'), '新增课程脚本有自己的缓存版本');
+assert(sources.includes('data/questions.js?v=unit4-food-v1'), '题库新依赖和新编号不能继续命中旧版缓存');
+assert(sources.includes('data/english-unit4.js?v=unit4-food-v1'), '新增 Unit 4 课程模块随页面交付');
+assert(html.includes('style.css?v=unit4-food-v1'), '新增课程样式有缓存版本');
 assert(paths.indexOf('speech-text.js') < paths.indexOf('data/audio-manifest.js'));
 assert(paths.indexOf('data/audio-manifest.js') < paths.indexOf('audio-player.js'));
 assert(paths.indexOf('audio-player.js') < paths.indexOf('app.js'));
-for (const prerequisite of ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js', 'data/english-unit3.js']) {
+for (const prerequisite of ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js', 'data/english-unit3.js', 'data/english-unit4.js']) {
   assert(paths.indexOf(prerequisite) < paths.indexOf('data/questions.js'), '题库依赖先加载');
 }
 const sandbox = { Audio: function Audio() {}, setTimeout, clearTimeout };
@@ -329,7 +390,7 @@ for (const source of ['speech-text.js', 'data/audio-manifest.js', 'audio-player.
   assert(reviewHTML.includes(`src="${source}?v=${version}"`), '试听页使用新版脚本缓存地址');
 }
 
-console.log(`音频静态检查通过：${entries.length} 段，${staticCount} 个固定朗读入口，${posterCount} 种海报、${bookletCount} 种小手册，${(totalBytes / 1024 / 1024).toFixed(2)} MiB。`);
+console.log(`音频${allowPending?'待生成审查':'全量交付检查'}通过：已验证 ${entries.length} 段，${staticCount} 个固定朗读入口，${posterCount} 种海报、${bookletCount} 种小手册、${picnicCount} 组野餐选项，${(totalBytes / 1024 / 1024).toFixed(2)} MiB。${allowPending?' 另有 '+pendingKeys.size+' 段明确未生成，本结果不代表新增录音已交付。':''}`);
 
 async function decodeEveryFile() {
   let next = 0;

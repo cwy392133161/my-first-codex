@@ -5,6 +5,7 @@
   const unit1 = typeof module !== 'undefined' ? require('./english-unit1.js') : root.GardenUnit1;
   const unit2 = typeof module !== 'undefined' ? require('./english-unit2.js') : root.GardenUnit2;
   const unit3 = typeof module !== 'undefined' ? require('./english-unit3.js') : root.GardenUnit3;
+  const unit4 = typeof module !== 'undefined' ? require('./english-unit4.js') : root.GardenUnit4;
   const topics = [
     { id: 'parts', subject: 'math', name: '10以内分与合', icon: '🧩', description: '把一个数分成两部分' },
     { id: 'arithmetic', subject: 'math', name: '10以内加减法', icon: '🍎', description: '数一数，加一加，减一减' },
@@ -17,7 +18,9 @@
     ...unit1.topics,
     ...unit2.topics,
     unit2.reviewTopic,
-    ...unit3.topics
+    ...unit3.topics,
+    ...unit4.topics,
+    unit4.reviewTopic
   ];
   const pinyin = [
     ['“妈妈”的“妈”，声母是哪一个？','m',['m','n','b'],'读 mā 时，先闭上嘴唇。','“妈”的拼音是 mā，声母是 m。'],
@@ -152,6 +155,7 @@
     return {id:`${topic}-${a}-${b}-${op || ''}`,topic,prompt,answer:String(answer),choices:choices.map(String),hint,explanation,math:{a,b,op:op||null}};
   }
   function bank(topic) {
+    if (unit4.topics.some(item => item.id === topic) || topic === unit4.reviewTopic.id) return unit4.bank(topic);
     if (unit3.topics.some(item => item.id === topic)) return unit3.bank(topic);
     if (unit2.topics.some(item => item.id === topic) || topic === unit2.reviewTopic.id) return unit2.bank(topic);
     if (unit1.topics.some(item => item.id === topic)) return unit1.bank(topic);

@@ -107,13 +107,15 @@ assert.equal(icon.toString('ascii', 12, 16), 'IHDR');
 assert.equal(icon.readUInt32BE(16), 180);
 assert.equal(icon.readUInt32BE(20), 180);
 for (const file of ['style.css', 'app.js', 'speech-text.js', 'audio-player.js']) {
-  assert(index.includes(`${file}?v=ios12-webapp-v1-20261014`), `${file} 更新缓存版本`);
+  const version = ['style.css','app.js'].includes(file) ? 'unit4-food-v1' : 'ios12-webapp-v1-20261014';
+  assert(index.includes(`${file}?v=${version}`), `${file} 更新缓存版本`);
 }
 
-// A layout/compatibility release cannot silently change the learning content,
+// New Unit 4 content is appended; existing learning content is immutable.
+// A curriculum extension cannot silently change the old content,
 // cloud recordings, question identities, or the persisted backup protocol.
 const unchanged = ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js',
-  'data/english-unit3.js', 'data/questions.js', 'data/audio-manifest.js', 'data/audio-audit.json', 'record-backup.js'];
+  'data/english-unit3.js', 'data/audio-manifest.js', 'data/audio-audit.json', 'record-backup.js'];
 for (const file of unchanged) assert.deepEqual(read(file), old(file), `${file} 与当前音频交付基线完全一致`);
 const cache = new Map();
 function baselineModule(file) {
@@ -127,10 +129,10 @@ function baselineModule(file) {
 }
 const beforeQuestions = baselineModule('data/questions.js');
 const questions = require('../data/questions.js');
-assert.deepEqual(questions.topics, plain(beforeQuestions.topics));
+assert.deepEqual(questions.topics.slice(0,beforeQuestions.topics.length), plain(beforeQuestions.topics), '原有主题完整保留，新主题追加');
 let count = 0;
 const ids = new Set();
-for (const topic of questions.topics) {
+for (const topic of beforeQuestions.topics) {
   const bank = questions.bank(topic.id);
   assert.deepEqual(bank, plain(beforeQuestions.bank(topic.id)), `${topic.id} 完整题目及稳定题号保留`);
   count += bank.length;

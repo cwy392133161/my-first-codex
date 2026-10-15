@@ -5,16 +5,17 @@ const hello=require('../data/english-hello.js');
 const unit1=require('../data/english-unit1.js');
 const unit2=require('../data/english-unit2.js');
 const unit3=require('../data/english-unit3.js');
+const unit4=require('../data/english-unit4.js');
 const questions=require('../data/questions.js');
 const speechText=require('../speech-text.js');
 const {canonical,sentences}=speechText;
 
-function collect({includeUnit3=true}={}) {
+function collect({includeUnit3=true,includeUnit4=true}={}) {
   const texts=[];
   const add=(text,source)=>{if(text)texts.push({text:speechText.text(text),source});};
   for(const unit of english.units) for(const word of english.vocabulary(unit.id)) add(word.speech||word.english,'word:'+unit.id+':'+word.key);
   for(const person of hello.characters) add(person.name,'character');
-  for(const topic of questions.topics.filter(t=>t.subject==='english'&&!t.id.startsWith('unit3-'))) for(const q of questions.bank(topic.id)) {
+  for(const topic of questions.topics.filter(t=>t.subject==='english'&&!t.id.startsWith('unit3-')&&!t.id.startsWith('unit4-')&&!t.id.startsWith('review34-'))) for(const q of questions.bank(topic.id)) {
     add(q.speech,'question:'+q.id);
     add(q.answerSpeech,'answer:'+q.id);
     if(q.passage?.length)add(q.passage.join(' '),'reading:'+q.id);
@@ -57,6 +58,29 @@ function collect({includeUnit3=true}={}) {
         for(const line of unit3.farmSentences({animals:[{key:animal.key,count,description:description.key}],care:unit3.farm.care.key}))
           add(line,'farm');
   }
+  // Keep every delivered input ahead of new sources. An existing canonical
+  // key therefore retains the exact text, punctuation, SSML and MP3 address.
+  if(includeUnit4) {
+    for(const topic of [...unit4.topics,unit4.reviewTopic]) {
+      for(const q of unit4.bank(topic.id)) {
+        add(q.speech,'question:'+q.id);
+        add(q.answerSpeech,'answer:'+q.id);
+        if(q.passage?.length)add(q.passage.join(' '),'reading:'+q.id);
+      }
+      for(const card of unit4.lesson(topic.id)) {
+        add(card.sayModel,'model:'+card.id);
+        if(!topic.id.endsWith('-phonics'))add(speechText.lesson(card,false),'lesson:'+card.id);
+      }
+    }
+    // Three distinct foods are required by the task. Vary one slot while the
+    // other two stay valid; the finite lines cover all complete picnic choices.
+    for(const food of unit4.picnic.foods) for(const reply of ['yes','no']) {
+      const others=unit4.picnic.foods.filter(item=>item.key!==food.key).slice(0,2);
+      const foods=[{key:food.key,reply},...others.map(item=>({key:item.key,reply:'yes'}))];
+      for(const drink of unit4.picnic.drinks)
+        for(const line of unit4.picnicSentences({foods,drink:drink.key}))add(line,'picnic');
+    }
+  }
   const clips=new Map();
   for(const {text,source} of texts) for(const sentence of sentences(text)) {
     const key=canonical(sentence);
@@ -76,4 +100,7 @@ function collect({includeUnit3=true}={}) {
   return {texts,clips:[...clips.values()].sort((a,b)=>(priority.get(a.key)??100000)-(priority.get(b.key)??100000) || a.key.localeCompare(b.key))};
 }
 module.exports={canonical,sentences,collect};
-if(require.main===module)process.stdout.write(JSON.stringify(collect({includeUnit3:!process.argv.includes('--published-only')}),null,2)+'\n');
+if(require.main===module)process.stdout.write(JSON.stringify(collect({
+  includeUnit3:!process.argv.includes('--published-only'),
+  includeUnit4:!process.argv.includes('--published-only')&&!process.argv.includes('--without-unit4')
+}),null,2)+'\n');

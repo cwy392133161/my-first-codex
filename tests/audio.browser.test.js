@@ -23,8 +23,10 @@ const KEY = 'learning-garden-v1';
 const AUDIO_CACHE = 'azure-jenny-unit3-v1-20261013';
 const APP_CACHE = 'unit3-farm-audio-v2-20261013';
 const COMPAT_CACHE = 'ios12-webapp-v1-20261014';
-const cacheVersion = source => ['app.js','style.css','audio-player.js','speech-text.js'].includes(source)
-  ? COMPAT_CACHE : ['data/questions.js','data/english-unit3.js'].includes(source) ? APP_CACHE : AUDIO_CACHE;
+const UNIT4_CACHE = 'unit4-food-v1';
+const cacheVersion = source => ['app.js', 'style.css', 'data/questions.js', 'data/english-unit4.js'].includes(source)
+  ? UNIT4_CACHE : ['audio-player.js', 'speech-text.js'].includes(source) ? COMPAT_CACHE
+    : source === 'data/english-unit3.js' ? APP_CACHE : AUDIO_CACHE;
 const exact = value => new RegExp(`^${value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
 const wall = questions.bank('english1').find(q => q.id === 'english1-wall-meaning');
 const listen = questions.bank('hello-numbers').find(q => q.kind === 'listening');
@@ -344,7 +346,7 @@ function initialize(options) {
     assert.deepEqual(await saved(page), afterAnswer, 'Hello / Hi 的听读不修改旧记录或英语首次作答');
     assert.equal(await page.evaluate(() => window.audioNativeCalls.length), 0, '新版问候不依赖系统语音 API');
     for (const source of ['speech-text.js', 'data/audio-manifest.js', 'audio-player.js', 'app.js',
-      'data/questions.js', 'data/english-unit3.js', 'style.css']) {
+      'data/questions.js', 'data/english-unit3.js', 'data/english-unit4.js', 'style.css']) {
       const sourceRequests = requests.filter(request => new URL(request.url).pathname === '/' + source);
       assert(sourceRequests.length > 0, '真实页面确实加载新版脚本 ' + source);
       const version = cacheVersion(source);
@@ -550,7 +552,7 @@ function initialize(options) {
     assert.equal(await upgrading.locator('.listening-text').isVisible(), false);
     const upgradeRequests = server.servedRequests.slice(beforeUpgrade);
     assert(upgradeRequests.includes('/data/audio-manifest.js?v=' + AUDIO_CACHE), '新缓存参数请求当前 501 段清单');
-    for (const source of ['app.js', 'data/questions.js', 'data/english-unit3.js', 'style.css']) {
+    for (const source of ['app.js', 'data/questions.js', 'data/english-unit3.js', 'data/english-unit4.js', 'style.css']) {
       assert(upgradeRequests.includes('/' + source + '?v=' + cacheVersion(source)), source + ' 使用新版缓存参数');
     }
     assert(upgradeRequests.includes('/' + manifest.clips[speechText.canonical(newlyRecorded.speech)]),

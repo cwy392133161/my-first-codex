@@ -11,6 +11,7 @@ const speech = require('../speech-text.js');
 const hello = require('../data/english-hello.js');
 const unit1 = require('../data/english-unit1.js');
 const unit2 = require('../data/english-unit2.js');
+const unit4 = require('../data/english-unit4.js');
 const english = require('../data/english.js');
 const { collect } = require('../scripts/audio-texts.js');
 
@@ -113,9 +114,18 @@ test('p/b 和 th/t 始终读完整示例词，不朗读字母名、括号或缺�
 
 test('构建覆盖新规范片段，Hello/Hi 优先，没有粘连词条或符号输入', () => {
   const data = collect();
-  const previous = collect({includeUnit3:false});
+  const previous = collect({includeUnit3:false,includeUnit4:false});
+  const published = collect({includeUnit4:false});
   assert.equal(previous.texts.length, 1517, '原有朗读入口都保留');
   assert.equal(previous.clips.length, 398, '原有完整词与例句的去重片段');
+  assert.equal(published.texts.length, 2029, '当前已发布朗读入口保持 2029 个');
+  assert.equal(published.clips.length, 501, '当前已发布录音保持 501 段');
+  assert.deepEqual(data.texts.slice(0,published.texts.length),published.texts, 'Unit 4 在全部已发布输入后追加');
+  for (const clip of published.clips) {
+    const current = data.clips.find(item=>item.key===clip.key);
+    assert.equal(current.text,clip.text, '所有已发布录音的实际文本与标点完全保留');
+    assert.deepEqual(current.sources.slice(0,clip.sources.length),clip.sources, '已发布录音的旧来源顺序保留');
+  }
   assert.deepEqual(data.texts.slice(0, previous.texts.length), previous.texts, '新增单元在原有入口后追加');
   assert(data.texts.length > previous.texts.length);
   for (const clip of previous.clips) assert.equal(data.clips.find(item=>item.key===clip.key).text, clip.text, '复用时原有真实朗读文本不改变');
@@ -130,6 +140,29 @@ test('构建覆盖新规范片段，Hello/Hi 优先，没有粘连词条或符�
   for (const key of ['foot', 'feet', "who's means who is", "he's means he is", "she's means she is", 'read', 'close', 'minute']) {
     assert(data.clips.some(clip => clip.key === key), `校对重点 ${key} 有独立音频入口`);
   }
+});
+
+test('Unit 4 与 3～4 复习的所有实际朗读入口纳入默认计划，拼读只示范完整词', () => {
+  const data=collect();
+  const inputs=new Map(data.texts.map(input=>[input.source,input.text]));
+  const topics=[...unit4.topics,unit4.reviewTopic];
+  for(const topic of topics) {
+    for(const q of unit4.bank(topic.id)) {
+      if(q.speech)assert.equal(inputs.get('question:'+q.id),speech.text(q.speech));
+      if(q.answerSpeech)assert.equal(inputs.get('answer:'+q.id),speech.text(q.answerSpeech));
+      if(q.passage&&q.passage.length)assert.equal(inputs.get('reading:'+q.id),speech.text(q.passage.join(' ')));
+    }
+    for(const card of unit4.lesson(topic.id)) {
+      assert.equal(inputs.get('model:'+card.id),speech.text(card.sayModel));
+      if(topic.id.endsWith('-phonics')) {
+        assert.equal(inputs.has('lesson:'+card.id),false, '不朗读拼读卡里的音标和高亮字母');
+        assert(!/[\[\]_→=\/]/.test(card.sayModel), '朗读器只接收完整示例词');
+        assert(!/\b[aA]\b/.test(card.sayModel), '不把目标字母 a 当字母名单独朗读');
+      } else assert.equal(inputs.get('lesson:'+card.id),speech.lesson(card,false));
+    }
+  }
+  assert(data.texts.some(input=>input.source==='picnic'), '野餐可选对话进入新增音频计划');
+  assert(data.clips.length>501, '新增朗读需求独立统计，不能把已发布数量当成已生成总量');
 });
 
 test('同一无外部依赖脚本可由浏览器和 Node 使用', () => {

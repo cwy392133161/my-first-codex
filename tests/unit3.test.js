@@ -51,7 +51,7 @@ for (const file of ['data/english.js', 'data/english-hello.js', 'data/english-un
 }
 assert.match(source('app.js'), /['"]learning-garden-v1['"]/, '沿用原浏览器记录键');
 assert.deepEqual(unit3.topics.map(topic => topic.id), goalIds, '七个学习目标可独立选择');
-assert.deepEqual(questions.topics.filter(topic => !oldTopicIds.has(topic.id)).map(topic => topic.id), goalIds, '统一题库只新增 Unit 3 七个目标');
+assert.deepEqual(questions.topics.filter(topic => topic.id.startsWith('unit3-')).map(topic => topic.id), goalIds, '统一题库完整包含 Unit 3 七个目标');
 
 const equivalent = value => value.toLowerCase().replace(/[’‘]/g, "'")
   .replace(/\bit's\b/g, 'it is').replace(/\bhe's\b/g, 'he is').replace(/\bshe's\b/g, 'she is')
@@ -231,7 +231,7 @@ assert.equal(extra.filter(line => line.startsWith('Our farm')).length, 3, '农�
 // Data modules are classic local scripts: Windows double-click must not require module fetches.
 const scripts = [...source('index.html').matchAll(/<script\b([^>]*)\bsrc=["']([^"']+)["'][^>]*>/g)]
   .map(match => ({ attributes: match[1], file: match[2].split(/[?#]/)[0] }));
-const dependencies = ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js', 'data/english-unit3.js', 'data/questions.js', 'record-backup.js'];
+const dependencies = ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js', 'data/english-unit3.js', 'data/english-unit4.js', 'data/questions.js', 'record-backup.js'];
 assert.deepEqual(scripts.filter(script => dependencies.includes(script.file)).map(script => script.file), dependencies);
 for (const script of scripts) {
   assert(!/^(?:[a-z]+:|\/)/i.test(script.file), '运行时脚本采用相对本地路径');
