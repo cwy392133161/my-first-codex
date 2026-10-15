@@ -102,6 +102,8 @@
   }
   group('问候与发音重点',['hello','hi','wall','close','read','minute','mother, father, brother','three']);
   group('Unit 3 农场与问答',['donkey','duck','cat, cow','chicken, duck','it has got long ears',"it hasn't got a long tail",'has it got long ears','yes, it has',"no, it hasn't",'a baby sheep is a lamb','our farm has got two sheep']);
+  group('Unit 4 喜好与礼貌',['i like apples',"i don't like mangoes",'she likes bread',"he doesn't like chocolate",'do you like grapes','yes, i do',"no, i don't",'can i have some water, please','here you are','would you like some cake','yes, please','no, thank you']);
+  group('Unit 4 字母 a 的完整例词与食谱',['mango','salad','cat','bag','cake','lemonade','paper','first, wash your hands','next, put the prepared fruit in a bowl','then, add some juice and mix','last, share the fruit salad']);
   group('数字',['one','two','three','four','five','six','seven','eight','nine','ten']);
   group('颜色',['black','blue','brown','green','grey','orange','pink','purple','red','white','yellow']);
   if(!keys.length){

@@ -1,0 +1,123 @@
+{
+  "date": "2026-10-15",
+  "branch": "unit4-food-learning",
+  "baseCommit": "775c985e22bad0a0e0cbb6376ea6272b1688b9fc",
+  "configuration": {
+    "provider": "Azure Speech",
+    "voice": "en-US-JennyNeural",
+    "language": "en-US",
+    "style": "default",
+    "rate": "normal",
+    "format": "audio-24khz-96kbitrate-mono-mp3",
+    "pipeline": 1
+  },
+  "originalPlan": {
+    "totalClips": 620,
+    "missingClips": 119
+  },
+  "planCorrection": {
+    "punctuationOnlyClipsRemoved": 1,
+    "quoteVariantDuplicatesMerged": 6,
+    "displayedQuestionsAndIDsUnchanged": true
+  },
+  "totalClips": 613,
+  "textSources": 3207,
+  "existingClipsPreserved": 501,
+  "newClips": 112,
+  "newRequests": {
+    "initialSample": 1,
+    "continuation": 111,
+    "total": 112,
+    "retries": 0
+  },
+  "oldMP3RequestedFromAzure": 0,
+  "oldMP3ByteIdentityVerified": 501,
+  "newAudioBytes": 3184416,
+  "totalAudioBytes": 15903936,
+  "newAudioDurationSeconds": 265.368,
+  "totalAudioDurationSeconds": 1325.328,
+  "newSpokenCharacters": 2588,
+  "conservativeNewSSMLCharacters": 17208,
+  "datasetSha256": "506061d73ff5bb265f3ae346faa330cd877dc19f880c73c3a0c38f58b2eb9658",
+  "samples": [
+    {
+      "key": "i don't like mangoes",
+      "text": "I don't like mangoes.",
+      "path": "assets/audio/427511fed7c8d65109b6.mp3"
+    },
+    {
+      "key": "can i have some water, please",
+      "text": "Can I have some water, please?",
+      "path": "assets/audio/db3360ecc71adf8a15c2.mp3"
+    },
+    {
+      "key": "first, wash your hands",
+      "text": "First, wash your hands.",
+      "path": "assets/audio/5f15f706cb19a217fc60.mp3"
+    },
+    {
+      "key": "would you like some grapes",
+      "text": "Would you like some grapes?",
+      "path": "assets/audio/69f3f92d882987e6cb1a.mp3"
+    }
+  ],
+  "humanPronunciationReviewedAll": false,
+  "physicalIOS12DeviceTested": false,
+  "deployedToOfficialSite": false,
+  "budgetNote": "Local conservative accounting for this run; not Azure remaining quota or billing.",
+  "readOnlyVerify": {
+    "verifiedClips": 613,
+    "newRequests": 0,
+    "reusedClips": 613
+  },
+  "publicPlanCheck": {
+    "availableClips": 613,
+    "pendingClips": 0,
+    "callsAzure": false,
+    "pendingRegistryAbsent": true
+  },
+  "softwareChecks": {
+    "generatorRegressionTestsPassed": 33,
+    "speechTextTestsPassed": 9,
+    "sequentialCoreNodeScriptsPassed": 7,
+    "unit4DataCheckPassed": true,
+    "ios12StaticCheckPassed": true,
+    "ios12FrontEndScriptsChecked": 24,
+    "unchangedCompleteQuestionObjects": 1933,
+    "unchangedCoreCompatibilityAndBackupSourceFiles": 12,
+    "unchangedStorageKey": "learning-garden-v1",
+    "oldMP3ByteAndPathIdentityVerified": 501,
+    "fullScreenMetadataPreserved": true,
+    "strictMappingSSMLHashDecodeClipsPassed": 613,
+    "staticReadingEntriesChecked": 2060,
+    "unit4BrowserGroupsPassed": 9,
+    "unit4RepresentativePlaybackRate": 1,
+    "unit4WrongReviewFirstAnswersRefreshJSONTextBackupRestorePassed": true,
+    "viewportWidthsOrDimensionsChecked": [
+      "414x736",
+      "736x414",
+      "390",
+      "1024"
+    ],
+    "audioReviewBrowserGroupsPassed": 6,
+    "audioReviewUnit4RepresentativeClipsPassed": 8,
+    "audioReviewNewUnit4ClipsPassed": 6,
+    "ios12BrowserGroupsPassed": 4,
+    "backupBrowserGroupsPassed": 14,
+    "longTextBackupRecordsChecked": 1000,
+    "longTextBackupExportBytes": 194897,
+    "ios12PortraitAndLandscapeScreenshotsInspected": true,
+    "cacheUpgrade501To613Passed": true,
+    "oldHelloAndUnit3ScriptCacheReused": true,
+    "mainAudioBrowserGroupsPassed": 21,
+    "allBrowserMedia": {
+      "clipsPassed": 613,
+      "mediaErrors": 0,
+      "playbackRate": 4,
+      "muted": true,
+      "parallelLanes": 8,
+      "elapsedSeconds": 46.61
+    }
+  },
+  "fileSchemeBrowserCheck": "Skipped: managed Chromium policy blocks file:// navigation."
+}

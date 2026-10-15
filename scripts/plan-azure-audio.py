@@ -2,7 +2,8 @@
 
 Run ``python3 scripts/plan-azure-audio.py`` after editing English content. This
 does not synthesize audio, edit the live manifest, or mark pending MP3s delivered.
-Use ``--check`` in review to reject an out-of-date pending registry.
+Use ``--check`` in review to reject an out-of-date pending registry. Once every
+recording is delivered, the pending registry must be absent.
 """
 import argparse
 import hashlib
@@ -73,7 +74,8 @@ def prepare_plan():
         'availableClips': available,
         'pendingClips': len(pending),
         'sourceCount': len(current['texts']),
-        'reason': '新增录音尚未生成；本清单仅规划缺少的 MP3，不代表音频已交付。',
+        'reason': ('新增录音尚未生成；本清单仅规划缺少的 MP3，不代表音频已交付。'
+                   if pending else '当前所有朗读均有已核对的 MP3，无待生成片段。'),
         'clips': pending,
     }
 
@@ -84,12 +86,18 @@ def main():
     arguments = parser.parse_args()
     registry = prepare_plan()
     destination = ROOT / 'data/audio-pending.json'
-    if arguments.check:
+    if not registry['pendingClips']:
+        if arguments.check and destination.exists():
+            raise BUILD.SafeError('音频已完整交付，请移除旧待生成清单后再检查。')
+        if not arguments.check and destination.exists():
+            destination.unlink()
+    elif arguments.check:
         if not destination.is_file() or json.loads(destination.read_text(encoding='utf-8')) != registry:
             raise BUILD.SafeError('待生成清单与当前题库不一致，请重新运行计划脚本。')
     else:
         BUILD.atomic_json(destination, registry)
-    print('音频计划已' + ('核对' if arguments.check else '保存') + '：共 '
+    action = '核对' if arguments.check else ('保存' if registry['pendingClips'] else '完成')
+    print('音频计划已' + action + '：共 '
           + str(registry['totalClips']) + ' 段，可复用 ' + str(registry['availableClips'])
           + ' 段，待生成 ' + str(registry['pendingClips']) + ' 段；没有调用 Azure。')
 

@@ -11,7 +11,7 @@ const {pathToFileURL}=require('node:url');
 const manifest=require('../data/audio-manifest.js');
 const root=path.resolve(__dirname,'..');
 const recordKey='learning-garden-v1';
-const audioCache='azure-jenny-unit3-v1-20261013';
+const audioCache='azure-jenny-unit4-v1-20261015';
 const originalRecords='{"attempts":[{"question":"pinyin-59","correct":false}],"sessions":[],"wrong":["pinyin-59"]}';
 const exact=value=>new RegExp('^'+value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'$');
 
@@ -87,7 +87,7 @@ function initialize({recordKey,originalRecords}){
 
 (async()=>{
   assert.equal(manifest.version,3,'试听检查必须使用 Azure Jenny 音频');
-  assert.equal(Object.keys(manifest.clips).length,501,'试听页交付完整 501 段录音');
+  assert.equal(Object.keys(manifest.clips).length,613,'试听页交付完整 613 段可朗读录音');
   const server=await serverStart();
   const origin='http://127.0.0.1:'+server.address().port;
   let browser;
@@ -167,6 +167,36 @@ function initialize({recordKey,originalRecords}){
       '每段优先试听真实解码，有播放进度和结束事件');
       assert.equal(call.playbackRate,1,'优先试听使用正常一倍速度');
     }
+    const unit4Keys=['i like apples',"i don't like mangoes",'she likes bread',"he doesn't like chocolate",
+      'do you like grapes','yes, i do',"no, i don't",'can i have some water, please','here you are',
+      'would you like some cake','yes, please','no, thank you'];
+    const unit4PhonicsKeys=['mango','salad','cat','bag','cake','lemonade','paper','first, wash your hands',
+      'next, put the prepared fruit in a bowl','then, add some juice and mix','last, share the fruit salad'];
+    const unit4Priority=page.locator('#priority-clips h3:text-is("Unit 4 喜好与礼貌") + .priority-list');
+    const unit4Phonics=page.locator('#priority-clips h3:text-is("Unit 4 字母 a 的完整例词与食谱") + .priority-list');
+    assert.deepEqual(await unit4Priority.locator('button[data-clip]').evaluateAll(buttons=>buttons.map(button=>button.dataset.clip)),
+      unit4Keys,'Unit 4 优先试听覆盖喜好、请求、邀请及接受和谢绝');
+    assert.deepEqual(await unit4Phonics.locator('button[data-clip]').evaluateAll(buttons=>buttons.map(button=>button.dataset.clip)),
+      unit4PhonicsKeys,'字母 a 示例保持完整词，食谱优先组包含完整步骤');
+    // Eight normal-speed media checks include six newly generated sentences;
+    // mango and cake exercise both kinds of a without inventing phoneme audio.
+    for(const key of ["i don't like mangoes",'do you like grapes','can i have some water, please',
+      'no, thank you','mango','cake','next, put the prepared fruit in a bowl','then, add some juice and mix']){
+      const group=unit4Keys.includes(key)?unit4Priority:unit4Phonics;
+      await group.locator('button[data-clip]').filter({has:page.locator('span[lang=en]',{hasText:exact(key)})}).click();
+      await finished(page);
+      assert.equal(await page.locator('#current-clip').innerText(),key);
+      const call=await page.evaluate(()=>window.reviewPlaybackChecks.at(-1));
+      assert.equal(call.src,origin+'/'+manifest.clips[key],'Unit 4 试听按钮实际播放其清单对应 MP3');
+      assert(Number.isFinite(call.duration)&&call.duration>0&&call.maxTime>0
+        &&['loadedmetadata','canplay','playing','ended'].every(event=>call.events.includes(event)),
+      'Unit 4 每段代表音频都实际解码、有播放进度并正常结束');
+      assert.equal(call.playbackRate,1,'Unit 4 代表音频使用正常一倍速度');
+    }
+    await page.locator('#audio-search').fill(' DON’T ');
+    const dont=Object.keys(manifest.clips).filter(key=>key.includes("don't"));
+    assert.equal(await page.locator('#all-clips button').count(),dont.length,'Unit 4 弯引号缩写可以搜索');
+    assert.equal(await page.locator('#all-clips button[data-clip="i don\'t like mangoes"]').count(),1);
     await page.locator('#audio-search').fill(' HASN’T ');
     const negatives=Object.keys(manifest.clips).filter(key=>key.includes("hasn't"));
     assert.equal(await page.locator('#all-clips button').count(),negatives.length,'Unit 3 弯引号否定句可以搜索');
@@ -177,7 +207,7 @@ function initialize({recordKey,originalRecords}){
     assert.equal(await page.locator('#all-clips button[data-clip="a baby sheep is a lamb"]').count(),1);
     await page.locator('#audio-search').fill('');
     await recordsUnchanged(page);
-    pass('Unit 3 优先试听组真实播放 c/k/ck 整词、问答、宝宝和农场新句，否定缩写与宝宝搜索正确');
+    pass('Unit 3 与 Unit 4 优先组真实一倍速播放；喜好、礼貌、a 的整词和食谱映射及缩写搜索正确');
 
     const before=await page.evaluate(()=>window.reviewPlayCalls.length);
     await findClip(page,'hello').evaluate(button=>{button.click();button.click();button.click();});
@@ -227,7 +257,7 @@ function initialize({recordKey,originalRecords}){
     assert.deepEqual(errors,[]);
     for(const source of ['speech-text.js','data/audio-manifest.js','audio-player.js','audio-review.js']){
       const loaded=requests.filter(request=>new URL(request.url).pathname==='/'+source);
-      const version=source==='data/audio-manifest.js'?audioCache:'ios12-webapp-v1-20261014';
+      const version=source==='audio-player.js'?'ios12-webapp-v1-20261014':audioCache;
       assert(loaded.length>0&&loaded.every(request=>new URL(request.url).searchParams.get('v')===version),source+' 使用新版缓存参数');
     }
     assert(requests.every(request=>request.method==='GET'&&new URL(request.url).origin===origin),'只读取同源文件，不调用外部接口');

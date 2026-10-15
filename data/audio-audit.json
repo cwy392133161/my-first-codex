@@ -10,7 +10,7 @@
     "pipeline": 1
   },
   "region": "eastus",
-  "datasetSha256": "bf6e236e30f991d1f3c229fdcacaf889fdef7a03217bfe83218006c3a075de62",
+  "datasetSha256": "506061d73ff5bb265f3ae346faa330cd877dc19f880c73c3a0c38f58b2eb9658",
   "clips": [
     {
       "key": "hello",
@@ -603,7 +603,8 @@
       "sources": [
         "answer:unit3-describe-language-order-little",
         "model:unit3-lesson-describe-order",
-        "lesson:unit3-lesson-describe-order"
+        "lesson:unit3-lesson-describe-order",
+        "answer:review34-mixed-describe-order"
       ],
       "bytes": 22464,
       "sha256": "dcc2cb1b16d360bcdb72538ad8d9ee7dd2918e4609423f9df13dfb048bff1dc7",
@@ -655,6 +656,18 @@
       "bytes": 22464,
       "sha256": "9c8004e4d769ea4a674982ecbb680d50e8f34b97d9de29faf0f04d41f8e88f74",
       "duration": 1.872
+    },
+    {
+      "key": "an orange in the basket",
+      "text": "an orange in the basket",
+      "digest": "f6c7ce4f8ed477c47bc2e5379b70a63fffd8acfa5bf97805933ab6d493ee643b",
+      "path": "assets/audio/f6c7ce4f8ed477c47bc2.mp3",
+      "sources": [
+        "answer:review34-mixed-food-orange"
+      ],
+      "bytes": 28224,
+      "sha256": "ed14cf1474d8cb8c4d7737f2801785b1ee8da9d0d51625af4ed13ed9f8720645",
+      "duration": 2.352
     },
     {
       "key": "ana and noah are friends",
@@ -745,11 +758,41 @@
         "word:english4:apple",
         "question:english4-apple-meaning",
         "answer:english4-apple-meaning",
-        "answer:english4-apple-word"
+        "answer:english4-apple-word",
+        "answer:unit4-food-meaning-apple",
+        "answer:unit4-food-word-apple",
+        "question:unit4-food-listen-apple",
+        "answer:unit4-food-listen-apple",
+        "model:unit4-lesson-food-apple",
+        "lesson:unit4-lesson-food-apple"
       ],
       "bytes": 22464,
       "sha256": "0748bbfb437337d1960e785b557df0e0c40a89a43e379d2539f92fd7e822c7a3",
       "duration": 1.872
+    },
+    {
+      "key": "apples",
+      "text": "apples.",
+      "digest": "d5dbd49d1783166e43f90734b76ddf5db9058e8da045d5381704d55563c09840",
+      "path": "assets/audio/d5dbd49d1783166e43f9.mp3",
+      "sources": [
+        "model:unit4-lesson-recipes-ingredients"
+      ],
+      "bytes": 22464,
+      "sha256": "7b503def875931416f1edc5999087163799ed8d533ce3165bbe02416401e3e43",
+      "duration": 1.872
+    },
+    {
+      "key": "apples, bananas, grapes and juice",
+      "text": "apples, bananas, grapes and juice.",
+      "digest": "88b749dca28cf8a6d552aa5a7bc2c1e3c564da20cb6e78ac4a416b0ef99245d9",
+      "path": "assets/audio/88b749dca28cf8a6d552.mp3",
+      "sources": [
+        "lesson:unit4-lesson-recipes-ingredients"
+      ],
+      "bytes": 42624,
+      "sha256": "5cb4cf829337e1352574157907b19c154303f0e247f782da48d777c93ab34c0e",
+      "duration": 3.552
     },
     {
       "key": "are you ok",
@@ -784,6 +827,56 @@
       "duration": 1.872
     },
     {
+      "key": "ava has got a bowl and some fruit",
+      "text": "Ava has got a bowl and some fruit.",
+      "digest": "c39528cf36c0b02d45aedd9f67da17dee6b0fca134e08cbcbb13009c1cb98d8d",
+      "path": "assets/audio/c39528cf36c0b02d45ae.mp3",
+      "sources": [
+        "reading:unit4-strategies-check-prediction",
+        "answer:unit4-strategies-not-enough",
+        "reading:unit4-strategies-not-enough",
+        "model:unit4-lesson-strategies-check",
+        "lesson:unit4-lesson-strategies-check"
+      ],
+      "bytes": 34560,
+      "sha256": "81c80c04cf5d3942c00166826056ff2040416e01ceb07a0cfed0e66e76b079d7",
+      "duration": 2.88
+    },
+    {
+      "key": "ava says, can i have some water, please",
+      "text": "Ava says, Can I have some water, please?",
+      "digest": "43dfcb7d9934fed55a735e5dcfda633a38cb599d831806f5481f7328e616d314",
+      "path": "assets/audio/43dfcb7d9934fed55a73.mp3",
+      "sources": [
+        "reading:unit4-reading-ask-for-water-request",
+        "reading:unit4-reading-ask-for-water-giver",
+        "reading:unit4-reading-ask-for-water-thanks",
+        "reading:unit4-reading-ask-for-water-place",
+        "model:unit4-lesson-reading-ask-for-water",
+        "lesson:unit4-lesson-reading-ask-for-water"
+      ],
+      "bytes": 42048,
+      "sha256": "8634b56a5fee17fa70e1c123a86ee78e0cd257eb07d444ccf1636194df2be8db",
+      "duration": 3.504
+    },
+    {
+      "key": "ava says, thank you",
+      "text": "Ava says, Thank you.",
+      "digest": "b48e6dc62c6769054298bad365bb0c23ed5d1b23d953638f5dc898f1999b64a9",
+      "path": "assets/audio/b48e6dc62c6769054298.mp3",
+      "sources": [
+        "reading:unit4-reading-ask-for-water-request",
+        "reading:unit4-reading-ask-for-water-giver",
+        "reading:unit4-reading-ask-for-water-thanks",
+        "reading:unit4-reading-ask-for-water-place",
+        "model:unit4-lesson-reading-ask-for-water",
+        "lesson:unit4-lesson-reading-ask-for-water"
+      ],
+      "bytes": 29376,
+      "sha256": "ce11aa4dd8e49bec1995334c411a969c87644d150d9aa60f237c61a62c3b07c3",
+      "duration": 2.448
+    },
+    {
       "key": "bag",
       "text": "bag",
       "digest": "71c1d4f7592b86536db8255d56198726fbaef59b58e6423bb73d63a66b989e33",
@@ -797,7 +890,13 @@
         "answer:unit1-school-listen-bag",
         "answer:unit1-phonics-first-bag",
         "answer:unit1-phonics-spell-bag",
-        "lesson:unit1-lesson-school-bag"
+        "lesson:unit1-lesson-school-bag",
+        "answer:unit4-phonics-sound-bag",
+        "answer:unit4-phonics-word-bag",
+        "answer:unit4-phonics-short-pair",
+        "answer:unit4-phonics-not-always",
+        "model:unit4-lesson-phonics-short",
+        "model:unit4-lesson-phonics-compare"
       ],
       "bytes": 22464,
       "sha256": "1b416a23a3d7436a98e5e0f6d8e736c63488956bb7f472c1d24e089dfd6f7245",
@@ -826,10 +925,28 @@
         "word:english4:banana",
         "question:english4-banana-meaning",
         "answer:english4-banana-meaning",
-        "answer:english4-banana-word"
+        "answer:english4-banana-word",
+        "answer:unit4-food-meaning-banana",
+        "answer:unit4-food-word-banana",
+        "question:unit4-food-listen-banana",
+        "answer:unit4-food-listen-banana",
+        "model:unit4-lesson-food-banana",
+        "lesson:unit4-lesson-food-banana"
       ],
       "bytes": 22464,
       "sha256": "a455f24354382e1db9f714a733637100e1a0f914b7288df4a88ec7b479ddf3f6",
+      "duration": 1.872
+    },
+    {
+      "key": "bananas",
+      "text": "bananas.",
+      "digest": "8a87ccdf6ad96a02c3c559a6b2e079559c5c088c8640353c600d4573c31bb3f5",
+      "path": "assets/audio/8a87ccdf6ad96a02c3c5.mp3",
+      "sources": [
+        "model:unit4-lesson-recipes-ingredients"
+      ],
+      "bytes": 22464,
+      "sha256": "d98b6cc6597fbf00c87b361ba84dde1fa9f091adb2ac85f4623984d0ce2290a1",
       "duration": 1.872
     },
     {
@@ -852,7 +969,8 @@
       "sources": [
         "answer:unit3-gifts-care-kind",
         "model:unit3-lesson-gifts-care",
-        "lesson:unit3-lesson-gifts-care"
+        "lesson:unit3-lesson-gifts-care",
+        "answer:review34-mixed-care-choice"
       ],
       "bytes": 26208,
       "sha256": "381052e7b6a7e902db32c3e4ca86c12dc75d16b60675de326d6c8e51c93aad19",
@@ -867,7 +985,13 @@
         "word:english4:bean",
         "question:english4-bean-meaning",
         "answer:english4-bean-meaning",
-        "answer:english4-bean-word"
+        "answer:english4-bean-word",
+        "answer:unit4-food-meaning-bean",
+        "answer:unit4-food-word-bean",
+        "question:unit4-food-listen-bean",
+        "answer:unit4-food-listen-bean",
+        "model:unit4-lesson-food-bean",
+        "lesson:unit4-lesson-food-bean"
       ],
       "bytes": 22464,
       "sha256": "ba6d43ff003a5ec0b8758cde67e7757621a2322e6ac6613f93505427d277905a",
@@ -922,6 +1046,76 @@
       "bytes": 24192,
       "sha256": "8833523dedb1a6ba6c5df9965e0607cd1dc7966c5009f345ea6275862cbdce63",
       "duration": 2.016
+    },
+    {
+      "key": "ben doesn't like cake",
+      "text": "Ben doesn't like cake.",
+      "digest": "1b17e344747158ba2b663463d4459f7e15414313dfe40dd28f8976c7dd3ee534",
+      "path": "assets/audio/1b17e344747158ba2b66.mp3",
+      "sources": [
+        "reading:unit4-strategies-negative",
+        "model:unit4-lesson-strategies-negative",
+        "lesson:unit4-lesson-strategies-negative"
+      ],
+      "bytes": 27072,
+      "sha256": "ec8a4d23354cbe6effa0ca6c5a0d4050fa377c5d0d817d1ceb879575f1447c11",
+      "duration": 2.256
+    },
+    {
+      "key": "ben has got a banana",
+      "text": "Ben has got a banana.",
+      "digest": "3c44f8f616ac408a7fec866b3564d5d426cb6f74e19ef4258ce1c7a6ad539ee9",
+      "path": "assets/audio/3c44f8f616ac408a7fec.mp3",
+      "sources": [
+        "answer:unit4-strategies-unknown-like",
+        "reading:unit4-strategies-unknown-like"
+      ],
+      "bytes": 26784,
+      "sha256": "c03db431fc75b006488c993d76defc781957f8bdfbbf3af2894348c2c7d59a3b",
+      "duration": 2.232
+    },
+    {
+      "key": "ben has got some chicken and grapes",
+      "text": "Ben has got some chicken and grapes.",
+      "digest": "26ebf3333fbd7687aadeb6db5630af34ed04625842a2c15ee0cd9e0f11a03248",
+      "path": "assets/audio/26ebf3333fbd7687aade.mp3",
+      "sources": [
+        "reading:unit4-reading-picnic-basket-mia",
+        "answer:unit4-reading-picnic-basket-ben",
+        "reading:unit4-reading-picnic-basket-ben",
+        "reading:unit4-reading-picnic-basket-water",
+        "reading:unit4-reading-picnic-basket-activity",
+        "model:unit4-lesson-reading-picnic-basket",
+        "lesson:unit4-lesson-reading-picnic-basket"
+      ],
+      "bytes": 34560,
+      "sha256": "993a459ed311158a2d24e8d72e8d920bda99e246a51c7117c692c080ff0ab5c6",
+      "duration": 2.88
+    },
+    {
+      "key": "ben has got the water",
+      "text": "Ben has got the water.",
+      "digest": "eaa81a3c81668b6d46c3ec3256db5b02dd5c730d3c65cacac2468bef0a658ca7",
+      "path": "assets/audio/eaa81a3c81668b6d46c3.mp3",
+      "sources": [
+        "answer:unit4-strategies-ask-person",
+        "reading:unit4-strategies-ask-person"
+      ],
+      "bytes": 26496,
+      "sha256": "ddfa537486abd12e16daa654a0287eefc8f7c49dd5b0542f46db4d975115dd96",
+      "duration": 2.208
+    },
+    {
+      "key": "ben likes bread",
+      "text": "Ben likes bread.",
+      "digest": "77c09caef2db16ef76dc138062ad2924a20a7fc3a0c306cba342b77092929ce0",
+      "path": "assets/audio/77c09caef2db16ef76dc.mp3",
+      "sources": [
+        "reading:unit4-strategies-check-person"
+      ],
+      "bytes": 23616,
+      "sha256": "1989fc64851227d2b07866a64007947b5ca3c577a6d899e7d9a33bd02fa0f67b",
+      "duration": 1.968
     },
     {
       "key": "big",
@@ -1093,7 +1287,13 @@
         "word:english4:bread",
         "question:english4-bread-meaning",
         "answer:english4-bread-meaning",
-        "answer:english4-bread-word"
+        "answer:english4-bread-word",
+        "answer:unit4-food-meaning-bread",
+        "answer:unit4-food-word-bread",
+        "question:unit4-food-listen-bread",
+        "answer:unit4-food-listen-bread",
+        "model:unit4-lesson-food-bread",
+        "lesson:unit4-lesson-food-bread"
       ],
       "bytes": 22464,
       "sha256": "4081424a0244d4c71ded129b1cfec8a3645741eedddff4783a94a2b3563938cf",
@@ -1173,7 +1373,13 @@
         "word:english4:burger",
         "question:english4-burger-meaning",
         "answer:english4-burger-meaning",
-        "answer:english4-burger-word"
+        "answer:english4-burger-word",
+        "answer:unit4-food-meaning-burger",
+        "answer:unit4-food-word-burger",
+        "question:unit4-food-listen-burger",
+        "answer:unit4-food-listen-burger",
+        "model:unit4-lesson-food-burger",
+        "lesson:unit4-lesson-food-burger"
       ],
       "bytes": 22464,
       "sha256": "ddf4b603eb3df22b8f75359182ed8f6dddf22270750a873d3c748d34cefcd21e",
@@ -1188,7 +1394,20 @@
         "word:english4:cake",
         "question:english4-cake-meaning",
         "answer:english4-cake-meaning",
-        "answer:english4-cake-word"
+        "answer:english4-cake-word",
+        "answer:unit4-food-meaning-cake",
+        "answer:unit4-food-word-cake",
+        "question:unit4-food-listen-cake",
+        "answer:unit4-food-listen-cake",
+        "model:unit4-lesson-food-cake",
+        "lesson:unit4-lesson-food-cake",
+        "answer:unit4-phonics-sound-cake",
+        "answer:unit4-phonics-word-cake",
+        "answer:unit4-phonics-compare",
+        "answer:unit4-phonics-not-always",
+        "model:unit4-lesson-phonics-long",
+        "model:unit4-lesson-phonics-compare",
+        "answer:review34-mixed-phonics-a"
       ],
       "bytes": 22464,
       "sha256": "9de81f3a79f77bd15ba832c2793e773646fb01d118d302b7ff3a6a6837898f35",
@@ -1239,6 +1458,102 @@
       "duration": 1.872
     },
     {
+      "key": "can i have some apples, please",
+      "text": "Can I have some apples, please?",
+      "digest": "632cee12059fbab647edeea892bb5e92c0dbd1bd85b0a281a65677afb95e3a00",
+      "path": "assets/audio/632cee12059fbab647ed.mp3",
+      "sources": [
+        "answer:unit4-requests-some-apples",
+        "model:unit4-lesson-requests-some",
+        "lesson:unit4-lesson-requests-some"
+      ],
+      "bytes": 32256,
+      "sha256": "0a7a1e69fc869fd415dcc32180b0130c2908bd028b5fc8dffd5ab08c53816754",
+      "duration": 2.688
+    },
+    {
+      "key": "can i have some bread, please",
+      "text": "Can I have some bread, please?",
+      "digest": "476209c2e49af3a08fdec23d29427de5df80b86b8f9a872c22a1340b129dd567",
+      "path": "assets/audio/476209c2e49af3a08fde.mp3",
+      "sources": [
+        "answer:unit4-requests-ask-bread"
+      ],
+      "bytes": 31680,
+      "sha256": "237ea590f7a20c74dee9890115b962e8a31370ff1d5936450c45770c45a761db",
+      "duration": 2.64
+    },
+    {
+      "key": "can i have some chicken, please",
+      "text": "Can I have some chicken, please?",
+      "digest": "e9f51fc2408df83f8d0e7ddd4f461bbc65c3bfe33324cb4c84ca841ee444be58",
+      "path": "assets/audio/e9f51fc2408df83f8d0e.mp3",
+      "sources": [
+        "answer:unit4-requests-some-chicken"
+      ],
+      "bytes": 31968,
+      "sha256": "0310fb87dcf6616d1fd368033337fabea187e17338c6cfdac93bc3ffa7be8e62",
+      "duration": 2.664
+    },
+    {
+      "key": "can i have some chocolate, please",
+      "text": "Can I have some chocolate, please?",
+      "digest": "25ab75e8b62b87ef35e2675dee961362fdc532ad9f5a8be3f9ccee779b20aebb",
+      "path": "assets/audio/25ab75e8b62b87ef35e2.mp3",
+      "sources": [
+        "answer:unit4-requests-translate-request"
+      ],
+      "bytes": 32832,
+      "sha256": "bce6828375587db779bc0b22849cd33f9d0cd3f714193c835818d72adcf5ccdd",
+      "duration": 2.736
+    },
+    {
+      "key": "can i have some juice, please",
+      "text": "Can I have some juice, please?",
+      "digest": "d18962f55c707429acbb574a16e0a480ace51917541d0893ff64fbf50693e6c5",
+      "path": "assets/audio/d18962f55c707429acbb.mp3",
+      "sources": [
+        "answer:unit4-requests-please",
+        "picnic"
+      ],
+      "bytes": 31680,
+      "sha256": "43a28ec9e04c53db3db04b86a58d41264a74a8f2603a7d6ea8c864d97527f449",
+      "duration": 2.64
+    },
+    {
+      "key": "can i have some lemonade, please",
+      "text": "Can I have some lemonade, please?",
+      "digest": "0136e2e5d19cfbb97a3baf426641662361e11a80d5319f7553595b00c5fce489",
+      "path": "assets/audio/0136e2e5d19cfbb97a3b.mp3",
+      "sources": [
+        "picnic"
+      ],
+      "bytes": 33120,
+      "sha256": "5d4471110cf9f4e7f501444a2b60533226d439caf435c3981de4dc12a5a383d4",
+      "duration": 2.76
+    },
+    {
+      "key": "can i have some water, please",
+      "text": "Can I have some water, please?",
+      "digest": "db3360ecc71adf8a15c2056761b7bfd4dc52535de2567820857ac0e0ea9d9a69",
+      "path": "assets/audio/db3360ecc71adf8a15c2.mp3",
+      "sources": [
+        "answer:unit4-requests-ask-water",
+        "question:unit4-requests-listen-request",
+        "answer:unit4-requests-listen-request",
+        "model:unit4-lesson-requests-ask",
+        "lesson:unit4-lesson-requests-ask",
+        "answer:unit4-reading-ask-for-water-request",
+        "answer:review34-mixed-request-water",
+        "model:review34-lesson-invitation",
+        "lesson:review34-lesson-invitation",
+        "picnic"
+      ],
+      "bytes": 31104,
+      "sha256": "0aa69a7dcdad32516f97637a60df2c07f30f61d476a8ec6d1f05296ac6986c67",
+      "duration": 2.592
+    },
+    {
       "key": "carrot",
       "text": "carrot",
       "digest": "7c3d3bade68cb855ff17da4289acfcfee803e83812b97d557f0941c8607034b0",
@@ -1279,7 +1594,12 @@
         "answer:unit3-spelling-count-cat",
         "answer:unit3-spelling-complete-cat",
         "model:unit3-lesson-spelling-count",
-        "lesson:unit3-lesson-spelling-count"
+        "lesson:unit3-lesson-spelling-count",
+        "answer:unit4-phonics-sound-cat",
+        "answer:unit4-phonics-word-cat",
+        "answer:unit4-phonics-short-pair",
+        "model:unit4-lesson-phonics-short",
+        "model:unit4-lesson-phonics-compare"
       ],
       "bytes": 22464,
       "sha256": "b78385b6ea0a070e9f7215be6152d215397fcce28ef92afb652da0241d6bbcbd",
@@ -1383,7 +1703,13 @@
         "answer:unit3-spelling-count-chicken",
         "answer:unit3-spelling-complete-chicken",
         "model:unit3-lesson-spelling-chicken",
-        "lesson:unit3-lesson-spelling-chicken"
+        "lesson:unit3-lesson-spelling-chicken",
+        "answer:unit4-food-meaning-chicken",
+        "answer:unit4-food-word-chicken",
+        "question:unit4-food-listen-chicken",
+        "answer:unit4-food-listen-chicken",
+        "model:unit4-lesson-food-chicken",
+        "lesson:unit4-lesson-food-chicken"
       ],
       "bytes": 22464,
       "sha256": "5cb2b816f981d921ca3f9e584dda8b17c69011697a23a23ea5d726211b233d23",
@@ -1442,7 +1768,13 @@
         "word:english4:chocolate",
         "question:english4-chocolate-meaning",
         "answer:english4-chocolate-meaning",
-        "answer:english4-chocolate-word"
+        "answer:english4-chocolate-word",
+        "answer:unit4-food-meaning-chocolate",
+        "answer:unit4-food-word-chocolate",
+        "question:unit4-food-listen-chocolate",
+        "answer:unit4-food-listen-chocolate",
+        "model:unit4-lesson-food-chocolate",
+        "lesson:unit4-lesson-food-chocolate"
       ],
       "bytes": 22464,
       "sha256": "7ab14c6530c150c2b1f8afc3751f362654e07ad0d26c1334a18b8c7c03ef8830",
@@ -1548,7 +1880,10 @@
         "answer:unit3-gifts-listen-milk",
         "model:unit3-lesson-gifts-milk",
         "lesson:unit3-lesson-gifts-milk",
-        "farm"
+        "farm",
+        "answer:review34-mixed-resource-milk",
+        "model:review34-lesson-food",
+        "lesson:review34-lesson-food"
       ],
       "bytes": 25344,
       "sha256": "fbd6bba9a2d5802bb1f03e56fb20fd962907712de3d605e586fab88dafd05815",
@@ -1639,6 +1974,51 @@
       "duration": 1.872
     },
     {
+      "key": "do you like apples",
+      "text": "Do you like apples?",
+      "digest": "cf830754c1568c74e368994791ac840ea8677233702cfaf6d9faa7662b293d88",
+      "path": "assets/audio/cf830754c1568c74e368.mp3",
+      "sources": [
+        "answer:unit4-likes-ask-do",
+        "answer:unit4-likes-yes-context"
+      ],
+      "bytes": 24480,
+      "sha256": "77f3336929ad35044341e30b2e39d10644a122543d98ec407cd35c309e6db91c",
+      "duration": 2.04
+    },
+    {
+      "key": "do you like grapes",
+      "text": "Do you like grapes?",
+      "digest": "f5f7f96171b281a8ea62c59a3bc3ce7491d33b3212884541df417becf085d715",
+      "path": "assets/audio/f5f7f96171b281a8ea62.mp3",
+      "sources": [
+        "answer:unit4-likes-ask",
+        "answer:unit4-likes-no-context",
+        "model:unit4-lesson-likes-question",
+        "lesson:unit4-lesson-likes-question",
+        "model:unit4-lesson-likes-answer-yes",
+        "lesson:unit4-lesson-likes-answer-yes",
+        "model:unit4-lesson-likes-answer-no",
+        "lesson:unit4-lesson-likes-answer-no",
+        "answer:unit4-strategies-not-like-offer"
+      ],
+      "bytes": 24480,
+      "sha256": "45435396a45ef5485916db913eaf9989cfb720a10153d44778e35185cea14ccc",
+      "duration": 2.04
+    },
+    {
+      "key": "do you like mangoes",
+      "text": "Do you like mangoes?",
+      "digest": "0a675461d5967ec7731399b4d12d8681477e0db18f4648393e228093f46054bb",
+      "path": "assets/audio/0a675461d5967ec77313.mp3",
+      "sources": [
+        "answer:review34-mixed-like-answer"
+      ],
+      "bytes": 25344,
+      "sha256": "5172ea6d3665a30dc7ebc7407980901596e372856179892afc8471b6b622ebc1",
+      "duration": 2.112
+    },
+    {
       "key": "dog",
       "text": "dog",
       "digest": "9e12a85ac13a2491a143ee4ba26f3355416c4e6005e83906de885f5f5f8050d0",
@@ -1682,7 +2062,8 @@
         "answer:unit3-phonics-donkey-position",
         "model:unit3-lesson-phonics-k",
         "answer:unit3-spelling-count-donkey",
-        "answer:unit3-spelling-complete-donkey"
+        "answer:unit3-spelling-complete-donkey",
+        "answer:review34-mixed-animal-donkey"
       ],
       "bytes": 22464,
       "sha256": "ff3a8def0dbad43f93ea2fab90a18acd7b4942de3ab2dd21541f8838d0443af0",
@@ -1727,7 +2108,9 @@
         "answer:unit3-phonics-listen-duck",
         "answer:unit3-phonics-duck-letter-count",
         "answer:unit3-spelling-count-duck",
-        "answer:unit3-spelling-complete-duck"
+        "answer:unit3-spelling-complete-duck",
+        "answer:review34-mixed-animal-duck",
+        "answer:review34-mixed-phonics-ck"
       ],
       "bytes": 22464,
       "sha256": "558bb7a5409b7b075be91e73508c1f059376827d627e5785b4cbcda052e9b0aa",
@@ -1802,6 +2185,36 @@
       "bytes": 22464,
       "sha256": "2a03785b3bd5f79a59d27e1e1bceb4fc77d768a25bed84a6b5b6d81a113c268a",
       "duration": 1.872
+    },
+    {
+      "key": "eli does not like mangoes",
+      "text": "Eli does not like mangoes.",
+      "digest": "4f633655d8a0acc9afd63fdf5567170b9cd23b4d0c8935193255fc212f2a7709",
+      "path": "assets/audio/4f633655d8a0acc9afd6.mp3",
+      "sources": [
+        "reading:unit4-reading-different-tastes-nora",
+        "answer:unit4-reading-different-tastes-eli-not",
+        "reading:unit4-reading-different-tastes-eli-not",
+        "reading:unit4-reading-different-tastes-he",
+        "reading:unit4-reading-different-tastes-together",
+        "model:unit4-lesson-reading-different-tastes",
+        "lesson:unit4-lesson-reading-different-tastes"
+      ],
+      "bytes": 31392,
+      "sha256": "d883163668e043e4cdff0992c7327026758ffcc738bafeb3e5cb5df84d3a8e6b",
+      "duration": 2.616
+    },
+    {
+      "key": "eli says, yes, i do",
+      "text": "Eli says, Yes, I do.",
+      "digest": "55a7a9dbb1f93a1c08e37b091fc9db78d51016c902f535a20bb6a7fbc828b391",
+      "path": "assets/audio/55a7a9dbb1f93a1c08e3.mp3",
+      "sources": [
+        "reading:unit4-strategies-not-like-offer"
+      ],
+      "bytes": 37152,
+      "sha256": "2f696ecd51df4e1516da945358151badb890bc848d27c647bd425262159b5d3b",
+      "duration": 3.096
     },
     {
       "key": "eye",
@@ -1910,6 +2323,36 @@
       "duration": 1.872
     },
     {
+      "key": "first, wash your hands",
+      "text": "First, wash your hands.",
+      "digest": "5f15f706cb19a217fc60a8fd34c0796e98548cb69fb5dfef7a115675056b844f",
+      "path": "assets/audio/5f15f706cb19a217fc60.mp3",
+      "sources": [
+        "reading:unit4-recipes-fruit-ingredients",
+        "reading:unit4-recipes-juice",
+        "reading:unit4-recipes-bowl",
+        "answer:unit4-recipes-first",
+        "reading:unit4-recipes-first",
+        "reading:unit4-recipes-next",
+        "reading:unit4-recipes-then",
+        "reading:unit4-recipes-last",
+        "reading:unit4-recipes-mix",
+        "reading:unit4-recipes-prepared",
+        "reading:unit4-recipes-ingredient-or-tool",
+        "reading:unit4-recipes-not-listed",
+        "answer:unit4-recipes-order",
+        "reading:unit4-recipes-order",
+        "answer:unit4-recipes-first-word",
+        "model:unit4-lesson-recipes-method",
+        "lesson:unit4-lesson-recipes-method",
+        "model:unit4-lesson-recipes-steps",
+        "lesson:unit4-lesson-recipes-steps"
+      ],
+      "bytes": 30816,
+      "sha256": "b4ee608a40fc1395803034b763149f8e0293a3ec40ed41ce62976bd66d91cf46",
+      "duration": 2.568
+    },
+    {
       "key": "five",
       "text": "five",
       "digest": "4e369ae99d52d935e4968f56f74b69c41a9b04ecbe5ac733ad195f40a867b3b0",
@@ -1995,7 +2438,13 @@
         "word:english4:fruit",
         "question:english4-fruit-meaning",
         "answer:english4-fruit-meaning",
-        "answer:english4-fruit-word"
+        "answer:english4-fruit-word",
+        "answer:unit4-food-meaning-fruit",
+        "answer:unit4-food-word-fruit",
+        "question:unit4-food-listen-fruit",
+        "answer:unit4-food-listen-fruit",
+        "model:unit4-lesson-food-fruit",
+        "lesson:unit4-lesson-food-fruit"
       ],
       "bytes": 22464,
       "sha256": "028e21df085bfe4946ccd23a76f76d1ddd8dba8acb5df0e4621d5abfbb6d3795",
@@ -2154,10 +2603,29 @@
         "word:english4:grape",
         "question:english4-grape-meaning",
         "answer:english4-grape-meaning",
-        "answer:english4-grape-word"
+        "answer:english4-grape-word",
+        "answer:unit4-food-meaning-grape",
+        "answer:unit4-food-word-grape",
+        "question:unit4-food-listen-grape",
+        "answer:unit4-food-listen-grape",
+        "model:unit4-lesson-food-grape",
+        "lesson:unit4-lesson-food-grape"
       ],
       "bytes": 22464,
       "sha256": "53513ab8bccc16476aac3e4ff16caf75f962682c899710d298d198fef585a40f",
+      "duration": 1.872
+    },
+    {
+      "key": "grapes",
+      "text": "grapes",
+      "digest": "c79d8d9513066a6182bdfb46166221c67cf13aa68632447a59830ffe03856aaa",
+      "path": "assets/audio/c79d8d9513066a6182bd.mp3",
+      "sources": [
+        "answer:unit4-recipes-ingredient-or-tool",
+        "model:unit4-lesson-recipes-ingredients"
+      ],
+      "bytes": 22464,
+      "sha256": "c0036970781e463f55ddfe340bfd2fb966f9daae362a840e52cf85e39ac3b176",
       "duration": 1.872
     },
     {
@@ -2321,7 +2789,8 @@
         "model:unit3-lesson-hasgot-question",
         "lesson:unit3-lesson-hasgot-question",
         "model:unit3-lesson-hasgot-answer-yes",
-        "lesson:unit3-lesson-hasgot-answer-yes"
+        "lesson:unit3-lesson-hasgot-answer-yes",
+        "answer:review34-mixed-hasgot-yes"
       ],
       "bytes": 26496,
       "sha256": "c907f5e79ee0a992120b0ac5c454fe4576c016c83555dfb24d04f3d58842eb7a",
@@ -2387,6 +2856,92 @@
       "bytes": 24768,
       "sha256": "594cf2501f07ffe22464f3023bb0b11983d70a23c83a28cdbbae9db7abef793a",
       "duration": 2.064
+    },
+    {
+      "key": "he doesn't like cake",
+      "text": "He doesn't like cake.",
+      "digest": "bf022ff0bc6ad8df71b47636d5d40e196ebcdcddd5f010973f470fe04892e7a3",
+      "path": "assets/audio/bf022ff0bc6ad8df71b4.mp3",
+      "sources": [
+        "answer:unit4-likes-doesnt-full",
+        "answer:review34-mixed-like-he-no"
+      ],
+      "bytes": 26496,
+      "sha256": "99b1b1d2113825cefc2bb3aab034b319d6ea228a5b159032dc492d57e5ec2581",
+      "duration": 2.208
+    },
+    {
+      "key": "he doesn't like chicken",
+      "text": "He doesn't like chicken.",
+      "digest": "e399db4cc6a541618acf21366551c302305aa3566e10fc5d1dc3736f1ffa5c35",
+      "path": "assets/audio/e399db4cc6a541618acf.mp3",
+      "sources": [
+        "question:unit4-likes-listen-he",
+        "answer:unit4-likes-listen-he"
+      ],
+      "bytes": 26496,
+      "sha256": "0e5a55b001c36856bc83435de3751bc438f4119d83e99acf0aca450706b97653",
+      "duration": 2.208
+    },
+    {
+      "key": "he doesn't like chocolate",
+      "text": "He doesn't like chocolate.",
+      "digest": "55054356d9ea1d2568e418177e8faf1631b25ee6a505de4071479fb558ffb854",
+      "path": "assets/audio/55054356d9ea1d2568e4.mp3",
+      "sources": [
+        "answer:unit4-likes-he-no-verb",
+        "model:unit4-lesson-likes-he-no",
+        "lesson:unit4-lesson-likes-he-no"
+      ],
+      "bytes": 28224,
+      "sha256": "edbc750cb3d783b4b02906b5b652a34df1adff0e86bd11180c1177a04667e9f5",
+      "duration": 2.352
+    },
+    {
+      "key": "he doesn't like meatballs",
+      "text": "He doesn't like meatballs.",
+      "digest": "b97825137658cc9cc9df383dfe8280fe41312fb9e171b49f8abb94ed00ec6723",
+      "path": "assets/audio/b97825137658cc9cc9df.mp3",
+      "sources": [
+        "answer:unit4-likes-translate-doesnt"
+      ],
+      "bytes": 28800,
+      "sha256": "e3c8aec10220569e800a006dfa60da0579fcec567c5099366fd5972eb41366a4",
+      "duration": 2.4
+    },
+    {
+      "key": "he likes apples",
+      "text": "He likes apples.",
+      "digest": "b8d0626dcb8cf1bd2d164095bcca88a7730d6af35b29b6ee45d26ca65d63cda5",
+      "path": "assets/audio/b8d0626dcb8cf1bd2d16.mp3",
+      "sources": [
+        "reading:unit4-reading-different-tastes-nora",
+        "reading:unit4-reading-different-tastes-eli-not",
+        "answer:unit4-reading-different-tastes-he",
+        "reading:unit4-reading-different-tastes-he",
+        "reading:unit4-reading-different-tastes-together",
+        "model:unit4-lesson-reading-different-tastes",
+        "lesson:unit4-lesson-reading-different-tastes"
+      ],
+      "bytes": 25056,
+      "sha256": "cf0d4482da5b5cc0d17d580628aef2f442e5aa803c198d2d601382bb02ede358",
+      "duration": 2.088
+    },
+    {
+      "key": "he likes bananas",
+      "text": "He likes bananas.",
+      "digest": "74b75ced9e903a435cfa655c1997342b3aa5bd6c4becad580f28a2662ece4875",
+      "path": "assets/audio/74b75ced9e903a435cfa.mp3",
+      "sources": [
+        "answer:unit4-likes-he-yes",
+        "answer:unit4-strategies-negative",
+        "reading:unit4-strategies-negative",
+        "model:unit4-lesson-strategies-negative",
+        "lesson:unit4-lesson-strategies-negative"
+      ],
+      "bytes": 26208,
+      "sha256": "08e31c84c5bc4ec3a086f1a6d6702a47bdcd4a8d0099b7cdd0ed499368beb621",
+      "duration": 2.184
     },
     {
       "key": "he reads a book",
@@ -2567,7 +3122,14 @@
       "sources": [
         "answer:unit1-kindness-here-you-are",
         "model:unit1-lesson-kindness-share",
-        "lesson:unit1-lesson-kindness-share"
+        "lesson:unit1-lesson-kindness-share",
+        "answer:unit4-requests-giver",
+        "model:unit4-lesson-requests-give",
+        "lesson:unit4-lesson-requests-give",
+        "answer:unit4-reading-ask-for-water-giver",
+        "model:review34-lesson-invitation",
+        "lesson:review34-lesson-invitation",
+        "picnic"
       ],
       "bytes": 22464,
       "sha256": "2a63b62cd508e39f7a1da8b63bb2ca7bc7a91f8b01d0dc817059931c6fe8509c",
@@ -2678,6 +3240,57 @@
       "duration": 1.872
     },
     {
+      "key": "i don't like bread",
+      "text": "I don't like bread.",
+      "digest": "777ec4eebfef1053a950b2636a317f63a69ffba80e2627f870432ee81ebd1483",
+      "path": "assets/audio/777ec4eebfef1053a950.mp3",
+      "sources": [
+        "answer:unit4-likes-translate-dont"
+      ],
+      "bytes": 24192,
+      "sha256": "0ce4d6ae335bae8b0ae1a9d6980c14f276caa2601944389f42d15a54c2f0cbfe",
+      "duration": 2.016
+    },
+    {
+      "key": "i don't like cake",
+      "text": "I don't like cake.",
+      "digest": "a552b63326c0bf729e6827b328ee7e28b873f14fb328a173818d80cd2f83e016",
+      "path": "assets/audio/a552b63326c0bf729e68.mp3",
+      "sources": [
+        "answer:unit4-likes-negative-full"
+      ],
+      "bytes": 24480,
+      "sha256": "355aae11b06e575315ac6dacecd7c739c2fd70a3a5e5785dbfe4f379d02eabd5",
+      "duration": 2.04
+    },
+    {
+      "key": "i don't like mangoes",
+      "text": "I don't like mangoes.",
+      "digest": "427511fed7c8d65109b60782a38e73cdcac1d91a234fbd238bcff77b9384784c",
+      "path": "assets/audio/427511fed7c8d65109b6.mp3",
+      "sources": [
+        "answer:unit4-likes-self-no",
+        "model:unit4-lesson-likes-self-no",
+        "lesson:unit4-lesson-likes-self-no"
+      ],
+      "bytes": 26784,
+      "sha256": "b3fb6f6c61d52be795685931b66424e75d73dcbea62e9789a324870e0a1dbe31",
+      "duration": 2.232
+    },
+    {
+      "key": "i don't like sausages",
+      "text": "I don't like sausages.",
+      "digest": "d71a9f0ad4956f71b87248f03e123e9fb59abb67d737be8464a368fc824d3ca0",
+      "path": "assets/audio/d71a9f0ad4956f71b872.mp3",
+      "sources": [
+        "question:unit4-likes-listen-negative",
+        "answer:unit4-likes-listen-negative"
+      ],
+      "bytes": 28224,
+      "sha256": "d5127bce389d55f968a429ef76a9a9baa3d16cfce14ed2ca6b142484e5e7a06d",
+      "duration": 2.352
+    },
+    {
       "key": "i haven't got black hair",
       "text": "I haven't got black hair.",
       "digest": "c46bc8656fef6de3efb8c0f9e69800e73fd2466ae34f5ee3870feb153685e675",
@@ -2711,6 +3324,60 @@
       "bytes": 32256,
       "sha256": "e61174ea80d767dba9429e503c31473e976febc8ddc5f69f75d51f8f0e5dcc96",
       "duration": 2.688
+    },
+    {
+      "key": "i like apples",
+      "text": "I like apples.",
+      "digest": "dfc883550e62e19559da3b3b4cb06b9822b9276f5ea27ee4b187a24c611840fd",
+      "path": "assets/audio/dfc883550e62e19559da.mp3",
+      "sources": [
+        "answer:unit4-likes-self-yes",
+        "answer:unit4-likes-apples-plural",
+        "model:unit4-lesson-likes-self-yes",
+        "lesson:unit4-lesson-likes-self-yes",
+        "model:review34-lesson-food",
+        "lesson:review34-lesson-food"
+      ],
+      "bytes": 23904,
+      "sha256": "fb600aea468e27f6f6d99ff457573223c9dfd54a3899192193e37aaeaae41102",
+      "duration": 1.992
+    },
+    {
+      "key": "i like burgers",
+      "text": "I like burgers.",
+      "digest": "f079e237b1e32994f728f7fae15e024ebf8d239131033bef3bd41fc38e0d0f18",
+      "path": "assets/audio/f079e237b1e32994f728.mp3",
+      "sources": [
+        "question:unit4-likes-listen-self",
+        "answer:unit4-likes-listen-self"
+      ],
+      "bytes": 24480,
+      "sha256": "9c4357cc1265425f79bebf29e16b8d1364be8ee4cbe0aaf89f644c1d5127ff7e",
+      "duration": 2.04
+    },
+    {
+      "key": "i like grapes",
+      "text": "I like grapes.",
+      "digest": "dfebc1002b1d31b33b381dd5bc890b62fe931c3509be30c2ce243bd5b5d6da5b",
+      "path": "assets/audio/dfebc1002b1d31b33b38.mp3",
+      "sources": [
+        "answer:review34-mixed-like-self"
+      ],
+      "bytes": 23904,
+      "sha256": "607b47b12718cd049a7dc844755772d5fada978fb70290fd1ad709aed35d1ef6",
+      "duration": 1.992
+    },
+    {
+      "key": "i like mangoes",
+      "text": "I like mangoes.",
+      "digest": "8de32207e82dbcaf29a99b3639c56d31afe3281e4eead5dfa8ba53be21db7b52",
+      "path": "assets/audio/8de32207e82dbcaf29a9.mp3",
+      "sources": [
+        "answer:unit4-likes-mangoes-form"
+      ],
+      "bytes": 25344,
+      "sha256": "7c4066738b1a2e0785b763cea71bf839ca0d7a90d35e438a773fc3dcce913098",
+      "duration": 2.112
     },
     {
       "key": "i'm ava",
@@ -3100,7 +3767,9 @@
         "word:english4:ice_cream",
         "question:english4-ice_cream-meaning",
         "answer:english4-ice_cream-meaning",
-        "answer:english4-ice_cream-word"
+        "answer:english4-ice_cream-word",
+        "answer:unit4-requests-icecream",
+        "lesson:unit4-lesson-requests-icecream"
       ],
       "bytes": 22464,
       "sha256": "7c39539bbf1841a35753b7a1aaaa5f448ef94f2da05464cfbaea2a8edc9287ba",
@@ -3120,6 +3789,18 @@
       "bytes": 22464,
       "sha256": "7b59d4fa6a8887624425658f68a0cfe132d80986d0fdc1fdeadc758c6546fd1b",
       "duration": 1.872
+    },
+    {
+      "key": "ingredients",
+      "text": "ingredients",
+      "digest": "4132f873fa9ad1a3bcfa26ab7c52a7eefed53e801dfa72e5b6306b7f075ebeea",
+      "path": "assets/audio/4132f873fa9ad1a3bcfa.mp3",
+      "sources": [
+        "answer:unit4-recipes-ingredients-meaning"
+      ],
+      "bytes": 23328,
+      "sha256": "7ff46041d446bcff13138aedbf6d7312db952be9eae5ca375823560eb3f7e056",
+      "duration": 1.944
     },
     {
       "key": "interesting",
@@ -3290,6 +3971,18 @@
       "duration": 2.472
     },
     {
+      "key": "it hasn't got wings",
+      "text": "It hasn't got wings.",
+      "digest": "7bf8980af162fda6c4b5c6b62ad49f3472fec4d7e396c94ae813c67cdc37fdae",
+      "path": "assets/audio/7bf8980af162fda6c4b5.mp3",
+      "sources": [
+        "answer:review34-mixed-hasgot-no"
+      ],
+      "bytes": 28224,
+      "sha256": "50924df423ad832e61f7b74f75e72ebd984f23acb3c96ce60fd6c4949d10af7f",
+      "duration": 2.352
+    },
+    {
       "key": "it is big",
       "text": "It is big.",
       "digest": "1354d08dcf856d0f7d82e16c93a68f5ca492f87a914d9d86dd2069ffb31e3004",
@@ -3311,7 +4004,8 @@
         "model:unit3-lesson-describe-is",
         "lesson:unit3-lesson-describe-is",
         "answer:unit3-hasgot-language-has-versus-is",
-        "farm"
+        "farm",
+        "answer:review34-mixed-describe-is"
       ],
       "bytes": 22464,
       "sha256": "1921b9fcdaf575c1d025d9f53d71848dbc2a4c7fb3a1b033a7fae32c2ecf1e29",
@@ -3624,11 +4318,49 @@
         "word:english4:juice",
         "question:english4-juice-meaning",
         "answer:english4-juice-meaning",
-        "answer:english4-juice-word"
+        "answer:english4-juice-word",
+        "answer:unit4-food-meaning-juice",
+        "answer:unit4-food-word-juice",
+        "question:unit4-food-listen-juice",
+        "answer:unit4-food-listen-juice",
+        "model:unit4-lesson-food-juice",
+        "lesson:unit4-lesson-food-juice",
+        "model:unit4-lesson-recipes-ingredients"
       ],
       "bytes": 22464,
       "sha256": "b8b2ba0468b7d464de2bfe4af4135aaeb71e1c933f6de65767df222d06c911fa",
       "duration": 1.872
+    },
+    {
+      "key": "last, share the fruit salad",
+      "text": "Last, share the fruit salad.",
+      "digest": "775abb4754a82f954ebda050b1da90125d94be0c7ce82f599b322440121021e7",
+      "path": "assets/audio/775abb4754a82f954ebd.mp3",
+      "sources": [
+        "reading:unit4-recipes-fruit-ingredients",
+        "reading:unit4-recipes-juice",
+        "reading:unit4-recipes-bowl",
+        "reading:unit4-recipes-first",
+        "reading:unit4-recipes-next",
+        "reading:unit4-recipes-then",
+        "answer:unit4-recipes-last",
+        "reading:unit4-recipes-last",
+        "reading:unit4-recipes-mix",
+        "reading:unit4-recipes-prepared",
+        "reading:unit4-recipes-ingredient-or-tool",
+        "reading:unit4-recipes-not-listed",
+        "answer:unit4-recipes-order",
+        "reading:unit4-recipes-order",
+        "answer:unit4-recipes-last-word",
+        "model:unit4-lesson-recipes-method",
+        "lesson:unit4-lesson-recipes-method",
+        "model:unit4-lesson-recipes-steps",
+        "lesson:unit4-lesson-recipes-steps",
+        "answer:review34-mixed-recipe-last"
+      ],
+      "bytes": 33696,
+      "sha256": "9cf21998fc3379eb58c7030e25dd9070cbaae202f7bbe03ef18551acb3fce065",
+      "duration": 2.808
     },
     {
       "key": "late",
@@ -3674,7 +4406,16 @@
         "word:english4:lemonade",
         "question:english4-lemonade-meaning",
         "answer:english4-lemonade-meaning",
-        "answer:english4-lemonade-word"
+        "answer:english4-lemonade-word",
+        "answer:unit4-food-meaning-lemonade",
+        "answer:unit4-food-word-lemonade",
+        "question:unit4-food-listen-lemonade",
+        "answer:unit4-food-listen-lemonade",
+        "model:unit4-lesson-food-lemonade",
+        "lesson:unit4-lesson-food-lemonade",
+        "answer:unit4-phonics-sound-lemonade",
+        "answer:unit4-phonics-word-lemonade",
+        "model:unit4-lesson-phonics-long"
       ],
       "bytes": 22464,
       "sha256": "8eccd35d37111fddbcbc39bd7a768bd5f862c221399e7703fd45c280d832d37d",
@@ -3794,6 +4535,41 @@
       "duration": 1.872
     },
     {
+      "key": "lina says, would you like some cake",
+      "text": "Lina says, Would you like some cake?",
+      "digest": "5e3d5741bdd42a025e1ea6560fe2015ae3b5d46922409095d013ae9efc5d8ab9",
+      "path": "assets/audio/5e3d5741bdd42a025e1e.mp3",
+      "sources": [
+        "reading:unit4-reading-polite-choice-first",
+        "reading:unit4-reading-polite-choice-decline",
+        "reading:unit4-reading-polite-choice-accept",
+        "reading:unit4-reading-polite-choice-who",
+        "model:unit4-lesson-reading-polite-choice",
+        "lesson:unit4-lesson-reading-polite-choice",
+        "reading:unit4-strategies-decline-clue"
+      ],
+      "bytes": 36864,
+      "sha256": "e21b1c2804802d417ca4cc2c4a0062906d37dadec99f32b9c556676d7037b3cb",
+      "duration": 3.072
+    },
+    {
+      "key": "lina says, would you like some grapes",
+      "text": "Lina says, Would you like some grapes?",
+      "digest": "ac5f375e4166275e9e790eb75a1a5bbb8277e5a28c01ec4b288a00ddfcc65de2",
+      "path": "assets/audio/ac5f375e4166275e9e79.mp3",
+      "sources": [
+        "reading:unit4-reading-polite-choice-first",
+        "reading:unit4-reading-polite-choice-decline",
+        "reading:unit4-reading-polite-choice-accept",
+        "reading:unit4-reading-polite-choice-who",
+        "model:unit4-lesson-reading-polite-choice",
+        "lesson:unit4-lesson-reading-polite-choice"
+      ],
+      "bytes": 37440,
+      "sha256": "db07d388cbe9a52521cfab1ceb143ac77b1b77f01083b47569dc2013b97a5af1",
+      "duration": 3.12
+    },
+    {
       "key": "listen",
       "text": "listen",
       "digest": "bd56a3046473fa66aff78e906da64b290033e5494bde1681e9914c3d5536421e",
@@ -3865,7 +4641,16 @@
         "word:english4:mango",
         "question:english4-mango-meaning",
         "answer:english4-mango-meaning",
-        "answer:english4-mango-word"
+        "answer:english4-mango-word",
+        "answer:unit4-food-meaning-mango",
+        "answer:unit4-food-word-mango",
+        "question:unit4-food-listen-mango",
+        "answer:unit4-food-listen-mango",
+        "model:unit4-lesson-food-mango",
+        "lesson:unit4-lesson-food-mango",
+        "answer:unit4-phonics-sound-mango",
+        "answer:unit4-phonics-word-mango",
+        "model:unit4-lesson-phonics-short"
       ],
       "bytes": 22464,
       "sha256": "5a873c8895e1ef9e22e19b9baded1507f5a0cced9002338954b6c6954b322f07",
@@ -3880,7 +4665,13 @@
         "word:english4:meat",
         "question:english4-meat-meaning",
         "answer:english4-meat-meaning",
-        "answer:english4-meat-word"
+        "answer:english4-meat-word",
+        "answer:unit4-food-meaning-meat",
+        "answer:unit4-food-word-meat",
+        "question:unit4-food-listen-meat",
+        "answer:unit4-food-listen-meat",
+        "model:unit4-lesson-food-meat",
+        "lesson:unit4-lesson-food-meat"
       ],
       "bytes": 22464,
       "sha256": "8efb77d762b753c5ba266cec8e079c0ec505c74b68bf4a6b584a46cda6b339b5",
@@ -3895,10 +4686,28 @@
         "word:english4:meatball",
         "question:english4-meatball-meaning",
         "answer:english4-meatball-meaning",
-        "answer:english4-meatball-word"
+        "answer:english4-meatball-word",
+        "answer:unit4-food-meaning-meatball",
+        "answer:unit4-food-word-meatball",
+        "question:unit4-food-listen-meatball",
+        "answer:unit4-food-listen-meatball",
+        "model:unit4-lesson-food-meatball",
+        "lesson:unit4-lesson-food-meatball"
       ],
       "bytes": 22464,
       "sha256": "8c3c93ec896b74992ac2aa8deb774ac9d974bd2ab94444fb2cb530d3705ffc50",
+      "duration": 1.872
+    },
+    {
+      "key": "meatballs",
+      "text": "meatballs",
+      "digest": "df90568c3384b6cdc546e6f6f4fa15d2117dbb417d9ee2d852ea3d1660a110c6",
+      "path": "assets/audio/df90568c3384b6cdc546.mp3",
+      "sources": [
+        "answer:unit4-recipes-not-listed"
+      ],
+      "bytes": 22464,
+      "sha256": "bafc653a12bda8d9f63e47103315f63202f508849753a6b0c682d1b2a328f4c1",
       "duration": 1.872
     },
     {
@@ -3917,6 +4726,42 @@
       "duration": 1.872
     },
     {
+      "key": "mia and ben have a picnic",
+      "text": "Mia and Ben have a picnic.",
+      "digest": "3ec656f34fd1b2f029e90ac0aa34a5705ea1284384d97c2bc42dac992dcf603e",
+      "path": "assets/audio/3ec656f34fd1b2f029e9.mp3",
+      "sources": [
+        "reading:unit4-reading-picnic-basket-mia",
+        "reading:unit4-reading-picnic-basket-ben",
+        "reading:unit4-reading-picnic-basket-water",
+        "answer:unit4-reading-picnic-basket-activity",
+        "reading:unit4-reading-picnic-basket-activity",
+        "model:unit4-lesson-reading-picnic-basket",
+        "lesson:unit4-lesson-reading-picnic-basket"
+      ],
+      "bytes": 30528,
+      "sha256": "ba1967aef27abca9349fe37ec92778488c446977f5771458112353d26a9167ca",
+      "duration": 2.544
+    },
+    {
+      "key": "mia has got some bread and apples",
+      "text": "Mia has got some bread and apples.",
+      "digest": "635773d9c73bb5778969a269ddaaa8541d05d64b5ebdecf36fc162d26316637f",
+      "path": "assets/audio/635773d9c73bb5778969.mp3",
+      "sources": [
+        "answer:unit4-reading-picnic-basket-mia",
+        "reading:unit4-reading-picnic-basket-mia",
+        "reading:unit4-reading-picnic-basket-ben",
+        "reading:unit4-reading-picnic-basket-water",
+        "reading:unit4-reading-picnic-basket-activity",
+        "model:unit4-lesson-reading-picnic-basket",
+        "lesson:unit4-lesson-reading-picnic-basket"
+      ],
+      "bytes": 34560,
+      "sha256": "feb08fa8b15df61111eb7efced6765ff636ef06d774d11c114776e277c34c3ef",
+      "duration": 2.88
+    },
+    {
       "key": "mia has two crayons",
       "text": "Mia has two crayons.",
       "digest": "809197803ce80496f8ac958ae73609df7253bee71591b21cecf3d02819f11bbd",
@@ -3932,6 +4777,56 @@
       "bytes": 28512,
       "sha256": "da84325e342262bda3c0c529af4fcf5904eb83c1a4fc1051fb4fa94c3ab95d40",
       "duration": 2.376
+    },
+    {
+      "key": "mia likes apples",
+      "text": "Mia likes apples.",
+      "digest": "9fc2e88dbc6ee85b30b79b4eb775099d9583abdfbb09dd5eaa98faeae59ff4aa",
+      "path": "assets/audio/9fc2e88dbc6ee85b30b7.mp3",
+      "sources": [
+        "reading:unit4-strategies-ask-food"
+      ],
+      "bytes": 25920,
+      "sha256": "7470fbd39363ecc6a1a67fd66a5c926c33f2979b95f4ff554d4c59b1c5c5e760",
+      "duration": 2.16
+    },
+    {
+      "key": "mia likes bread",
+      "text": "Mia likes bread.",
+      "digest": "b022a730439084e17be0382b44937fb5374d1f981ce85bd9d2934808403d22cb",
+      "path": "assets/audio/b022a730439084e17be0.mp3",
+      "sources": [
+        "reading:unit4-strategies-ask-place"
+      ],
+      "bytes": 24768,
+      "sha256": "5632554a94098d9d236455ba8544c7571338d33591d5c42e47a43ccfd3a98b90",
+      "duration": 2.064
+    },
+    {
+      "key": "mia likes grapes",
+      "text": "Mia likes grapes.",
+      "digest": "85f92e3d5af67b55b8bf882523fbe3e27a736c3584b0dc827ce801e4a26d8cbd",
+      "path": "assets/audio/85f92e3d5af67b55b8bf.mp3",
+      "sources": [
+        "model:review34-lesson-clues",
+        "lesson:review34-lesson-clues"
+      ],
+      "bytes": 25920,
+      "sha256": "dae630696d57d310055a543a54795abbf8a5d04d854a044e83b121bf87f0dd87",
+      "duration": 2.16
+    },
+    {
+      "key": "mia likes mangoes",
+      "text": "Mia likes mangoes.",
+      "digest": "66fbfef2f63970f71eacf6196d1b30a04970f81e9dfa9c98c8501f9acdb02098",
+      "path": "assets/audio/66fbfef2f63970f71eac.mp3",
+      "sources": [
+        "answer:unit4-strategies-check-person",
+        "reading:unit4-strategies-check-person"
+      ],
+      "bytes": 27360,
+      "sha256": "18de8dfd9df2474319c023d9ca0281110fbcfd8b5816620e2ae0cb7e3d307376",
+      "duration": 2.28
     },
     {
       "key": "mia shares her crayons with ben",
@@ -4079,6 +4974,35 @@
       "duration": 1.872
     },
     {
+      "key": "next, put the prepared fruit in a bowl",
+      "text": "Next, put the prepared fruit in a bowl.",
+      "digest": "ddc410ffa94c8ce9ec65bb002d5249754f50a9d04011614538115b04fea105a4",
+      "path": "assets/audio/ddc410ffa94c8ce9ec65.mp3",
+      "sources": [
+        "reading:unit4-recipes-fruit-ingredients",
+        "reading:unit4-recipes-juice",
+        "answer:unit4-recipes-bowl",
+        "reading:unit4-recipes-bowl",
+        "reading:unit4-recipes-first",
+        "answer:unit4-recipes-next",
+        "reading:unit4-recipes-next",
+        "reading:unit4-recipes-then",
+        "reading:unit4-recipes-last",
+        "reading:unit4-recipes-mix",
+        "answer:unit4-recipes-prepared",
+        "reading:unit4-recipes-prepared",
+        "reading:unit4-recipes-ingredient-or-tool",
+        "reading:unit4-recipes-not-listed",
+        "answer:unit4-recipes-order",
+        "reading:unit4-recipes-order",
+        "model:unit4-lesson-recipes-method",
+        "lesson:unit4-lesson-recipes-method"
+      ],
+      "bytes": 38304,
+      "sha256": "e28a13783e5640d582198f055045005e1133f978ec188d62c9de4fcc7c39f781",
+      "duration": 3.192
+    },
+    {
       "key": "nice",
       "text": "nice",
       "digest": "e92f88992ff9608fd07131fa6fab9aefe8dc984949b0d581c4c2873432667125",
@@ -4115,6 +5039,21 @@
       "duration": 1.872
     },
     {
+      "key": "no, i don't",
+      "text": "No, I don't.",
+      "digest": "ce34a9e27a6b03ba19330ef04c0651c9e9d8afa33b302368cd613e5c8326f24d",
+      "path": "assets/audio/ce34a9e27a6b03ba1933.mp3",
+      "sources": [
+        "answer:unit4-likes-no-context",
+        "model:unit4-lesson-likes-answer-no",
+        "lesson:unit4-lesson-likes-answer-no",
+        "answer:review34-mixed-like-answer"
+      ],
+      "bytes": 24768,
+      "sha256": "307856207c751aea1e193553f42fdc67ec0ef71227041589c7d145255d8fccce",
+      "duration": 2.064
+    },
+    {
       "key": "no, i haven't",
       "text": "No, I haven't.",
       "digest": "367a81619153caf1759f4937825df80b40b471c5ac8f38484a80bea98f9ccb52",
@@ -4148,6 +5087,29 @@
       "duration": 2.304
     },
     {
+      "key": "no, thank you",
+      "text": "No, thank you.",
+      "digest": "ea3a10e41b8732c0cf8091cf524b1c0667245d80cb1ea8cfabeb5ed563aa423d",
+      "path": "assets/audio/ea3a10e41b8732c0cf80.mp3",
+      "sources": [
+        "answer:unit4-requests-decline",
+        "answer:unit4-requests-respect-no",
+        "question:unit4-requests-listen-decline",
+        "answer:unit4-requests-listen-decline",
+        "model:unit4-lesson-requests-decline",
+        "lesson:unit4-lesson-requests-decline",
+        "answer:unit4-reading-polite-choice-decline",
+        "answer:unit4-strategies-decline-clue",
+        "answer:review34-mixed-invitation-no",
+        "model:review34-lesson-invitation",
+        "lesson:review34-lesson-invitation",
+        "picnic"
+      ],
+      "bytes": 25344,
+      "sha256": "ea6641ebadfa62a58e028daa64eb3e32267b38bac59d201f33c43789a302b588",
+      "duration": 2.112
+    },
+    {
       "key": "noah shows ana a picture",
       "text": "Noah shows Ana a picture.",
       "digest": "eacdd036057dd6711e42812d722339563de139d1a8e5db9ba9a807fd3db3d7f6",
@@ -4162,6 +5124,36 @@
       "bytes": 30240,
       "sha256": "d73a20bb66918e4812a6754e3fb1b634bcee44d9c88ccf308e0dac3089c95d68",
       "duration": 2.52
+    },
+    {
+      "key": "nora likes mangoes",
+      "text": "Nora likes mangoes.",
+      "digest": "1829b3895220cf3120cf490e421e6a79adfb7cc03f11af8573d8e941d7ba3fd1",
+      "path": "assets/audio/1829b3895220cf3120cf.mp3",
+      "sources": [
+        "answer:unit4-reading-different-tastes-nora",
+        "reading:unit4-reading-different-tastes-nora",
+        "reading:unit4-reading-different-tastes-eli-not",
+        "reading:unit4-reading-different-tastes-he",
+        "reading:unit4-reading-different-tastes-together",
+        "model:unit4-lesson-reading-different-tastes",
+        "lesson:unit4-lesson-reading-different-tastes"
+      ],
+      "bytes": 27648,
+      "sha256": "bba47910ed211b969fa911f4fc1979d511da6ffabc5158cf293ff482719c816e",
+      "duration": 2.304
+    },
+    {
+      "key": "nora says, do you like grapes",
+      "text": "Nora says, Do you like grapes?",
+      "digest": "096a863e259d57abd4f2962636163c7ce4c2c94d7ca65f0147ca20d09d59896d",
+      "path": "assets/audio/096a863e259d57abd4f2.mp3",
+      "sources": [
+        "reading:unit4-strategies-not-like-offer"
+      ],
+      "bytes": 35424,
+      "sha256": "7f9de3a396e91faf55a05c6575858cb134e1476d1c8e01b82fe17c3d17c9e8c4",
+      "duration": 2.952
     },
     {
       "key": "nose",
@@ -4272,7 +5264,13 @@
         "question:hello-colours-listen-orange",
         "answer:hello-colours-listen-orange",
         "model:hello-lesson-colour-orange",
-        "lesson:hello-lesson-colour-orange"
+        "lesson:hello-lesson-colour-orange",
+        "answer:unit4-food-meaning-orange",
+        "answer:unit4-food-word-orange",
+        "question:unit4-food-listen-orange",
+        "answer:unit4-food-listen-orange",
+        "model:unit4-lesson-food-orange",
+        "lesson:unit4-lesson-food-orange"
       ],
       "bytes": 22464,
       "sha256": "6ef3f912439f4fe98ec05fe1939bf5571f407e6a38d10285f5ded8c05e6e53a4",
@@ -4543,6 +5541,54 @@
       "duration": 2.496
     },
     {
+      "key": "our recipe needs apples, bananas and juice",
+      "text": "Our recipe needs apples, bananas and juice.",
+      "digest": "eb0eef6e5867e21c1c11a237e506ee153a3d6425a247e263002179b644f4b7e4",
+      "path": "assets/audio/eb0eef6e5867e21c1c11.mp3",
+      "sources": [
+        "answer:unit4-strategies-ingredient-eliminate",
+        "reading:unit4-strategies-ingredient-eliminate"
+      ],
+      "bytes": 46656,
+      "sha256": "b291f6acb0dd8aafaa41fa6983e0ff164f1afa6b624f70a0357c2478026c6102",
+      "duration": 3.888
+    },
+    {
+      "key": "owen says, no, thank you",
+      "text": "Owen says, No, thank you.",
+      "digest": "003ca791a5b8dc33e9eeff3841b480289578fa80e7b47a42bb1d063d1589f93c",
+      "path": "assets/audio/003ca791a5b8dc33e9ee.mp3",
+      "sources": [
+        "reading:unit4-reading-polite-choice-first",
+        "reading:unit4-reading-polite-choice-decline",
+        "reading:unit4-reading-polite-choice-accept",
+        "reading:unit4-reading-polite-choice-who",
+        "model:unit4-lesson-reading-polite-choice",
+        "lesson:unit4-lesson-reading-polite-choice",
+        "reading:unit4-strategies-decline-clue"
+      ],
+      "bytes": 35712,
+      "sha256": "4d2d24e43cd1eeb0fbc486416b853ec4ebbd1c5f612394177b78ca1f2aaaa3c7",
+      "duration": 2.976
+    },
+    {
+      "key": "owen says, yes, please",
+      "text": "Owen says, Yes, please.",
+      "digest": "5e458fc3443a0e93d5f1fbc3ae4ea7f98ae2847e1803273cdf55b099a77ea24e",
+      "path": "assets/audio/5e458fc3443a0e93d5f1.mp3",
+      "sources": [
+        "reading:unit4-reading-polite-choice-first",
+        "reading:unit4-reading-polite-choice-decline",
+        "reading:unit4-reading-polite-choice-accept",
+        "reading:unit4-reading-polite-choice-who",
+        "model:unit4-lesson-reading-polite-choice",
+        "lesson:unit4-lesson-reading-polite-choice"
+      ],
+      "bytes": 36576,
+      "sha256": "56ba2a299171098c84a0d1edf83af157b8073f9ad3f4d8874c6e674548534709",
+      "duration": 3.048
+    },
+    {
       "key": "paper",
       "text": "paper",
       "digest": "68a4d6465f3b4f035dac63e751eaff95ab4b4fee61ef8334d4a69c1d5e893e56",
@@ -4554,7 +5600,12 @@
         "answer:english1-paper-word",
         "question:unit1-school-listen-paper",
         "answer:unit1-school-listen-paper",
-        "lesson:unit1-lesson-school-paper"
+        "lesson:unit1-lesson-school-paper",
+        "answer:unit4-phonics-sound-paper",
+        "answer:unit4-phonics-word-paper",
+        "answer:unit4-phonics-compare",
+        "model:unit4-lesson-phonics-long",
+        "model:unit4-lesson-phonics-compare"
       ],
       "bytes": 22464,
       "sha256": "11a97d66ccf556687969e74696929f25681ed1f868177e50a88da799175dafdc",
@@ -4702,6 +5753,20 @@
       "duration": 1.944
     },
     {
+      "key": "people make food in different ways",
+      "text": "People make food in different ways.",
+      "digest": "6061d41f3aa6333b4ccad5f7c78521388dea59e24a46d6b9337b7c828abe8f64",
+      "path": "assets/audio/6061d41f3aa6333b4cca.mp3",
+      "sources": [
+        "answer:unit4-recipes-culture-different",
+        "model:unit4-lesson-recipes-cultures",
+        "lesson:unit4-lesson-recipes-cultures"
+      ],
+      "bytes": 34272,
+      "sha256": "dd5556e5b59caa32d4cf57083fd48ee0828ababc2f6bf795dcda81e4bb474364",
+      "duration": 2.856
+    },
+    {
       "key": "pink",
       "text": "pink",
       "digest": "e6605d6f6cfa1d79874a241cbc607bf1e72d4dc4adfdf380c7694ab79dae4450",
@@ -4804,6 +5869,18 @@
       ],
       "bytes": 22464,
       "sha256": "f318b50c1d3192716b3e04cbce0a12804a572127d224c5913af504bd94577a8b",
+      "duration": 1.872
+    },
+    {
+      "key": "recipe",
+      "text": "recipe",
+      "digest": "7a4aea4b654bea6344e16916c59e268469479a77b5f526645958e3c385aee887",
+      "path": "assets/audio/7a4aea4b654bea6344e1.mp3",
+      "sources": [
+        "answer:unit4-recipes-recipe-meaning"
+      ],
+      "bytes": 22464,
+      "sha256": "61ac8de75e279c96fe736938f850cf2e46bc2f885446d20313a829363e34a085",
       "duration": 1.872
     },
     {
@@ -4918,11 +5995,39 @@
         "word:english4:salad",
         "question:english4-salad-meaning",
         "answer:english4-salad-meaning",
-        "answer:english4-salad-word"
+        "answer:english4-salad-word",
+        "answer:unit4-food-meaning-salad",
+        "answer:unit4-food-word-salad",
+        "question:unit4-food-listen-salad",
+        "answer:unit4-food-listen-salad",
+        "model:unit4-lesson-food-salad",
+        "lesson:unit4-lesson-food-salad",
+        "answer:unit4-phonics-sound-salad",
+        "answer:unit4-phonics-word-salad",
+        "answer:unit4-phonics-salad-first",
+        "model:unit4-lesson-phonics-short",
+        "model:unit4-lesson-phonics-salad"
       ],
       "bytes": 22464,
       "sha256": "4e860576c8528eedd70f2d54e9d31404717f30faae47d2ff3f336bdbacbdacae",
       "duration": 1.872
+    },
+    {
+      "key": "sam says, here you are",
+      "text": "Sam says, Here you are.",
+      "digest": "1e727f2306450466b046e0525940cba41973a62bb40f2c346b129e685b721763",
+      "path": "assets/audio/1e727f2306450466b046.mp3",
+      "sources": [
+        "reading:unit4-reading-ask-for-water-request",
+        "reading:unit4-reading-ask-for-water-giver",
+        "reading:unit4-reading-ask-for-water-thanks",
+        "reading:unit4-reading-ask-for-water-place",
+        "model:unit4-lesson-reading-ask-for-water",
+        "lesson:unit4-lesson-reading-ask-for-water"
+      ],
+      "bytes": 32832,
+      "sha256": "5413c53ab9f7fef326cc8f4b357029bba38f0a1bc972923bfef46d3d55808bcc",
+      "duration": 2.736
     },
     {
       "key": "sausage",
@@ -4933,7 +6038,13 @@
         "word:english4:sausage",
         "question:english4-sausage-meaning",
         "answer:english4-sausage-meaning",
-        "answer:english4-sausage-word"
+        "answer:english4-sausage-word",
+        "answer:unit4-food-meaning-sausage",
+        "answer:unit4-food-word-sausage",
+        "question:unit4-food-listen-sausage",
+        "answer:unit4-food-listen-sausage",
+        "model:unit4-lesson-food-sausage",
+        "lesson:unit4-lesson-food-sausage"
       ],
       "bytes": 22464,
       "sha256": "e18ab39d5c6bb51beebc8d91894c83cbcfc7370707bd76c154fd1e3c8f58ccce",
@@ -5021,6 +6132,85 @@
       "bytes": 26208,
       "sha256": "d062df9c409a4c09475add9973319af10ff4c85b1c4668b88ec96fd6ed7dea79",
       "duration": 2.184
+    },
+    {
+      "key": "she doesn't like juice",
+      "text": "She doesn't like juice.",
+      "digest": "a6208f0b0c1130db9c3f8f753f93c7b1e4380dabd17b4fe19a772d60f4a9901e",
+      "path": "assets/audio/a6208f0b0c1130db9c3f.mp3",
+      "sources": [
+        "answer:unit4-likes-she-no"
+      ],
+      "bytes": 27360,
+      "sha256": "a8538536fa34d846be9245ad2610ea05a1ab4efe26f7e1469f72208f161374b1",
+      "duration": 2.28
+    },
+    {
+      "key": "she likes bread",
+      "text": "She likes bread.",
+      "digest": "11169b9b92e52cc60d57cb36e214f212bef74dae9c8266f21be2edb7ccc2b092",
+      "path": "assets/audio/11169b9b92e52cc60d57.mp3",
+      "sources": [
+        "answer:unit4-likes-she-yes",
+        "answer:unit4-likes-bread-mass",
+        "model:unit4-lesson-likes-she",
+        "lesson:unit4-lesson-likes-she"
+      ],
+      "bytes": 23904,
+      "sha256": "d884fedc179a7df3240ff1b3eb5481af4bf55346308e001cdbd5e24552a6a0bc",
+      "duration": 1.992
+    },
+    {
+      "key": "she likes chocolate",
+      "text": "She likes chocolate.",
+      "digest": "862a5b5d40f68617c905158388147e42efcd9b98f2f2cfd2a34f2cf6d23e78a8",
+      "path": "assets/audio/862a5b5d40f68617c905.mp3",
+      "sources": [
+        "question:unit4-likes-listen-she",
+        "answer:unit4-likes-listen-she"
+      ],
+      "bytes": 25632,
+      "sha256": "c81df25e188b5f7566742eb535cc2c3173159db4ebd52dd11aaa7f7999ffa991",
+      "duration": 2.136
+    },
+    {
+      "key": "she likes fruit",
+      "text": "She likes fruit.",
+      "digest": "89f8768b91906933237e25dac60c910c521b282f2e30ed3ec84c58780828cd54",
+      "path": "assets/audio/89f8768b91906933237e.mp3",
+      "sources": [
+        "answer:review34-mixed-like-she"
+      ],
+      "bytes": 23616,
+      "sha256": "ef3804680b844b833f30ea3208479c708e12cdc94cdcb687490ae23c804cfcf7",
+      "duration": 1.968
+    },
+    {
+      "key": "she likes salad",
+      "text": "She likes salad.",
+      "digest": "57a13bbc378dc6af4a62dbbb4150be416458f8569e7d61971c4724b9f13e1f64",
+      "path": "assets/audio/57a13bbc378dc6af4a62.mp3",
+      "sources": [
+        "answer:unit4-likes-translate-likes"
+      ],
+      "bytes": 24192,
+      "sha256": "16e650e1ead4b5da77e3353021e7f082b7848935ff6382348b8911306878dfe6",
+      "duration": 2.016
+    },
+    {
+      "key": "she makes a fruit salad",
+      "text": "She makes a fruit salad.",
+      "digest": "a3baad9d42674bd2c4a6a2295b3292f03b934c4815ca08233b0e0714e280153d",
+      "path": "assets/audio/a3baad9d42674bd2c4a6.mp3",
+      "sources": [
+        "answer:unit4-strategies-check-prediction",
+        "reading:unit4-strategies-check-prediction",
+        "model:unit4-lesson-strategies-check",
+        "lesson:unit4-lesson-strategies-check"
+      ],
+      "bytes": 27648,
+      "sha256": "61aa06882426ba2da6d028b233dd6070faea24d9927339b3aa01186758e5aca5",
+      "duration": 2.304
     },
     {
       "key": "she's a girl",
@@ -5129,7 +6319,8 @@
         "answer:unit3-gifts-listen-wool",
         "model:unit3-lesson-gifts-wool",
         "lesson:unit3-lesson-gifts-wool",
-        "farm"
+        "farm",
+        "answer:review34-mixed-resource-wool"
       ],
       "bytes": 24768,
       "sha256": "45ed7322cccc67add4078cf8cf2c8e393dc8547f659a8c3ccc76c6cf19779a5f",
@@ -5239,6 +6430,69 @@
       ],
       "bytes": 22464,
       "sha256": "641311be05c0951f1d2d66e4d927fbf96459ef6668bed1c4001c6e0f77ec29f6",
+      "duration": 1.872
+    },
+    {
+      "key": "some apples",
+      "text": "some apples.",
+      "digest": "9f485f9f552748e05bb31a2ac40b71fd458b9734a0446f5f44fb8ede33d736f1",
+      "path": "assets/audio/9f485f9f552748e05bb3.mp3",
+      "sources": [
+        "model:unit4-lesson-requests-some",
+        "lesson:unit4-lesson-requests-some"
+      ],
+      "bytes": 22464,
+      "sha256": "3399c9b028d13fcdf7265c0900ee73b0ae27212502f0b58841cbe4e92341c904",
+      "duration": 1.872
+    },
+    {
+      "key": "some bread",
+      "text": "some bread.",
+      "digest": "ce60188d254f4b98481d1bb836f804f90f022a50b372915c9fee41c95aa6a980",
+      "path": "assets/audio/ce60188d254f4b98481d.mp3",
+      "sources": [
+        "model:unit4-lesson-requests-some",
+        "lesson:unit4-lesson-requests-some"
+      ],
+      "bytes": 22464,
+      "sha256": "34a86412790e5d838d7b2e8b67272df37cdeb292aad889297c644da4be64063b",
+      "duration": 1.872
+    },
+    {
+      "key": "some chicken for lunch",
+      "text": "some chicken for lunch",
+      "digest": "3fe537b70c1636a290e47a68d0779e9734b64d50c6f7a912d842f5a7d28bae48",
+      "path": "assets/audio/3fe537b70c1636a290e4.mp3",
+      "sources": [
+        "answer:review34-mixed-food-chicken"
+      ],
+      "bytes": 27648,
+      "sha256": "fe9ba76f8ab6495c61deae457965f181fee0a7dbb23d1ececd435a8abadb2ce3",
+      "duration": 2.304
+    },
+    {
+      "key": "some meatballs",
+      "text": "some meatballs",
+      "digest": "a83362b32737cdeddfb1d4f0082927940fc5833d52a540fa22a9d184c2134aea",
+      "path": "assets/audio/a83362b32737cdeddfb1.mp3",
+      "sources": [
+        "answer:unit4-requests-some-meatballs"
+      ],
+      "bytes": 23904,
+      "sha256": "c9322d9c100edf015a0f57732fbdc954062b3dad379670b4648da97839b56316",
+      "duration": 1.992
+    },
+    {
+      "key": "some water",
+      "text": "some water.",
+      "digest": "3f9b651f73d3f98f0a2e6d783fa81d75c2d538c76243e702b755f871031bca92",
+      "path": "assets/audio/3f9b651f73d3f98f0a2e.mp3",
+      "sources": [
+        "model:unit4-lesson-requests-some",
+        "lesson:unit4-lesson-requests-some"
+      ],
+      "bytes": 22464,
+      "sha256": "67e93a7ef43d6ab03ac68979136e77bbfcb06398c46c72465cc75b43fb22e10d",
       "duration": 1.872
     },
     {
@@ -5383,11 +6637,29 @@
         "answer:unit1-kindness-thanks",
         "answer:unit1-kindness-here-you-are",
         "model:unit1-lesson-kindness-share",
-        "lesson:unit1-lesson-kindness-share"
+        "lesson:unit1-lesson-kindness-share",
+        "answer:unit4-requests-thanks",
+        "model:unit4-lesson-requests-give",
+        "lesson:unit4-lesson-requests-give",
+        "answer:unit4-reading-ask-for-water-thanks",
+        "answer:review34-mixed-request-give",
+        "picnic"
       ],
       "bytes": 22464,
       "sha256": "ca5f9abad26d993b42680c376d97abb351bddbe60e175ef8ca085701e5784130",
       "duration": 1.872
+    },
+    {
+      "key": "the apples are on the table",
+      "text": "The apples are on the table.",
+      "digest": "79f1fd55d710253bd8fe456b76c9f95a1132f4688ee15092dc428117e6b8c582",
+      "path": "assets/audio/79f1fd55d710253bd8fe.mp3",
+      "sources": [
+        "reading:unit4-strategies-ask-food"
+      ],
+      "bytes": 29088,
+      "sha256": "410e85a39a70b36facf0ffdcbf3d8da97a031db7036d30cb2ac0730b027f98b0",
+      "duration": 2.424
     },
     {
       "key": "the bag is under the chair",
@@ -5549,6 +6821,19 @@
       "duration": 2.376
     },
     {
+      "key": "the bread is in the basket",
+      "text": "The bread is in the basket.",
+      "digest": "f9813651faab863427619b21092759eaa1167b3ee1644cebefa353ff1d2a938b",
+      "path": "assets/audio/f9813651faab86342761.mp3",
+      "sources": [
+        "answer:unit4-strategies-ask-place",
+        "reading:unit4-strategies-ask-place"
+      ],
+      "bytes": 28512,
+      "sha256": "6900f6d371ac58ab7fb6ae24081b3a26bb0ec373c9db5c410a2547e2ef9aae07",
+      "duration": 2.376
+    },
+    {
       "key": "the crayon is in the bag",
       "text": "The crayon is in the bag.",
       "digest": "6adcb403b1b899fb3ef03913b9c304f24f51bae7dad76cf499e523e8811657b6",
@@ -5663,6 +6948,19 @@
       "duration": 2.592
     },
     {
+      "key": "the donkey has got long ears",
+      "text": "The donkey has got long ears.",
+      "digest": "0ac865a961ac79f445dfb60b8d32ed0d984f957c4fea3af32655f8393eb3aeb3",
+      "path": "assets/audio/0ac865a961ac79f445df.mp3",
+      "sources": [
+        "model:review34-lesson-animals",
+        "lesson:review34-lesson-animals"
+      ],
+      "bytes": 32256,
+      "sha256": "82c1345da6d04e550e11ececd918e8dff33ca0f92c635ff0e70b10a0af68800a",
+      "duration": 2.688
+    },
+    {
       "key": "the duckling is little",
       "text": "The duckling is little.",
       "digest": "aa5cca6f09143e6489e7e1a7c85f60eec3f6e1025fa2d98dcbfd2c458c272572",
@@ -5678,6 +6976,34 @@
       "bytes": 26208,
       "sha256": "bed5a48503cd1d6ff3a7de37c243cb908680112d0cb16bd0178b8c5c6b12e579",
       "duration": 2.184
+    },
+    {
+      "key": "the grapes are in the basket",
+      "text": "The grapes are in the basket.",
+      "digest": "2501b9ef47d1072bd22bc4443c5f1596d7c1583deaf8484d35e415bdb09ba67e",
+      "path": "assets/audio/2501b9ef47d1072bd22b.mp3",
+      "sources": [
+        "model:review34-lesson-clues",
+        "lesson:review34-lesson-clues"
+      ],
+      "bytes": 29088,
+      "sha256": "bc03e8a3403eb88e4c123db50bd77b9f6fbabd93e43ac03dbd27de098e8b61e1",
+      "duration": 2.424
+    },
+    {
+      "key": "the juice is on the table",
+      "text": "The juice is on the table.",
+      "digest": "1d5edd989db4c42ec99a445c6a23b14c00959d18a9eca61a09738298d0f7cff6",
+      "path": "assets/audio/1d5edd989db4c42ec99a.mp3",
+      "sources": [
+        "answer:unit4-strategies-same-object",
+        "reading:unit4-strategies-same-object",
+        "model:unit4-lesson-strategies-evidence",
+        "lesson:unit4-lesson-strategies-evidence"
+      ],
+      "bytes": 27648,
+      "sha256": "27390424ccc9641e401fca2d886ce362b2b6a366afe165018bbf31c30631fcea",
+      "duration": 2.304
     },
     {
       "key": "the lamb grows",
@@ -6119,7 +7445,9 @@
       "path": "assets/audio/493b7d34af844e632037.mp3",
       "sources": [
         "model:unit3-lesson-describe-happy",
-        "lesson:unit3-lesson-describe-happy"
+        "lesson:unit3-lesson-describe-happy",
+        "model:review34-lesson-clues",
+        "lesson:review34-lesson-clues"
       ],
       "bytes": 27072,
       "sha256": "33a1117fbf937b84671434fbd5f7aba9b60465b4908ef02e1afe77f43efb7997",
@@ -6164,6 +7492,57 @@
       "duration": 2.376
     },
     {
+      "key": "the water is in a bottle",
+      "text": "The water is in a bottle.",
+      "digest": "8f81a6417c5a7e278be6485040dae704726d7c65084fc4f7dfa5d7db19e2cfe6",
+      "path": "assets/audio/8f81a6417c5a7e278be6.mp3",
+      "sources": [
+        "reading:unit4-strategies-ask-person"
+      ],
+      "bytes": 26784,
+      "sha256": "75f8411bfb355fd55928002b327c81a5cbb6d52b980ab6bd7504823b15ee623e",
+      "duration": 2.232
+    },
+    {
+      "key": "the water is in the basket",
+      "text": "The water is in the basket.",
+      "digest": "714a8c43e4d49780807b56e6701a7f3dd9ef6ff5aa7cffadfea1fdef050afcef",
+      "path": "assets/audio/714a8c43e4d49780807b.mp3",
+      "sources": [
+        "reading:unit4-reading-picnic-basket-mia",
+        "reading:unit4-reading-picnic-basket-ben",
+        "answer:unit4-reading-picnic-basket-water",
+        "reading:unit4-reading-picnic-basket-water",
+        "reading:unit4-reading-picnic-basket-activity",
+        "model:unit4-lesson-reading-picnic-basket",
+        "lesson:unit4-lesson-reading-picnic-basket",
+        "reading:unit4-strategies-same-object",
+        "model:unit4-lesson-strategies-evidence",
+        "lesson:unit4-lesson-strategies-evidence"
+      ],
+      "bytes": 28800,
+      "sha256": "fcefdeae6b34ebe98068edb8655c5ecaf98c8c67dc6dca09547c95a28e4a1bfe",
+      "duration": 2.4
+    },
+    {
+      "key": "the water is on the picnic table",
+      "text": "The water is on the picnic table.",
+      "digest": "96b6fa00079b968bac575d392d243486e025f2410f91549dc0d70a9ca077ffcd",
+      "path": "assets/audio/96b6fa00079b968bac57.mp3",
+      "sources": [
+        "reading:unit4-reading-ask-for-water-request",
+        "reading:unit4-reading-ask-for-water-giver",
+        "reading:unit4-reading-ask-for-water-thanks",
+        "answer:unit4-reading-ask-for-water-place",
+        "reading:unit4-reading-ask-for-water-place",
+        "model:unit4-lesson-reading-ask-for-water",
+        "lesson:unit4-lesson-reading-ask-for-water"
+      ],
+      "bytes": 32256,
+      "sha256": "5a07a921fdafb9e109e675cc16c26c0f1ba36350b2d90ccb8b4efc7bd2fad346",
+      "duration": 2.688
+    },
+    {
       "key": "then",
       "text": "then",
       "digest": "9943713bdb02f824cfed761b2fabc3b9742dea180a90f2188f8b20fcc4c81aef",
@@ -6177,6 +7556,35 @@
       "bytes": 22464,
       "sha256": "6d326438d6205595060b2eaa66e2d717f775398e232510a1afb46c69c768d0ed",
       "duration": 1.872
+    },
+    {
+      "key": "then, add some juice and mix",
+      "text": "Then, add some juice and mix.",
+      "digest": "50641735ff6a5444dbf94dd60e32dd30ebfb7b86773494fb16c62b9e08f9cf9a",
+      "path": "assets/audio/50641735ff6a5444dbf9.mp3",
+      "sources": [
+        "reading:unit4-recipes-fruit-ingredients",
+        "answer:unit4-recipes-juice",
+        "reading:unit4-recipes-juice",
+        "reading:unit4-recipes-bowl",
+        "reading:unit4-recipes-first",
+        "reading:unit4-recipes-next",
+        "answer:unit4-recipes-then",
+        "reading:unit4-recipes-then",
+        "reading:unit4-recipes-last",
+        "answer:unit4-recipes-mix",
+        "reading:unit4-recipes-mix",
+        "reading:unit4-recipes-prepared",
+        "reading:unit4-recipes-ingredient-or-tool",
+        "reading:unit4-recipes-not-listed",
+        "answer:unit4-recipes-order",
+        "reading:unit4-recipes-order",
+        "model:unit4-lesson-recipes-method",
+        "lesson:unit4-lesson-recipes-method"
+      ],
+      "bytes": 34560,
+      "sha256": "98934e4dfd275318580e2d883357e8fbb7b7bee74125ba6bfa8e4732c81fa99c",
+      "duration": 2.88
     },
     {
       "key": "they are big",
@@ -6213,7 +7621,9 @@
         "model:unit3-lesson-describe-little",
         "lesson:unit3-lesson-describe-little",
         "model:unit3-lesson-describe-order",
-        "lesson:unit3-lesson-describe-order"
+        "lesson:unit3-lesson-describe-order",
+        "model:review34-lesson-animals",
+        "lesson:review34-lesson-animals"
       ],
       "bytes": 25056,
       "sha256": "d97435b739fc8268347a606d24f8e44827d2b1a7e62acb025d6841edbb221dac",
@@ -6253,7 +7663,8 @@
       "sources": [
         "answer:unit3-describe-language-are-tired",
         "model:unit3-lesson-describe-are",
-        "lesson:unit3-lesson-describe-are"
+        "lesson:unit3-lesson-describe-are",
+        "answer:review34-mixed-describe-are"
       ],
       "bytes": 22464,
       "sha256": "334e00cca7e8ffeb0362eb1733665eeff93209fa08d00f00ecc428457b4711ec",
@@ -6309,6 +7720,36 @@
       "bytes": 29088,
       "sha256": "45e36b325da118168b01f77b6300426610c34a6c60859cb750bc02fc7b6cc763",
       "duration": 2.424
+    },
+    {
+      "key": "they like fruit",
+      "text": "They like fruit.",
+      "digest": "1990533417994511fd0757013ae70a5c22d24c0eea241e31148e306a0b9ca5ff",
+      "path": "assets/audio/1990533417994511fd07.mp3",
+      "sources": [
+        "answer:unit4-likes-they-yes"
+      ],
+      "bytes": 23040,
+      "sha256": "365a8433e48b96d21bd2cf3255efa41378cc84bcf3fd41a3c60bdb26d960b6f0",
+      "duration": 1.92
+    },
+    {
+      "key": "they listen to each other",
+      "text": "They listen to each other.",
+      "digest": "cbb6d8e36eacd7626a38728adb8414b4f76a2f7dddaae66af1a0b8a3604cb8a0",
+      "path": "assets/audio/cbb6d8e36eacd7626a38.mp3",
+      "sources": [
+        "reading:unit4-reading-different-tastes-nora",
+        "reading:unit4-reading-different-tastes-eli-not",
+        "reading:unit4-reading-different-tastes-he",
+        "answer:unit4-reading-different-tastes-together",
+        "reading:unit4-reading-different-tastes-together",
+        "model:unit4-lesson-reading-different-tastes",
+        "lesson:unit4-lesson-reading-different-tastes"
+      ],
+      "bytes": 26496,
+      "sha256": "b86f8573495b0335f2e3d18e9e9219a64c8b08e4cf7844449b9739ea095a641b",
+      "duration": 2.208
     },
     {
       "key": "they look at the picture together",
@@ -6971,6 +8412,20 @@
       "duration": 1.92
     },
     {
+      "key": "this pasta dish is from italy",
+      "text": "This pasta dish is from Italy.",
+      "digest": "4f03dea43cdcf9e1895f199eba756c54b00db4efcd9f02984489c0e6afe71fef",
+      "path": "assets/audio/4f03dea43cdcf9e1895f.mp3",
+      "sources": [
+        "answer:unit4-recipes-culture-place",
+        "model:unit4-lesson-recipes-cultures",
+        "lesson:unit4-lesson-recipes-cultures"
+      ],
+      "bytes": 31392,
+      "sha256": "46d0aca8227c262c4d6d8d35dc30d0bd95082815442f4dce073d08190ba0d183",
+      "duration": 2.616
+    },
+    {
       "key": "three",
       "text": "three",
       "digest": "2f5db24459823f1f7cfd8fcf9ce8aa612d56b3e78c920306eada4b43f2cba926",
@@ -7146,7 +8601,8 @@
       "sources": [
         "answer:unit3-spelling-plural-sheep",
         "model:unit3-lesson-spelling-sheep",
-        "lesson:unit3-lesson-spelling-sheep"
+        "lesson:unit3-lesson-spelling-sheep",
+        "answer:review34-mixed-animal-sheep"
       ],
       "bytes": 22464,
       "sha256": "d5a5b7e4c452f3d818e8bfd9cb5906feea367780d3492ba34624f5fd9bcd3209",
@@ -7195,7 +8651,13 @@
         "word:english4:water",
         "question:english4-water-meaning",
         "answer:english4-water-meaning",
-        "answer:english4-water-word"
+        "answer:english4-water-word",
+        "answer:unit4-food-meaning-water",
+        "answer:unit4-food-word-water",
+        "question:unit4-food-listen-water",
+        "answer:unit4-food-listen-water",
+        "model:unit4-lesson-food-water",
+        "lesson:unit4-lesson-food-water"
       ],
       "bytes": 22464,
       "sha256": "ed97605c587932bb5b1138b20535d3a87b1cd1f15f1f8ebd0bcd4b6a39b2cfe2",
@@ -7241,6 +8703,156 @@
       "bytes": 27072,
       "sha256": "796d52429598f20e4b03ff4f30e8154247d57b811e670d0277716fba0634e453",
       "duration": 2.256
+    },
+    {
+      "key": "we have got apples, bananas and grapes",
+      "text": "We have got apples, bananas and grapes.",
+      "digest": "04231874aeb4fe64e012ba96bc7a9cd9ef35ffa0523e1b152812d551f271038e",
+      "path": "assets/audio/04231874aeb4fe64e012.mp3",
+      "sources": [
+        "answer:unit4-recipes-fruit-ingredients",
+        "reading:unit4-recipes-fruit-ingredients",
+        "reading:unit4-recipes-juice",
+        "reading:unit4-recipes-bowl",
+        "reading:unit4-recipes-first",
+        "reading:unit4-recipes-next",
+        "reading:unit4-recipes-then",
+        "reading:unit4-recipes-last",
+        "reading:unit4-recipes-mix",
+        "reading:unit4-recipes-prepared",
+        "reading:unit4-recipes-ingredient-or-tool",
+        "reading:unit4-recipes-not-listed",
+        "reading:unit4-recipes-order",
+        "model:unit4-lesson-recipes-method",
+        "lesson:unit4-lesson-recipes-method"
+      ],
+      "bytes": 42336,
+      "sha256": "21c19fc36392a4de7e9f890a91d52974725f34e28f87cb4b1b2b9f8cbe1afb34",
+      "duration": 3.528
+    },
+    {
+      "key": "we have got some apples",
+      "text": "We have got some apples.",
+      "digest": "8e37dbfddde2dfe151b81629250c5301ca561f54deee1d46d2bb3c7e8d35b50c",
+      "path": "assets/audio/8e37dbfddde2dfe151b8.mp3",
+      "sources": [
+        "picnic"
+      ],
+      "bytes": 27648,
+      "sha256": "56117e118e7c9e83a4e1e1a27b47db7bfd5643b6da7e1d15eaa7b40c2547c53c",
+      "duration": 2.304
+    },
+    {
+      "key": "we have got some bananas",
+      "text": "We have got some bananas.",
+      "digest": "28762bce3c421faee0f2fef3e63c9e41d0c45778ef1cf297039c909c22669155",
+      "path": "assets/audio/28762bce3c421faee0f2.mp3",
+      "sources": [
+        "picnic"
+      ],
+      "bytes": 28512,
+      "sha256": "27af9eec79cee0dcfb3cdaadf6fee3d09cf7936d9b72e20c614cb03de13cbe4b",
+      "duration": 2.376
+    },
+    {
+      "key": "we have got some bread",
+      "text": "We have got some bread.",
+      "digest": "6dd6287386f5818b362c97d525dbc2c4f7d4fb40820702887e8ba6bbfff24db7",
+      "path": "assets/audio/6dd6287386f5818b362c.mp3",
+      "sources": [
+        "picnic"
+      ],
+      "bytes": 25632,
+      "sha256": "55c5f9385c27554daeacfdd79b444d50bcdf9423dcf6e1b1a6382fad48a4382c",
+      "duration": 2.136
+    },
+    {
+      "key": "we have got some burgers",
+      "text": "We have got some burgers.",
+      "digest": "e4fd3c9c1dd1e4bca7bd15b188298a220d33d52bf79b957a6eff22d0ee73664c",
+      "path": "assets/audio/e4fd3c9c1dd1e4bca7bd.mp3",
+      "sources": [
+        "picnic"
+      ],
+      "bytes": 27936,
+      "sha256": "a083ab707e87eb509f4bb61f792a45864dba844df29e2ff9433c69edd156553c",
+      "duration": 2.328
+    },
+    {
+      "key": "we have got some cake",
+      "text": "We have got some cake.",
+      "digest": "0adcf077f22c8800da262e639b8aa15b6a4edd6e2827bdc69ebf5d7676aff026",
+      "path": "assets/audio/0adcf077f22c8800da26.mp3",
+      "sources": [
+        "picnic"
+      ],
+      "bytes": 26784,
+      "sha256": "fb71104f4d4c0b336cb411eabfccbb87434cb751a5308d8ecbb954e986d0ff2a",
+      "duration": 2.232
+    },
+    {
+      "key": "we have got some chicken",
+      "text": "We have got some chicken.",
+      "digest": "9eecd0a523c6f90ff65f1c0f8cf07b4ffdc64169bf287d9582ed8f198316585f",
+      "path": "assets/audio/9eecd0a523c6f90ff65f.mp3",
+      "sources": [
+        "picnic"
+      ],
+      "bytes": 26784,
+      "sha256": "9816fc604b8eee68c826871331972b609d34b0d021d84c46ff53222b33a74ef7",
+      "duration": 2.232
+    },
+    {
+      "key": "we have got some grapes",
+      "text": "We have got some grapes.",
+      "digest": "6c507461c7e0f2b4b0ff2fb53d6f00aad53169ad017ec75642c423f3f46a5db2",
+      "path": "assets/audio/6c507461c7e0f2b4b0ff.mp3",
+      "sources": [
+        "picnic"
+      ],
+      "bytes": 27360,
+      "sha256": "9e63da1d60f57f0416593c9094601351a82e6fc91493e45dd955a640a645e266",
+      "duration": 2.28
+    },
+    {
+      "key": "we have got some salad",
+      "text": "We have got some salad.",
+      "digest": "ae5369ef59808b555631d9c899426a8dcd8f58701cbaade4f1a5008eb4f39a4b",
+      "path": "assets/audio/ae5369ef59808b555631.mp3",
+      "sources": [
+        "picnic"
+      ],
+      "bytes": 26784,
+      "sha256": "325a1350ba50057d17ff5b8b64161b8dc2bd312c5498bbd663e97aa5430e18d9",
+      "duration": 2.232
+    },
+    {
+      "key": "we like different food",
+      "text": "We like different food.",
+      "digest": "40b5c1e1ee21fcf93d5d7ad760e1a5de3c555055aec86c0f7b5f958e673b1946",
+      "path": "assets/audio/40b5c1e1ee21fcf93d5d.mp3",
+      "sources": [
+        "model:unit4-lesson-likes-listen",
+        "lesson:unit4-lesson-likes-listen"
+      ],
+      "bytes": 26496,
+      "sha256": "f29e8ba9111e2cec395b0904052363f42899e68daf36c55a131584b433018da6",
+      "duration": 2.208
+    },
+    {
+      "key": "we listen to each other",
+      "text": "We listen to each other.",
+      "digest": "d5309c900c26657cc0695047f1d98ebde8990e80e405092fb34bf7879ce78183",
+      "path": "assets/audio/d5309c900c26657cc069.mp3",
+      "sources": [
+        "answer:unit4-likes-different-likes",
+        "model:unit4-lesson-likes-listen",
+        "lesson:unit4-lesson-likes-listen",
+        "answer:review34-mixed-care-choice"
+      ],
+      "bytes": 26208,
+      "sha256": "61b9477e0e13141e5074cfb609d621e4fe3e10bf6675d86ab8ff3ca51796dfa3",
+      "duration": 2.184
     },
     {
       "key": "we listen to him",
@@ -7413,6 +9025,20 @@
       "duration": 1.872
     },
     {
+      "key": "what food does mia like",
+      "text": "What food does Mia like?",
+      "digest": "336a7af34f2f1e9c9bd98fba9e25271cc0c491e3c8342890b7f3efffaea04403",
+      "path": "assets/audio/336a7af34f2f1e9c9bd9.mp3",
+      "sources": [
+        "answer:unit4-strategies-ask-food",
+        "model:unit4-lesson-strategies-question",
+        "lesson:unit4-lesson-strategies-question"
+      ],
+      "bytes": 28224,
+      "sha256": "d29233a7b1516ddd91d8beee0f6a51ea508b64c9c9e2eed720eb78584bdb55e0",
+      "duration": 2.352
+    },
+    {
       "key": "what's this",
       "text": "What's this?",
       "digest": "caa7c7a990f174927fb3e4884a8e2f815c04817c130b4f86efdef02896a65b67",
@@ -7473,6 +9099,19 @@
       ],
       "bytes": 22464,
       "sha256": "82255b5274b7d2ef07f917b43f76a6308486369dc5ca7a18c35fca7ae26a0eb2",
+      "duration": 1.872
+    },
+    {
+      "key": "where is the bread",
+      "text": "Where is the bread?",
+      "digest": "866e7813a43fd2b0fd7b8cfe958ae3381ffb5479a657effc96a2ecdc3f6f091a",
+      "path": "assets/audio/866e7813a43fd2b0fd7b.mp3",
+      "sources": [
+        "model:unit4-lesson-strategies-question",
+        "lesson:unit4-lesson-strategies-question"
+      ],
+      "bytes": 22464,
+      "sha256": "1b70298f8841de11d76decffe32ab5ce3e0f55d58d9f7c39c4741138c3be58ef",
       "duration": 1.872
     },
     {
@@ -7571,6 +9210,19 @@
       "bytes": 22464,
       "sha256": "514b8b4d0150b81c92a21fc796cce651b136eb75253a0380a50bca53b64dd156",
       "duration": 1.872
+    },
+    {
+      "key": "who has got the water",
+      "text": "Who has got the water?",
+      "digest": "90ade90e3800b8e4835350e802e2d76f590147183163475e4c0df23a09c8c76d",
+      "path": "assets/audio/90ade90e3800b8e48353.mp3",
+      "sources": [
+        "model:unit4-lesson-strategies-question",
+        "lesson:unit4-lesson-strategies-question"
+      ],
+      "bytes": 25056,
+      "sha256": "3de5ee4f8aefb00a84d321d6599cca4b028ed47f32d01934c49b5b59748a2744",
+      "duration": 2.088
     },
     {
       "key": "who is he",
@@ -7694,6 +9346,142 @@
       "duration": 1.872
     },
     {
+      "key": "would you like some apples",
+      "text": "Would you like some apples?",
+      "digest": "a73bc38a8c8b8fde51c956fbc6230b1c205d10722986459222b7885cc96c5f57",
+      "path": "assets/audio/a73bc38a8c8b8fde51c9.mp3",
+      "sources": [
+        "picnic"
+      ],
+      "bytes": 27072,
+      "sha256": "f9b7f8d1045cdbdbe7175cd8124bb73cf019ec0da0dbf2c567fe31bea0663a40",
+      "duration": 2.256
+    },
+    {
+      "key": "would you like some bananas",
+      "text": "Would you like some bananas?",
+      "digest": "cae3b643682586862ffe0ec11c6a1293f72311e4312c81bd04651d239b8ca368",
+      "path": "assets/audio/cae3b643682586862ffe.mp3",
+      "sources": [
+        "picnic"
+      ],
+      "bytes": 27936,
+      "sha256": "162991927884db973f91eed6077747370e587317bdb2281e59dd1541298eb106",
+      "duration": 2.328
+    },
+    {
+      "key": "would you like some bread",
+      "text": "Would you like some bread?",
+      "digest": "aa96dbfb2e6ae9714394ebd6f58462554906972a3b332ef48b132552f75eebf6",
+      "path": "assets/audio/aa96dbfb2e6ae9714394.mp3",
+      "sources": [
+        "answer:unit4-requests-some-bread",
+        "question:unit4-requests-listen-offer",
+        "answer:unit4-requests-listen-offer",
+        "answer:review34-mixed-invitation-yes",
+        "model:review34-lesson-invitation",
+        "lesson:review34-lesson-invitation",
+        "picnic"
+      ],
+      "bytes": 25056,
+      "sha256": "d94b711f1322e44669c8739d24c8d6f04e10acb99b296daae3103f8cacf2623c",
+      "duration": 2.088
+    },
+    {
+      "key": "would you like some burgers",
+      "text": "Would you like some burgers?",
+      "digest": "6ba93842260700d1de4e9420506fd888460e339beb0c777a4526b0a9869bc4e3",
+      "path": "assets/audio/6ba93842260700d1de4e.mp3",
+      "sources": [
+        "picnic"
+      ],
+      "bytes": 27360,
+      "sha256": "108a8948547e0f5ace83ed2f6f765e538d7e77c32d44b59a7a1215cab3266d9e",
+      "duration": 2.28
+    },
+    {
+      "key": "would you like some cake",
+      "text": "Would you like some cake?",
+      "digest": "5c003c0b5adec0df11877afe8608ffea2d742bd4f7af3ecbe58198a8bf2af58a",
+      "path": "assets/audio/5c003c0b5adec0df1187.mp3",
+      "sources": [
+        "answer:unit4-requests-offer",
+        "model:unit4-lesson-requests-offer",
+        "lesson:unit4-lesson-requests-offer",
+        "answer:unit4-reading-polite-choice-first",
+        "answer:unit4-reading-polite-choice-who",
+        "picnic"
+      ],
+      "bytes": 26208,
+      "sha256": "aed5212ecb5890f3b6673762723e6b777f532c225fbfa7276faf6bddcf35343d",
+      "duration": 2.184
+    },
+    {
+      "key": "would you like some chicken",
+      "text": "Would you like some chicken?",
+      "digest": "8ce2ccc51e8fa04cfb7b5be90d2d8328bec796650635d27f32f6681136f5d796",
+      "path": "assets/audio/8ce2ccc51e8fa04cfb7b.mp3",
+      "sources": [
+        "picnic"
+      ],
+      "bytes": 25920,
+      "sha256": "4f62031fe425d2197c560e3720f7b20ff357cc02528ace90612724bb35514226",
+      "duration": 2.16
+    },
+    {
+      "key": "would you like some grapes",
+      "text": "Would you like some grapes?",
+      "digest": "69f3f92d882987e6cb1a305bb08ba8a36d12fa9bf1b165e3b3a054c06c4d6ba8",
+      "path": "assets/audio/69f3f92d882987e6cb1a.mp3",
+      "sources": [
+        "answer:unit4-requests-offer-would",
+        "answer:unit4-reading-polite-choice-accept",
+        "picnic"
+      ],
+      "bytes": 26784,
+      "sha256": "87de5c2e0e6bd5e751f9bac6da0b029a19a1e330e25c696705cd462bf6d90ced",
+      "duration": 2.232
+    },
+    {
+      "key": "would you like some ice cream",
+      "text": "Would you like some ice cream?",
+      "digest": "8cf8ae544e9a49853e95c8bb5ebd65af106964f3f9675766cf35f642920a50dd",
+      "path": "assets/audio/8cf8ae544e9a49853e95.mp3",
+      "sources": [
+        "answer:unit4-requests-translate-offer",
+        "model:unit4-lesson-requests-icecream",
+        "lesson:unit4-lesson-requests-icecream"
+      ],
+      "bytes": 27648,
+      "sha256": "3d828943d5839d85b6e39b370877792618b454f4b0f676e43b8ab789c204d50a",
+      "duration": 2.304
+    },
+    {
+      "key": "would you like some juice",
+      "text": "Would you like some juice?",
+      "digest": "b0dd90e11d4a1ee1b9437cde4aaa2fdd75e8ff0d79f1c3d4000c8658d9b0f38e",
+      "path": "assets/audio/b0dd90e11d4a1ee1b943.mp3",
+      "sources": [
+        "answer:unit4-requests-invitation-v-like",
+        "answer:review34-mixed-invitation-no"
+      ],
+      "bytes": 26496,
+      "sha256": "250da48aa7d29844a6ee70fdb784a55e171e3de85f5095b616aa8ca226bb3f1d",
+      "duration": 2.208
+    },
+    {
+      "key": "would you like some salad",
+      "text": "Would you like some salad?",
+      "digest": "6c0fe8ec581f3613e142af822d0a1364f39ac576acd3606656e25c84efec6841",
+      "path": "assets/audio/6c0fe8ec581f3613e142.mp3",
+      "sources": [
+        "picnic"
+      ],
+      "bytes": 26208,
+      "sha256": "7ae2d2d1ce3a12ea0fad28dada903cac1a1aa7f257f90a186ed99d475a854110",
+      "duration": 2.184
+    },
+    {
       "key": "yellow",
       "text": "yellow",
       "digest": "44bd35419495d550628b266ea40c47790b5f3506aeec6a31e5b08d39134fe263",
@@ -7713,6 +9501,20 @@
       "bytes": 22464,
       "sha256": "6fb1381333a8c82d2305dfe8f6205d718ddb341dfddf3ddcc00e802d2e72401a",
       "duration": 1.872
+    },
+    {
+      "key": "yes, i do",
+      "text": "Yes, I do.",
+      "digest": "551117910bc476f0e483abc10f61d59b36a428436293551fa7e0dd5be2c20eac",
+      "path": "assets/audio/551117910bc476f0e483.mp3",
+      "sources": [
+        "answer:unit4-likes-yes-context",
+        "model:unit4-lesson-likes-answer-yes",
+        "lesson:unit4-lesson-likes-answer-yes"
+      ],
+      "bytes": 26784,
+      "sha256": "690cae7d5fbc5cc311f144d4803e2f83c86c600f4cc22b43c74def915c3757e2",
+      "duration": 2.232
     },
     {
       "key": "yes, i have",
@@ -7739,10 +9541,31 @@
         "question:unit3-hasgot-listen-yes",
         "answer:unit3-hasgot-listen-yes",
         "model:unit3-lesson-hasgot-answer-yes",
-        "lesson:unit3-lesson-hasgot-answer-yes"
+        "lesson:unit3-lesson-hasgot-answer-yes",
+        "answer:review34-mixed-hasgot-yes"
       ],
       "bytes": 26784,
       "sha256": "13f42e597a8294297e60cfc108c7287590bfb9cabf2587bd39b90089ceb597c8",
+      "duration": 2.232
+    },
+    {
+      "key": "yes, please",
+      "text": "Yes, please.",
+      "digest": "a33c6fedd3b2eec23482ce949ae5974107ddd4644d72c918dffdf14d8bdda765",
+      "path": "assets/audio/a33c6fedd3b2eec23482.mp3",
+      "sources": [
+        "answer:unit4-requests-accept",
+        "answer:unit4-requests-invitation-v-like",
+        "question:unit4-requests-listen-accept",
+        "answer:unit4-requests-listen-accept",
+        "model:unit4-lesson-requests-accept",
+        "lesson:unit4-lesson-requests-accept",
+        "answer:unit4-reading-polite-choice-accept",
+        "answer:review34-mixed-invitation-yes",
+        "picnic"
+      ],
+      "bytes": 26784,
+      "sha256": "304cf0d47df40bacbd42b2abe7d4faa472129448b3ca23bbe023a420247379e9",
       "duration": 2.232
     },
     {

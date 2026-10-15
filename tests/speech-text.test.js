@@ -100,6 +100,24 @@ test('缩写比较是三条说明，普通英语缩写不展开，不读等号�
   assert.equal(speech.text(speech.text(expected)), expected, '规范化可重复应用');
 });
 
+test('对话双引号不产生独立音频，人物与完整话语按句保留，原文不改', () => {
+  const passage = ['Ava says, "Can I have some water, please?"',
+    'Sam says, “Here you are.”', 'Ava says, "Thank you."',
+    'The water is on the picnic table.'];
+  const original = JSON.stringify(passage);
+  assert.deepEqual(speech.sentences(passage.join(' ')), [
+    'Ava says, Can I have some water, please?', 'Sam says, Here you are.',
+    'Ava says, Thank you.', 'The water is on the picnic table.'
+  ]);
+  assert.deepEqual(speech.sentences('"'), []);
+  assert.deepEqual(speech.sentences('“”'), []);
+  assert.equal(JSON.stringify(passage), original, '仅处理朗读文本，不修改显示原文');
+  for (const clip of collect().clips) {
+    assert(/[A-Za-z]/.test(clip.text), '每段录音含实际英语，不能生成标点占位音频');
+    assert(!/["\u201c\u201d]/.test(clip.text), '朗读输入不残留对话引号');
+  }
+});
+
 test('p/b 和 th/t 始终读完整示例词，不朗读字母名、括号或缺字标记', () => {
   const cards = [...unit1.lesson('unit1-phonics'), ...unit2.lesson('unit2-phonics')];
   assert.equal(cards.length, 8);

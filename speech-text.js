@@ -5,6 +5,8 @@
   function text(value) {
     return String(value === null || value === undefined ? '' : value)
       .replace(/[\u2018\u2019]/g, "'")
+      // Dialogue quotation marks are display punctuation, not spoken fragments.
+      .replace(/["\u201c\u201d]/g, '')
       .replace(/\b(who's|he's|she's)\s*=\s*(who is|he is|she is)\b/gi, (original, short, full) => {
         const expansions = { "who's": 'who is', "he's": 'he is', "she's": 'she is' };
         const key = short.toLowerCase();

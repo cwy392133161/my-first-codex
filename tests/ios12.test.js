@@ -107,7 +107,8 @@ assert.equal(icon.toString('ascii', 12, 16), 'IHDR');
 assert.equal(icon.readUInt32BE(16), 180);
 assert.equal(icon.readUInt32BE(20), 180);
 for (const file of ['style.css', 'app.js', 'speech-text.js', 'audio-player.js']) {
-  const version = ['style.css','app.js'].includes(file) ? 'unit4-food-v1' : 'ios12-webapp-v1-20261014';
+  const version = ['style.css','app.js'].includes(file) ? 'unit4-food-audio-v2-20261015'
+    : file === 'speech-text.js' ? 'azure-jenny-unit4-v1-20261015' : 'ios12-webapp-v1-20261014';
   assert(index.includes(`${file}?v=${version}`), `${file} 更新缓存版本`);
 }
 
@@ -115,7 +116,7 @@ for (const file of ['style.css', 'app.js', 'speech-text.js', 'audio-player.js'])
 // A curriculum extension cannot silently change the old content,
 // cloud recordings, question identities, or the persisted backup protocol.
 const unchanged = ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js',
-  'data/english-unit3.js', 'data/audio-manifest.js', 'data/audio-audit.json', 'record-backup.js'];
+  'data/english-unit3.js', 'record-backup.js'];
 for (const file of unchanged) assert.deepEqual(read(file), old(file), `${file} 与当前音频交付基线完全一致`);
 const cache = new Map();
 function baselineModule(file) {
@@ -141,9 +142,18 @@ for (const topic of beforeQuestions.topics) {
 assert.equal(count, 1742, '全部题对象保留（包括动态数学组合，不称其为固定题数量）');
 const manifest = require('../data/audio-manifest.js');
 const audit = JSON.parse(read('data/audio-audit.json'));
-assert.equal(Object.keys(manifest.clips).length, 501);
-assert.equal(audit.clips.length, 501);
+const originalManifest = baselineModule('data/audio-manifest.js');
+const originalAudit = JSON.parse(old('data/audio-audit.json'));
+assert.equal(Object.keys(originalManifest.clips).length, 501);
+assert.equal(Object.keys(manifest.clips).length, 613);
+assert.equal(audit.clips.length, 613);
+assert.deepEqual(manifest.voice, plain(originalManifest.voice), '音频扩展保留原 Jenny 风格、速度和输出格式');
 assert.equal(manifest.voice.name, 'en-US-JennyNeural');
+for (const clip of originalAudit.clips) {
+  assert.equal(manifest.clips[clip.key], originalManifest.clips[clip.key], `${clip.key} 原录音地址不变`);
+  assert.equal(sha256(read(clip.path)), clip.sha256, `${clip.key} 原 501 段录音字节保留`);
+}
+assert.equal(Object.keys(manifest.clips).filter(key => !originalManifest.clips[key]).length, 112);
 for (const clip of audit.clips) {
   assert.equal(manifest.clips[clip.key], clip.path);
   assert.match(clip.path, /^assets\/audio\/[a-f0-9]{20}\.mp3$/);
@@ -152,6 +162,7 @@ for (const clip of audit.clips) {
   assert.equal(sha256(bytes), clip.sha256, `${clip.key} MP3 完整校验`);
 }
 const audioFiles = fs.readdirSync(path.join(ROOT, 'assets/audio')).filter(file => file.endsWith('.mp3'));
-assert.equal(audioFiles.length, 501, '保留全部现有 501 段发音，不混入其它录音');
+assert.equal(audioFiles.length, 613, '原 501 段和新增 112 段完整交付，不混入其它录音');
+assert.deepEqual(new Set(audioFiles), new Set(Object.values(manifest.clips).map(file => path.basename(file))), '613 个文件与清单地址一一对应');
 assert.match(read('app.js').toString('utf8'), /['"]learning-garden-v1['"]/, '本地记录键不变');
-console.log(`通过：${browserFiles.size} 个前端脚本的 ES2019 语法、主站旧 API 检查、Apple 全屏元数据/180px 图标/子目录路径、1742 个完整题对象、501 段 MP3 SHA256 与原备份协议保留。无法以这些自动化检查证明 iOS 12 实机兼容性。`);
+console.log(`通过：${browserFiles.size} 个前端脚本的 ES2019 语法、主站旧 API 检查、Apple 全屏元数据/180px 图标/子目录路径、1742 个完整题对象、原 501 段 MP3 地址/字节及 613 段 SHA256、原备份协议保留。无法以这些自动化检查证明 iOS 12 实机兼容性。`);

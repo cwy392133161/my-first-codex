@@ -10,6 +10,7 @@ const path = require('node:path');
 const unit4 = require('../data/english-unit4.js');
 const questions = require('../data/questions.js');
 const manifest = require('../data/audio-manifest.js');
+const speech = require('../speech-text.js');
 const root = path.resolve(__dirname, '..'), KEY = 'learning-garden-v1';
 const goals = unit4.topics.map(topic => topic.id), reviewId = unit4.reviewTopic.id;
 const all = questions.topics.flatMap(topic => questions.bank(topic.id));
@@ -100,6 +101,33 @@ async function serve() {
       assert(size.actual <= size.width, `${label}：${size.actual} > ${size.width}，不应横向滚动`);
       for (const button of await page.locator('.choices button').all()) assert(await button.evaluate(el => el.scrollWidth <= el.clientWidth), `${label} 按钮文字完整`);
     };
+    const playAndCheck = async (button, text, label) => {
+      const expected = speech.sentences(text).map(line => {
+        const file = manifest.clips[speech.canonical(line)];
+        assert(file, `${label} 每句有真实音频映射：${line}`);
+        return origin + '/' + file;
+      });
+      assert.equal(await button.getAttribute('data-recorded-only'), 'true');
+      assert.equal(await button.isDisabled(), false, `${label} 完整交付后可以播放`);
+      const before = await current(), prior = await page.evaluate(() => window.unit4Audio.length);
+      await button.click();
+      await page.waitForFunction(({ prior, count }) => {
+        const samples = window.unit4Audio.slice(prior);
+        return samples.length === count && samples.every(sample => sample.events.includes('ended'));
+      }, { prior, count: expected.length }, { timeout: Math.max(15000, expected.length * 10000) });
+      const samples = await page.evaluate(prior => window.unit4Audio.slice(prior), prior);
+      assert.deepEqual(samples.map(sample => sample.src), expected, `${label} 按实际文本顺序播放对应 MP3`);
+      for (const sample of samples) {
+        assert.equal(sample.rate, 1, `${label} 正常语速`);
+        assert(sample.duration > 0 && sample.progressed, `${label} 实际解码并推进时间`);
+        assert(sample.events.includes('playing') && sample.events.includes('ended'));
+        assert(!sample.events.includes('error'));
+      }
+      assert.equal(await page.evaluate(() => window.unit4NativeCalls), 0, `${label} 不使用系统声线`);
+      assert.deepEqual(await current(), before, `${label} 听读不改变学习记录`);
+    };
+
+    assert.equal(Object.keys(manifest.clips).length, 613, '此流程检验完整音频交付态');
 
     await overview(); assert.equal(await page.locator('.goal-unit').count(), 7);
     assert.equal(await current(), null, '空记录浏览学习目标不写入数据');
@@ -113,7 +141,10 @@ async function serve() {
         assert.equal(await page.locator('.goal-title').innerText(), card.title);
         const text = await page.locator('.goal-card').innerText();
         for (const line of card.lines) { assert(text.includes(line.english)); assert(text.includes(line.chinese)); }
-        for (const button of await page.locator('button[data-action="speak"]').all()) assert.equal(await button.getAttribute('data-recorded-only'), 'true', 'Unit 4 和复习卡均只用已确认录音');
+        for (const button of await page.locator('button[data-action="speak"]').all()) {
+          assert.equal(await button.getAttribute('data-recorded-only'), 'true', 'Unit 4 和复习卡均只用已准备的录音');
+          assert.equal(await button.isDisabled(), false, '全部 54 张卡的示范和说法均有完整录音');
+        }
         assert.equal(await page.locator('.say-model').isVisible(), false);
         await click('show-model'); assert((await page.locator('.say-model').innerText()).includes(card.sayModel));
         await click('say-done'); assert.equal(await page.locator('button[data-action="say-done"]').isDisabled(), true);
@@ -201,11 +232,47 @@ async function serve() {
     await click('picnic-show'); assert.equal(await page.locator('#picnic-sheet').textContent(), sheet);
     assert.equal(await page.locator('button[data-action="read-picnic"]').getAttribute('data-recorded-only'), 'true');
     assert.deepEqual(await current(), beforePicnic, '野餐草稿、展示、中文开关和练说均不写学习记录');
-    passed.push('野餐三食物不重复、some 后名词形式、邀请接受和婉拒、饮料请求、中英开关与重编辑');
+    const picnic = { foods: selected.map((key, index) => ({ key, reply: index === 1 ? 'no' : 'yes' })), drink: 'lemonade' };
+    await playAndCheck(page.locator('button[data-action="read-picnic"]'), unit4.picnicSentences(picnic).join(' '), '完整野餐对话');
+    passed.push('野餐三食物不重复、邀请接受/婉拒、饮料请求、中英开关与重编辑；完整对话逐句实际 1 倍速播放');
 
-    // Missing new audio is explicit text practice, never the previously rejected device voice.
-    const missing = [...goals, reviewId].flatMap(unit4.bank).find(q => q.kind === 'listening' && !manifest.clips[q.speech.replace(/[‘’]/g, "'").trim().replace(/[.!?]+$/, '').toLowerCase()]);
-    assert(missing, '当前开发版有待生成录音的完整听辨文本');
+    const listening = [...goals, reviewId].flatMap(unit4.bank).filter(q => q.kind === 'listening');
+    for (const q of listening) assert(manifest.clips[speech.canonical(q.speech)], `${q.id} 听辨文本已完整映射`);
+    for (const q of listening.filter(q => ['unit4-likes', 'unit4-requests'].includes(q.topic))) {
+      await overview(); await prefer(q.id); await start(q.topic);
+      assert.equal((await displayed()).id, q.id);
+      assert.equal(await page.locator('.listening-text').isVisible(), false, '有录音时不提前显示听辨原句');
+      await playAndCheck(page.locator('button[data-action="listen"]'), q.speech, q.id);
+      await leave();
+    }
+    passed.push('喜好肯定/否定/第三人称和请求/邀请/接受/谢绝八道听辨题，真实音频地址、顺序及 1 倍速播放正确');
+
+    for (const card of unit4.lesson('unit4-phonics')) {
+      await overview(); await learn('unit4-phonics');
+      const index = unit4.lesson('unit4-phonics').findIndex(item => item.id === card.id);
+      for (let i = 0; i < index; i++) await click('goal-next');
+      assert.equal(await page.locator('.goal-title').innerText(), card.title);
+      const text = speech.lesson(card, true);
+      assert(!/[\[\]_→æə]|\/eɪ\//.test(text), '拼读示范不读 IPA 或括号标记');
+      await playAndCheck(page.locator('.goal-card > button[data-action="speak"]'), text, card.id);
+    }
+    passed.push('a 的四张拼读卡均读完整例词，/æ/ 与 /eɪ/ 示范及 salad 首个 a 提示保留');
+
+    for (const q of [unit4.bank('unit4-recipes').find(q => q.passage),
+      ...unit4.bank('unit4-reading').filter((q, index, list) => list.findIndex(other => JSON.stringify(other.passage) === JSON.stringify(q.passage)) === index)]) {
+      await overview(); await prefer(q.id); await start(q.topic);
+      assert.equal((await displayed()).id, q.id);
+      for (const line of q.passage) assert((await page.locator('.reading-passage').innerText()).includes(line));
+      await playAndCheck(page.locator('button[data-action="read-passage"]'), q.passage.join(' '), q.id);
+      await leave();
+    }
+    passed.push('完整五句食谱及四篇原创故事逐句实际播放到结束，句子顺序与题面对应');
+
+    // Even with a system voice available, a missing manifest entry is explicit text practice.
+    const missing = listening.find(q => q.id === 'unit4-likes-listen-negative');
+    assert(missing);
+    const missingKey = speech.canonical(missing.speech), missingPath = manifest.clips[missingKey];
+    await page.evaluate(key => { delete window.GardenAudioManifest.clips[key]; }, missingKey);
     await overview(missing.topic === reviewId); await prefer(missing.id); await start(missing.topic);
     assert.equal((await displayed()).id, missing.id);
     assert.equal(await page.locator('button[data-action="listen"]').isDisabled(), true);
@@ -213,31 +280,29 @@ async function serve() {
     assert((await page.locator('.listening-text').innerText()).includes(missing.fallbackPrompt));
     assert.equal(await page.evaluate(() => window.unit4NativeCalls), 0);
     await leave();
+    await page.evaluate(({ key, file }) => { window.GardenAudioManifest.clips[key] = file; }, { key: missingKey, file: missingPath });
     const wordListening = unit4.bank('unit4-food').find(q => q.id === 'unit4-food-listen-banana');
     assert(wordListening);
     await overview(); await prefer(wordListening.id); await start(wordListening.topic);
     assert.equal((await displayed()).id, wordListening.id);
     const audioButton = page.locator('button[data-action="listen"]');
     assert.equal(await audioButton.isDisabled(), false, '已交付核心词录音可复用');
-    const priorPlay = await page.evaluate(() => window.unit4Audio.length);
-    await audioButton.click();
-    await page.waitForFunction(prior => window.unit4Audio.slice(prior).some(sample => sample.events.includes('ended')), priorPlay, { timeout: 15000 });
-    const samples = await page.evaluate(prior => window.unit4Audio.slice(prior), priorPlay);
-    assert(samples.length > 0);
-    for (const sample of samples) { assert.equal(sample.rate, 1); assert(sample.duration > 0 && sample.progressed); assert(sample.events.includes('playing')); assert(!sample.events.includes('error')); }
-    assert.equal(await page.evaluate(() => window.unit4NativeCalls), 0);
+    await playAndCheck(audioButton, wordListening.speech, '原 banana 录音复用');
+    await leave();
+    await overview(); await prefer(missing.id); await start(missing.topic);
+    assert.equal((await displayed()).id, missing.id);
     const beforeFailedAudio = await current();
     await page.route('**/assets/audio/*.mp3', route => route.fulfill({ status: 404, body: 'Unavailable test recording' }));
     // The reused Audio element has completed playback; a forced load failure must not select system TTS.
     await page.evaluate(() => { performance.clearResourceTimings(); });
-    await audioButton.click();
+    await page.locator('button[data-action="listen"]').click();
     await page.waitForFunction(() => [...document.querySelectorAll('.speech-status')].some(el => el.textContent.includes('暂时无法播放')), null, { timeout: 15000 });
     assert.equal(await page.evaluate(() => window.unit4NativeCalls), 0);
     assert.equal(await page.locator('.listening-text').isVisible(), true, 'MP3 404 后自动露出文字备用');
     assert.deepEqual(await current(), beforeFailedAudio);
     await page.unroute('**/assets/audio/*.mp3');
     await leave();
-    passed.push('缺少新音频时立即显示文字、禁用按钮且不回退系统发音；已交付 MP3 在真实点击后正常 1 倍速解码播放');
+    passed.push('原 banana 录音复用；模拟新增清单项缺失和 MP3 404 后显示文字且不回退系统发音，学习记录不变');
 
     for (const q of [retryWrong, twiceWrong, oldQuestions.at(-2)]) {
       await home(); await click('review'); await prefer(q.id); await click('start-review');

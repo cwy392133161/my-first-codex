@@ -6,6 +6,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
+const crypto = require('node:crypto');
 const { execFileSync } = require('node:child_process');
 const unit4 = require('../data/english-unit4.js');
 const questions = require('../data/questions.js');
@@ -38,9 +39,27 @@ for (const topic of originalQuestions.topics) {
   for (const q of before) { assert(!ids.has(q.id)); ids.add(q.id); }
 }
 assert.equal(ids.size, 1742, '1742 个原有固定或数学动态组合题对象不变，未把运行次数算成题库数');
-for (const file of [...originalModules.map(file => `data/${file}`), 'record-backup.js', 'data/audio-manifest.js', 'data/audio-audit.json']) {
+for (const file of [...originalModules.map(file => `data/${file}`), 'record-backup.js']) {
   assert.deepEqual(fs.readFileSync(path.join(root, file)), previousSource(file), `${file} 已发布数据和协议逐字节不变`);
 }
+const originalAudio = oldModule('data/audio-manifest.js');
+const originalAudit = JSON.parse(previousSource('data/audio-audit.json'));
+const audio = require('../data/audio-manifest.js');
+const audit = JSON.parse(read('data/audio-audit.json'));
+assert.equal(Object.keys(originalAudio.clips).length, 501);
+assert.equal(Object.keys(audio.clips).length, 613, '完整交付 501 段原音频和 112 段新音频');
+assert.equal(audit.clips.length, 613);
+assert.deepEqual(audio.voice, plain(originalAudio.voice), '复用完全相同的 Jenny 默认风格和正常语速配置');
+const delivered = new Map(audit.clips.map(clip => [clip.key, clip]));
+for (const clip of originalAudit.clips) {
+  assert.equal(audio.clips[clip.key], originalAudio.clips[clip.key], `${clip.key} 原音频地址不变`);
+  assert.equal(delivered.get(clip.key).sha256, clip.sha256, `${clip.key} 原录音校验值不变`);
+  const bytes = fs.readFileSync(path.join(root, clip.path));
+  assert.equal(bytes.length, clip.bytes);
+  assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'), clip.sha256, `${clip.key} 原录音字节不变`);
+}
+assert.equal(Object.keys(audio.clips).filter(key => !originalAudio.clips[key]).length, 112);
+assert.equal(fs.existsSync(path.join(root, 'data/audio-pending.json')), false, '完整交付后不再保留待生成清单');
 assert.match(read('app.js'), /['"]learning-garden-v1['"]/, '不重置已有浏览器记录键');
 assert.deepEqual(unit4.topics.map(topic => topic.id), goalIds);
 assert.equal(unit4.reviewTopic.id, reviewId);
@@ -268,4 +287,4 @@ for (const topic of [...goalIds, reviewId]) {
   assert(!after.wrong.includes(q.id)); assert(after.wrong.includes(oldQ.id));
   assert.equal(after.attempts.filter(attempt => attempt.question === q.id).length, 2);
 }
-console.log(`Unit 4 数据检查通过：${added.length} 道新增原创固定题、${cards.length} 张卡、${taskLines.size} 种野餐任务句；原 1742 个题对象、501 段录音和 v1 备份兼容性保留。`);
+console.log(`Unit 4 数据检查通过：${added.length} 道新增原创固定题、${cards.length} 张卡、${taskLines.size} 种野餐任务句；原 1742 个题对象、501 段录音字节和地址、v1 备份兼容性保留，完整清单 613 段。`);
