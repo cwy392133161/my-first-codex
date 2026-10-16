@@ -2,7 +2,7 @@
 
 // node tests/audio.test.js
 // node tests/audio.test.js --decode  (also needs FFmpeg; decodes every MP3)
-// Strict full delivery: every current Unit 3 reading must have a real MP3.
+// Strict delivery requires every current reading, including Unit 4, to have a real MP3.
 // Enumerate real reading sources independently of the audio build helper.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
@@ -15,16 +15,21 @@ const hello = require('../data/english-hello.js');
 const unit1 = require('../data/english-unit1.js');
 const unit2 = require('../data/english-unit2.js');
 const unit3 = require('../data/english-unit3.js');
+const unit4 = require('../data/english-unit4.js');
 const questions = require('../data/questions.js');
 const speechText = require('../speech-text.js');
 const manifest = require('../data/audio-manifest.js');
 const audio = require('../audio-player.js');
 const audit = require('../data/audio-audit.json');
 const collect = require('../scripts/audio-texts.js').collect;
-assert(!process.argv.includes('--allow-pending'), '全量交付检查不再支持待生成审查模式。');
+assert(!process.argv.includes('--allow-pending'), '全量交付不接受 --allow-pending；任何缺音频必须失败。');
 const collected = collect();
-assert.equal(collected.clips.length, 501, '完整当前计划含 Unit 3，共501段');
-assert.equal(collected.texts.length, 2029, '2029个实际朗读入口全部纳入交付检查');
+const published = collect({includeUnit4:false});
+assert.equal(published.clips.length, 501, '已发布基线保持 501 段');
+assert.equal(published.texts.length, 2029, '已发布基线保持 2029 个朗读入口');
+assert.equal(collected.clips.length, 613, '完整 Unit 4 交付包含 613 段');
+assert.equal(collected.texts.length, 3207, '完整 Unit 4 交付包含 3207 个实际朗读来源');
+assert.equal(audit.clips.length, collected.clips.length, '当前每个朗读都必须有已验证 MP3。');
 
 const repository = path.resolve(__dirname, '..');
 const normalize = text => text.replace(/[\u2018\u2019]/g, "'").replace(/\s+/g, ' ')
@@ -42,7 +47,7 @@ function spokenPieces(text) {
     "He's = He is": "He's means he is.",
     "She's = She is": "She's means she is."
   };
-  let spoken = text.replace(/[\u2018\u2019]/g, "'");
+  let spoken = text.replace(/[\u2018\u2019]/g, "'").replace(/[\"\u201c\u201d]/g, '');
   for (const [display, reading] of Object.entries(shortForms)) spoken = spoken.replaceAll(display, reading);
   return spoken.replace(/\s*\/\s*/g, ', ').split(/[.!?;]/)
     .map(piece => piece.trim()).filter(Boolean);
@@ -63,10 +68,11 @@ function checkPlan(text, label, remember = false) {
     const key = normalize(piece);
     assert(key, `${label} 不包含空片段`);
     expectedKeys.add(key);
-    assert(Object.hasOwn(manifest.clips, key), `${label} 缺少音频：${piece}`);
+    assert(Object.hasOwn(manifest.clips, key), `${label} 缺少真实音频：${piece}`);
     return manifest.clips[key];
   });
-  assert.deepEqual(audio.plan(text), expected, `${label} 的整个朗读按顺序映射到本地音频`);
+  assert.deepEqual(audio.plan(text), expected,
+    `${label} 全部已准备时按序播放；任一句未生成时不虚报完整朗读`);
   sourceCount++;
   if (remember) staticSources.push({ text, label });
 }
@@ -120,6 +126,7 @@ for (const clip of audit.clips) {
   assert.equal(clip.text, input.text, `${clip.key} 使用当前实际朗读文本及标点`);
   assert.deepEqual(clip.sources, input.sources, `${clip.key} 对应当前朗读入口`);
   assert.equal(normalize(clip.text), clip.key);
+  assert(!/[\"\u201c\u201d]/.test(clip.text), '展示用双引号不进入实际 SSML 或独立音频');
   const ssml = expectedSSML(clip.text);
   const digest = hashJSON({ ssml, format: configuration.format, pipeline: 1 });
   assert.equal(clip.digest, digest, `${clip.key} 的完整指纹包含真实 SSML、输出格式与规则版本`);
@@ -155,13 +162,13 @@ for (const topic of questions.topics) {
     if (question.passage?.length) checkPlan(question.passage.join(' '), `故事全文 ${question.id}`, true);
   }
 }
-for (const api of [hello, unit1, unit2, unit3]) {
+for (const api of [hello, unit1, unit2, unit3, unit4]) {
   const topics = api.reviewTopic ? [...api.topics, api.reviewTopic] : api.topics;
   for (const topic of topics) {
     for (const card of api.lesson(topic.id)) {
       checkPlan(card.sayModel, `开口示范 ${card.id}`, true);
       // Phonics buttons use whole-word sayModel rather than reading IPA/letters.
-      if (!['unit1-phonics', 'unit2-phonics', 'unit3-phonics'].includes(topic.id)) {
+      if (!['unit1-phonics', 'unit2-phonics', 'unit3-phonics', 'unit4-phonics'].includes(topic.id)) {
         checkPlan(lessonReading(card), `学习卡英文 ${card.id}`, true);
       }
     }
@@ -241,10 +248,27 @@ checkPlan(unit3.farmSentences({ animals: [
   {key:'sheep',count:2,description:'small'}, {key:'duck',count:1,description:'happy'},
   {key:'donkey',count:3,description:'big'}], care:'kind' }).join(' '), '三组动物完整农场');
 
+// Enumerate the task's actual finite dialogue lines independently of collection.
+// A valid selection requires three distinct foods, including both reply choices.
+let picnicCount = 0;
+for (const food of unit4.picnic.foods) for (const reply of ['yes','no']) {
+  const others = unit4.picnic.foods.filter(item=>item.key!==food.key).slice(0,2);
+  for (const drink of unit4.picnic.drinks) {
+    const selection = {foods:[{key:food.key,reply},...others.map(item=>({key:item.key,reply:'yes'}))],drink:drink.key};
+    const lines = unit4.picnicSentences(selection);
+    assert(lines.length > 0, '野餐生成器的有效选择必须提供真实示范');
+    checkPlan(lines.join(' '), `野餐 ${food.key}/${reply}/${drink.key}`);
+    picnicCount++;
+  }
+}
+assert.equal(picnicCount, unit4.picnic.foods.length * 2 * unit4.picnic.drinks.length);
+
 // Verify the physical delivery, not just the promise of a manifest entry.
 const entries = Object.entries(manifest.clips);
-assert.equal(entries.length, expectedKeys.size, '题库、学习卡和全部作品实际需要的每个片段都已覆盖');
-assert.deepEqual(new Set(entries.map(([key]) => key)), expectedKeys, '所有音频都有实际教学朗读来源');
+const deliveredKeys = expectedKeys;
+assert.equal(entries.length, deliveredKeys.size, '全部已交付录音都有实际朗读用途');
+assert.deepEqual(new Set(entries.map(([key]) => key)), deliveredKeys, '完整清单覆盖每个真实教学朗读');
+assert.equal(deliveredKeys.size, 613, '独立枚举得到全部 613 段，任何遗漏都会失败');
 const files = new Set();
 let totalBytes = 0;
 for (const [key, filename] of entries) {
@@ -288,22 +312,23 @@ for (const [index, match] of scripts.entries()) {
   assert(!/^(?:[a-z]+:|\/)/i.test(paths[index]), '必需脚本都采用相对本地路径');
   assert(fs.statSync(path.join(repository, paths[index])).isFile(), `${paths[index]} 随项目交付`);
 }
-for (const required of ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js', 'data/english-unit3.js', 'data/questions.js', 'record-backup.js', 'speech-text.js', 'data/audio-manifest.js', 'audio-player.js', 'app.js']) {
+for (const required of ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js', 'data/english-unit3.js', 'data/english-unit4.js', 'data/questions.js', 'record-backup.js', 'speech-text.js', 'data/audio-manifest.js', 'audio-player.js', 'app.js']) {
   assert.equal(paths.filter(filename => filename === required).length, 1, `${required} 加载一次`);
 }
 for (const changed of ['speech-text.js', 'data/audio-manifest.js', 'audio-player.js']) {
-  const version=changed==='data/audio-manifest.js'?'azure-jenny-unit3-v1-20261013':'ios12-webapp-v1-20261014';
+  const version=['data/audio-manifest.js','speech-text.js'].includes(changed)?'azure-jenny-unit4-v1-20261015':'ios12-webapp-v1-20261014';
   assert.equal(sources.find(source => source.split(/[?#]/)[0] === changed), changed + '?v='+version,
     `${changed} 有缓存版本，避免平板沿用旧脚本`);
 }
 assert(sources.includes('data/english-unit3.js?v=unit3-farm-audio-v2-20261013'), '新增课程内容有独立缓存版本');
-assert(sources.includes('app.js?v=ios12-webapp-v1-20261014'), '兼容修复脚本有自己的缓存版本');
-assert(sources.includes('data/questions.js?v=unit3-farm-audio-v2-20261013'), '题库新依赖和新编号不能继续命中旧版缓存');
-assert(html.includes('style.css?v=ios12-webapp-v1-20261014'), '兼容修复样式有缓存版本');
+assert(sources.includes('app.js?v=unit4-food-audio-v2-20261015'), '新增课程脚本有自己的缓存版本');
+assert(sources.includes('data/questions.js?v=unit4-food-audio-v2-20261015'), '题库新依赖和新编号不能继续命中旧版缓存');
+assert(sources.includes('data/english-unit4.js?v=unit4-food-audio-v2-20261015'), '新增 Unit 4 课程模块随页面交付');
+assert(html.includes('style.css?v=unit4-food-audio-v2-20261015'), '新增课程样式有缓存版本');
 assert(paths.indexOf('speech-text.js') < paths.indexOf('data/audio-manifest.js'));
 assert(paths.indexOf('data/audio-manifest.js') < paths.indexOf('audio-player.js'));
 assert(paths.indexOf('audio-player.js') < paths.indexOf('app.js'));
-for (const prerequisite of ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js', 'data/english-unit3.js']) {
+for (const prerequisite of ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js', 'data/english-unit3.js', 'data/english-unit4.js']) {
   assert(paths.indexOf(prerequisite) < paths.indexOf('data/questions.js'), '题库依赖先加载');
 }
 const sandbox = { Audio: function Audio() {}, setTimeout, clearTimeout };
@@ -325,11 +350,11 @@ for (const required of ['Azure Speech', 'en-US-JennyNeural', '美式英语', '�
 assert(!notice.includes('发音修正版使用 Kokoro'), '当前来源说明不再把 Azure 成品归属到旧声线');
 const reviewHTML = fs.readFileSync(path.join(repository, 'audio-review.html'), 'utf8');
 for (const source of ['speech-text.js', 'data/audio-manifest.js', 'audio-player.js', 'audio-review.js']) {
-  const version=source==='data/audio-manifest.js'?'azure-jenny-unit3-v1-20261013':'ios12-webapp-v1-20261014';
+  const version=['data/audio-manifest.js','speech-text.js','audio-review.js'].includes(source)?'azure-jenny-unit4-v1-20261015':'ios12-webapp-v1-20261014';
   assert(reviewHTML.includes(`src="${source}?v=${version}"`), '试听页使用新版脚本缓存地址');
 }
 
-console.log(`音频静态检查通过：${entries.length} 段，${staticCount} 个固定朗读入口，${posterCount} 种海报、${bookletCount} 种小手册，${(totalBytes / 1024 / 1024).toFixed(2)} MiB。`);
+console.log(`音频全量交付检查通过：已验证 ${entries.length} 段，${staticCount} 个固定朗读入口，${posterCount} 种海报、${bookletCount} 种小手册、${picnicCount} 组野餐选项，${(totalBytes / 1024 / 1024).toFixed(2)} MiB。`);
 
 async function decodeEveryFile() {
   let next = 0;

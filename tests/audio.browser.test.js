@@ -15,16 +15,19 @@ const audit = require('../data/audio-audit.json');
 const questions = require('../data/questions.js');
 const unit2 = require('../data/english-unit2.js');
 const unit3 = require('../data/english-unit3.js');
+const unit4 = require('../data/english-unit4.js');
 const manifest = require('../data/audio-manifest.js');
 const speechText = require('../speech-text.js');
 
 const root = path.resolve(__dirname, '..');
 const KEY = 'learning-garden-v1';
-const AUDIO_CACHE = 'azure-jenny-unit3-v1-20261013';
+const AUDIO_CACHE = 'azure-jenny-unit4-v1-20261015';
 const APP_CACHE = 'unit3-farm-audio-v2-20261013';
 const COMPAT_CACHE = 'ios12-webapp-v1-20261014';
-const cacheVersion = source => ['app.js','style.css','audio-player.js','speech-text.js'].includes(source)
-  ? COMPAT_CACHE : ['data/questions.js','data/english-unit3.js'].includes(source) ? APP_CACHE : AUDIO_CACHE;
+const UNIT4_CACHE = 'unit4-food-audio-v2-20261015';
+const cacheVersion = source => ['app.js', 'style.css', 'data/questions.js', 'data/english-unit4.js'].includes(source)
+  ? UNIT4_CACHE : source === 'audio-player.js' ? COMPAT_CACHE
+    : source === 'data/english-unit3.js' ? APP_CACHE : AUDIO_CACHE;
 const exact = value => new RegExp(`^${value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`);
 const wall = questions.bank('english1').find(q => q.id === 'english1-wall-meaning');
 const listen = questions.bank('hello-numbers').find(q => q.kind === 'listening');
@@ -61,7 +64,7 @@ async function legacyAudioFiles() {
   // Retain the real previous resources in browser HTTP cache before switching
   // the same origin to the candidate. Playwright routing would disable cache.
   const read = filename => new Promise((resolve, reject) => {
-    execFile('git', ['show', `15992d8:${filename}`],
+    execFile('git', ['show', `775c985e22bad0a0e0cbb6376ea6272b1688b9fc:${filename}`],
       { cwd: root, encoding: 'buffer', maxBuffer: 1024 * 1024 }, (error, body) => {
         if (error) { reject(new Error(`无法读取交接提交中的缓存升级检查文件：${filename}`)); return; }
         resolve(body);
@@ -73,7 +76,7 @@ async function legacyAudioFiles() {
   vm.runInNewContext(manifestSource.toString('utf8'), sandbox);
   const previous = sandbox.module.exports;
   assert.equal(previous.version, 3, '增量升级从真实 Azure Jenny v3 清单开始');
-  assert.equal(Object.keys(previous.clips).length, 398, '升级检查加载真实原有 398 段清单');
+  assert.equal(Object.keys(previous.clips).length, 501, '升级检查加载真实交接基线 501 段清单');
   // Serve a coherent historical page, including its bank and app. Combining
   // the old HTML with new scripts is not a real snapshot.
   const historical = new Map([['/index.html', index], ['/data/audio-manifest.js', manifestSource],
@@ -185,7 +188,7 @@ function initialize(options) {
 }
 
 (async () => {
-  assert.equal(Object.keys(manifest.clips).length, 501, '交付版必须包含全部 501 段录音');
+  assert.equal(Object.keys(manifest.clips).length, 613, '交付版必须包含全部 613 段录音');
   const server = await serverStart();
   const origin = `http://127.0.0.1:${server.address().port}`;
   let browser;
@@ -229,7 +232,8 @@ function initialize(options) {
         await page.locator(`.english-unit[data-topic="${question.topic}"] button[data-action="start"]`).click();
       } else {
         await goals(page, question.topic.startsWith('hello-') ? 'hello' : question.topic.startsWith('unit1-') ? 'unit1'
-          : question.topic.startsWith('unit3-') ? 'unit3' : 'unit2');
+          : question.topic.startsWith('unit3-') ? 'unit3'
+          : question.topic.startsWith('unit4-') ? 'unit4' : question.topic === 'review34-mixed' ? 'review34' : 'unit2');
         await page.locator(`.goal-unit[data-topic="${question.topic}"] button[data-action="start"]`).click();
       }
       assert.equal(await page.locator('.question').getAttribute('data-question-id'), question.id);
@@ -264,7 +268,7 @@ function initialize(options) {
       const expected = speechText.sentences(text).map(part => manifest.clips[speechText.canonical(part)]);
       assert(expected.length > 0 && expected.every(Boolean), '每个完整句子或示例词都有真实清单映射');
       assert.equal(await page.locator(`button[data-action="${action}"]`).first().isDisabled(), false,
-        '已有录音的 Unit 3 播放按钮启用');
+        '完整交付的播放按钮启用');
       const calls = await playToEnd(page, action, timeout);
       assert.deepEqual(calls.map(call => new URL(call.src).pathname), expected.map(file => '/' + file),
         '实际浏览器请求与英文句子按顺序一一对应');
@@ -344,7 +348,7 @@ function initialize(options) {
     assert.deepEqual(await saved(page), afterAnswer, 'Hello / Hi 的听读不修改旧记录或英语首次作答');
     assert.equal(await page.evaluate(() => window.audioNativeCalls.length), 0, '新版问候不依赖系统语音 API');
     for (const source of ['speech-text.js', 'data/audio-manifest.js', 'audio-player.js', 'app.js',
-      'data/questions.js', 'data/english-unit3.js', 'style.css']) {
+      'data/questions.js', 'data/english-unit3.js', 'data/english-unit4.js', 'style.css']) {
       const sourceRequests = requests.filter(request => new URL(request.url).pathname === '/' + source);
       assert(sourceRequests.length > 0, '真实页面确实加载新版脚本 ' + source);
       const version = cacheVersion(source);
@@ -493,7 +497,7 @@ function initialize(options) {
     }
     pass('录音失败后原生兜底可用；原生抛错、报错、超时与旧回调安全降级；仅同源文件读取');
 
-    // 9: Refresh the same origin with prior 398-clip Azure resources cached. Existing
+    // 9: Refresh the same origin with the real 501-clip Unit 4 handoff cached. Existing
     // Chinese/English first answers, mistakes and unrelated settings survive.
     const legacy = await legacyAudioFiles();
     server.legacyFiles = legacy.files;
@@ -504,11 +508,11 @@ function initialize(options) {
     }, { key: KEY, records: afterListening });
     await upgrading.reload();
     assert.equal(await upgrading.evaluate(() => GardenAudioManifest.version), 3);
-    assert.equal(await upgrading.evaluate(() => Object.keys(GardenAudioManifest.clips).length), 398);
-    const newlyRecorded = questions.bank('unit3-hasgot').find(q => q.id === 'unit3-hasgot-listen-no-tail');
+    assert.equal(await upgrading.evaluate(() => Object.keys(GardenAudioManifest.clips).length), 501);
+    const newlyRecorded = questions.bank('unit4-likes').find(q => q.id === 'unit4-likes-listen-negative');
     await start(upgrading, newlyRecorded);
     assert.equal(await upgrading.locator('button[data-action="listen"]').isDisabled(), true,
-      '真实旧版清单缺少新增 Unit 3 录音时明确禁用');
+      '交接基线缺少新增 Unit 4 录音时明确禁用');
     assert.equal(await upgrading.locator('.listening-text').isVisible(), true);
     assert((await status(upgrading)).includes('准备'));
     await goals(upgrading, 'hello');
@@ -516,22 +520,24 @@ function initialize(options) {
     const oldPlayback = await playToEnd(upgrading, 'speak');
     assert.equal(oldPlayback.length, 1);
     assert.equal(new URL(oldPlayback[0].src).pathname, '/' + legacy.previous.clips.hello);
-    assert(server.servedRequests.includes('/data/audio-manifest.js?v=azure-jenny-v3-20261012'), '真实原 398 段清单曾下载并可进入 HTTP 缓存');
+    assert(server.servedRequests.includes('/data/audio-manifest.js?v=azure-jenny-unit3-v1-20261013'), '真实原 501 段清单曾下载并可进入 HTTP 缓存');
     assert(server.servedRequests.includes('/' + legacy.previous.clips.hello), '真实旧 Hello 曾下载并播放');
     const oldHelloRequests = () => server.servedRequests.filter(url => url === '/' + legacy.previous.clips.hello).length;
     const cachedHelloRequests = oldHelloRequests();
     await playToEnd(upgrading, 'speak');
     assert.equal(oldHelloRequests(), cachedHelloRequests, '再次播放旧 Hello 命中浏览器缓存，没有向服务端重复下载');
     assert.deepEqual(await saved(upgrading), afterListening);
+    const unit3ScriptRequests = () => server.servedRequests.filter(url => url === '/data/english-unit3.js?v=' + APP_CACHE).length;
+    const cachedUnit3ScriptRequests = unit3ScriptRequests();
     const beforeUpgrade = server.servedRequests.length;
     server.legacyFiles = null;
     await upgrading.reload();
     assert.equal(await upgrading.evaluate(() => GardenAudioManifest.version), 3, '增量升级继续使用 Azure v3 音频格式');
-    assert.equal(await upgrading.evaluate(() => Object.keys(GardenAudioManifest.clips).length), 501,
-      '同源刷新加载完整 501 段清单，没有沿用已缓存的 398 段清单');
+    assert.equal(await upgrading.evaluate(() => Object.keys(GardenAudioManifest.clips).length), 613,
+      '同源刷新加载完整 613 段清单，没有沿用已缓存的 501 段清单');
     assert.equal(await upgrading.evaluate(() => GardenAudioManifest.voice.name), 'en-US-JennyNeural');
-    assert(await upgrading.evaluate(() => GardenQuestions.topics.some(topic=>topic.id==='unit3-hasgot')),
-      '同源升级获取包含 Unit 3 的题库，而不是旧缓存');
+    assert(await upgrading.evaluate(() => GardenQuestions.topics.some(topic=>topic.id==='unit4-likes')),
+      '同源升级获取当前 Unit 4 的题库与清单');
     assert.deepEqual(await saved(upgrading), afterListening, '刷新升级原样保留中文、英语首次记录与错题');
     assert.equal(await upgrading.evaluate(() => localStorage.getItem('audio-upgrade-setting')), 'keep-me');
     await goals(upgrading, 'hello');
@@ -539,7 +545,7 @@ function initialize(options) {
     const newPlayback = await playToEnd(upgrading, 'speak');
     assert.equal(newPlayback.length, 1);
     assert.equal(new URL(newPlayback[0].src).pathname, '/' + manifest.clips.hello);
-    assert.equal(manifest.clips.hello, legacy.previous.clips.hello, '原 398 段录音的 Hello 地址继续复用');
+    assert.equal(manifest.clips.hello, legacy.previous.clips.hello, '原 501 段录音的 Hello 地址继续复用');
     assert.equal(oldHelloRequests(), cachedHelloRequests, '升级后播放复用同一 Hello HTTP 缓存，不重复下载');
     const oldHelloBytes = legacy.files.get('/' + legacy.previous.clips.hello);
     assert.deepEqual(await fs.readFile(path.join(root, manifest.clips.hello)), oldHelloBytes,
@@ -549,14 +555,17 @@ function initialize(options) {
     await playMappedToEnd(upgrading, 'listen', newlyRecorded.speech);
     assert.equal(await upgrading.locator('.listening-text').isVisible(), false);
     const upgradeRequests = server.servedRequests.slice(beforeUpgrade);
-    assert(upgradeRequests.includes('/data/audio-manifest.js?v=' + AUDIO_CACHE), '新缓存参数请求当前 501 段清单');
-    for (const source of ['app.js', 'data/questions.js', 'data/english-unit3.js', 'style.css']) {
+    assert(upgradeRequests.includes('/data/audio-manifest.js?v=' + AUDIO_CACHE), '新缓存参数请求当前 613 段清单');
+    for (const source of ['app.js', 'data/questions.js', 'data/english-unit4.js', 'style.css']) {
       assert(upgradeRequests.includes('/' + source + '?v=' + cacheVersion(source)), source + ' 使用新版缓存参数');
     }
+    assert.equal(unit3ScriptRequests(), cachedUnit3ScriptRequests, '未变的 Unit 3 数据继续命中原 HTTP 缓存');
+    assert.deepEqual(await fs.readFile(path.join(root, 'data/english-unit3.js')), legacy.files.get('/data/english-unit3.js'),
+      '复用缓存的 Unit 3 数据字节与交接基线完全相同');
     assert(upgradeRequests.includes('/' + manifest.clips[speechText.canonical(newlyRecorded.speech)]),
-      '刷新后实际下载并播放新增 Unit 3 MP3');
+      '刷新后实际下载并播放新增 Unit 4 MP3');
     assert.deepEqual(await saved(upgrading), afterListening, '新声音播放不改首次作答或错题，也没有清空数据');
-    pass('同源原 398 段与 MP3 已缓存时，刷新切换 501 段并启用新 Unit 3 录音，Hello 缓存与学习记录和错题保留');
+    pass('同源交接基线 501 段与 MP3 已缓存时，刷新切换 613 段并启用新 Unit 4 录音，Hello 缓存与学习记录和错题保留');
 
     // 10: New Unit 3 listening prompts and answer models are real Jenny MP3s.
     const farmPage = await fresh('ok');
@@ -653,13 +662,104 @@ function initialize(options) {
 
     // 14: Unit 3 must not silently use a different system voice when media fails.
     const unit3Failure = await fresh('ok', true);
-    await start(unit3Failure, newlyRecorded);
+    const missingFarmClip = questions.bank('unit3-hasgot').find(q => q.id === 'unit3-hasgot-listen-no-tail');
+    await start(unit3Failure, missingFarmClip);
     await click(unit3Failure, 'listen');
     await unit3Failure.locator('.listening-text').waitFor({ state: 'visible', timeout: 15000 });
-    assert((await unit3Failure.locator('.listening-text').innerText()).includes(newlyRecorded.fallbackPrompt));
+    assert((await unit3Failure.locator('.listening-text').innerText()).includes(missingFarmClip.fallbackPrompt));
     assert.equal(await unit3Failure.evaluate(() => window.audioNativeCalls.length), 0);
     assert.deepEqual(await saved(unit3Failure), oldRecords);
     pass('新增 Unit 3 MP3 失败时提供明确文字提示，有系统语音也不替换已指定 Jenny 声线');
+
+    // 15: New preferences and answer models use normal-speed prerecorded Jenny.
+    const foodPage = await fresh('ok');
+    for (const id of ['self', 'negative', 'she', 'he']) {
+      const q = questions.bank('unit4-likes').find(item => item.id === 'unit4-likes-listen-' + id);
+      await start(foodPage, q);
+      assert.equal(await foodPage.locator('.listening-text').isVisible(), false);
+      await playMappedToEnd(foodPage, 'listen', q.speech);
+      assert.equal(await foodPage.locator('.listening-text').isVisible(), false, '喜好听辨播放后仍隐藏答案');
+    }
+    let unit4Records = oldRecords;
+    for (const id of ['yes-context', 'no-context']) {
+      const q = questions.bank('unit4-likes').find(item => item.id === 'unit4-likes-' + id);
+      await start(foodPage, q);
+      await choice(foodPage, q.answer).click();
+      const recorded = await saved(foodPage);
+      assert.equal(recorded.attempts.length, unit4Records.attempts.length + 1);
+      await playMappedToEnd(foodPage, 'speak', q.answerSpeech);
+      assert.deepEqual(await saved(foodPage), recorded);
+      unit4Records = recorded;
+    }
+    await home(foodPage); await foodPage.reload();
+    assert.deepEqual(await saved(foodPage), unit4Records, '新喜好作答与旧错题刷新保存');
+    pass('Unit 4 肯定/否定/第三人称喜好与 Do 问答实际播放，隐藏答案且首次成绩刷新保存');
+
+    // 16: Requests, invitations, accepting and politely declining are distinct recordings.
+    for (const id of ['request', 'offer', 'accept', 'decline']) {
+      const q = questions.bank('unit4-requests').find(item => item.id === 'unit4-requests-listen-' + id);
+      await start(foodPage, q);
+      await playMappedToEnd(foodPage, 'listen', q.speech);
+      assert.equal(await foodPage.locator('.listening-text').isVisible(), false);
+    }
+    assert.deepEqual(await saved(foodPage), unit4Records);
+    pass('Unit 4 请求、邀请、接受及礼貌谢绝逐一播放对应 MP3，不改变记录');
+
+    // 17: All four a-phonics cards play complete example words, not letters or IPA.
+    await goals(foodPage, 'unit4');
+    await foodPage.locator('.goal-unit[data-topic="unit4-phonics"] button[data-action="goal-learn"]').click();
+    for (const [index, card] of unit4.lesson('unit4-phonics').entries()) {
+      if (index) await click(foodPage, 'goal-next');
+      const button = foodPage.locator('button[data-action="speak"]').first();
+      assert.equal(await button.getAttribute('data-text'), card.sayModel);
+      assert(!/[\[\]æɪ]/.test(card.sayModel), '示范中只包含完整词，不含拼写标记或音标');
+      assert((await button.innerText()).includes('听示例词'));
+      await playMappedToEnd(foodPage, 'speak', card.sayModel);
+    }
+    assert.deepEqual(await saved(foodPage), unit4Records);
+    pass('Unit 4 字母 a 四张卡逐词播放 mango/salad/cat/bag/cake/lemonade/paper，未将字母名替代词音');
+
+    // 18 and 19: Original recipe and story are complete, ordered sequences.
+    for (const [topic, label] of [['unit4-recipes', '食谱'], ['unit4-reading', '野餐故事']]) {
+      const q = questions.bank(topic).find(item => topic === 'unit4-reading'
+        ? item.id === 'unit4-reading-polite-choice-first' : item.passage && item.passage.length >= 4);
+      await start(foodPage, q);
+      const calls = await playMappedToEnd(foodPage, 'read-passage', q.passage.join(' '));
+      assert.equal(calls.length, speechText.sentences(q.passage.join(' ')).length);
+      assert.deepEqual(await saved(foodPage), unit4Records);
+      pass('Unit 4 ' + label + '每句按原文顺序真实解码并完整播放，展示引号不形成空片段且听读不计成绩');
+    }
+
+    // 20: Two full picnic dialogues prove edited food/reply/drink mappings.
+    await goals(foodPage, 'unit4'); await click(foodPage, 'picnic');
+    const picnic = {foods:[{key:'bread',reply:'yes'},{key:'banana',reply:'no'},{key:'apple',reply:'yes'}],drink:'water'};
+    await click(foodPage, 'picnic-show');
+    const picnicText = unit4.picnicSentences(picnic);
+    assert.deepEqual(await foodPage.locator('#picnic-sheet p[lang="en"]').allTextContents(), picnicText);
+    await playMappedToEnd(foodPage, 'read-picnic', picnicText.join(' '), 90000);
+    await click(foodPage, 'picnic-edit');
+    await foodPage.locator('select[data-picnic-food="0"]').selectOption('cake');
+    await foodPage.locator('select[data-picnic-reply="0"]').selectOption('no');
+    await foodPage.locator('#picnic-drink').selectOption('lemonade');
+    await click(foodPage, 'picnic-show');
+    const changedPicnic = {foods:[{key:'cake',reply:'no'},picnic.foods[1],picnic.foods[2]],drink:'lemonade'};
+    const changedPicnicText = unit4.picnicSentences(changedPicnic);
+    assert.deepEqual(await foodPage.locator('#picnic-sheet p[lang="en"]').allTextContents(), changedPicnicText);
+    const changedPicnicCalls = await playMappedToEnd(foodPage, 'read-picnic', changedPicnicText.join(' '), 90000);
+    assert.equal(new URL(changedPicnicCalls[0].src).pathname, '/' + manifest.clips['we have got some cake']);
+    assert.equal(await foodPage.evaluate(() => window.audioMaxActive), 1);
+    assert.deepEqual(await saved(foodPage), unit4Records, '野餐编辑和两次完整听读保留全部记录与错题');
+    assert.equal(await foodPage.evaluate(() => window.audioNativeCalls.length), 0, '全部新模块只用 Jenny MP3');
+    pass('Unit 4 完整野餐邀请/接受/谢绝与饮料请求顺序播放，编辑后切换对应音频且不叠音');
+
+    // 21: The specified Jenny voice is never replaced on new-module failures.
+    const foodFailure = await fresh('ok', true);
+    await start(foodFailure, newlyRecorded); await click(foodFailure, 'listen');
+    await foodFailure.locator('.listening-text').waitFor({ state: 'visible', timeout: 15000 });
+    assert((await foodFailure.locator('.listening-text').innerText()).includes(newlyRecorded.fallbackPrompt));
+    assert.equal(await foodFailure.evaluate(() => window.audioNativeCalls.length), 0);
+    assert.deepEqual(await saved(foodFailure), oldRecords);
+    pass('Unit 4 MP3 失败时显示文字提示，系统语音可用也不更换 Jenny 声线');
 
     assert.deepEqual(pageErrors, [], '所有设备和失败场景均没有未捕获脚本异常');
     assert(requests.every(request => request.method === 'GET' && new URL(request.url).origin === origin),

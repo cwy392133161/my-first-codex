@@ -445,7 +445,7 @@ for (const script of scripts) {
   assert(fs.existsSync(path.join(repository, script.source)), `项目内存在 ${script.source}`);
   assert(!/\b(?:fetch|XMLHttpRequest|WebSocket)\s*\(/.test(read(script.source)), '学习及备份没有外部网络加载');
 }
-const dependencies = ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js', 'data/english-unit3.js', 'data/questions.js', 'record-backup.js'];
+const dependencies = ['data/english.js', 'data/english-hello.js', 'data/english-unit1.js', 'data/english-unit2.js', 'data/english-unit3.js', 'data/english-unit4.js', 'data/questions.js', 'record-backup.js'];
 assert.deepEqual(scripts.filter(script => dependencies.includes(script.source)).map(script => script.source), dependencies, '新旧数据经典脚本顺序正确');
 const sandbox = {};
 const context = vm.createContext(sandbox);
